@@ -79,7 +79,18 @@ const Level1_Mechanics: React.FC = () => {
       const matchingMaterial = Object.values(MATERIALS).find(
         m => Math.abs(m.density - density) < 0.01 && Math.abs(m.stiffness - stiffness) < 0.1
       );
-      const materialCost = matchingMaterial?.cost || 0;
+
+      // Check if values are from database
+      if (!matchingMaterial) {
+        setErrorMsg(
+          `FEHLER: Die eingegebenen Werte stimmen nicht mit einem Material aus der Datenbank überein. Bitte trage die Werte exakt aus der Materialdatenbank ein.`
+        );
+        setLevelState('FAIL');
+        setSimulating(false);
+        return;
+      }
+
+      const materialCost = matchingMaterial.cost;
 
       if (!result.isSafeMass) {
         setErrorMsg(
@@ -160,11 +171,6 @@ const Level1_Mechanics: React.FC = () => {
                 Konstruiere einen neuen Arm aus der Materialdatenbank. Bei einer Last von <strong>5kg</strong> darf er sich höchstens <strong>2mm</strong> durchbiegen.
                 Außerdem darf der Arm nicht schwerer als <strong>1000g</strong> sein, sonst brennen die Schultermotoren durch.
               </p>
-
-              <div className="mt-4 p-3 bg-cyan-900/20 border border-cyan-500/30 rounded text-sm">
-                <strong className="text-cyan-400">INFO:</strong> Die Geometrie des Arms ist standardisiert (250cm³ Volumen).
-                Du musst die Materialwerte aus der Datenbank in die Simulationskonsole übertragen.
-              </div>
             </motion.div>
           )}
 
