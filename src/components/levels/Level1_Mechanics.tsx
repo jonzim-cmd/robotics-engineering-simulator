@@ -80,6 +80,10 @@ const Level1_Mechanics: React.FC = () => {
       return;
     }
 
+    // CRITICAL: Save state BEFORE any simulation/credit changes
+    // This ensures credits are restored when going back
+    pushStateHistory();
+
     setSimulating(true);
     setErrorMsg(null);
     setSimulationResult(null); // Reset previous result
@@ -122,8 +126,6 @@ const Level1_Mechanics: React.FC = () => {
         );
         setLevelState('FAIL');
       } else {
-        // Save state before deducting credits (for proper back navigation)
-        pushStateHistory();
         // Deduct credits on success
         removeCredits(materialCost);
         setErrorMsg(
