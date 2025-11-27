@@ -218,16 +218,16 @@ const Level1_Mechanics: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT SIDE: Material Database (Read-Only) */}
           <div className="space-y-4">
-            <div className="bg-slate-900/50 border border-slate-700 rounded px-3 pt-3 pb-1 h-full">
-              <h3 className="text-cyan-400 font-bold font-mono text-sm mb-3 uppercase tracking-wider flex items-center border-b border-slate-800 pb-2">
+            <div className="bg-slate-900/50 border border-slate-700 rounded px-3 pt-3 pb-2 h-full flex flex-col">
+              <h3 className="text-cyan-400 font-bold font-mono text-sm mb-2 uppercase tracking-wider flex items-center border-b border-slate-800 pb-2">
                 <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2 animate-pulse" />
                 Material-Datenbank
               </h3>
-              <div className="text-xs text-slate-400 mb-4 font-mono">
+              <div className="text-xs text-slate-400 mb-2 font-mono">
                 [ READ-ONLY ] Verfügbare Materialien. Finde ein Material, das die Anforderungen erfüllt.
               </div>
 
-              <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
+              <div className="space-y-2 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
                 {Object.values(MATERIALS).map((material, idx) => (
                   <MaterialCard
                     key={idx}
