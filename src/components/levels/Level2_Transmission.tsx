@@ -6,7 +6,7 @@ import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { StalledRampVisualization } from '@/components/ui/StalledRampVisualization';
-import { ReflectionChat } from '@/components/ui/ReflectionChat';
+import { SmartphoneResearch } from '@/components/ui/SmartphoneResearch';
 import { calculateTransmission } from '@/lib/physicsEngine';
 import { motion } from 'framer-motion';
 
@@ -16,7 +16,7 @@ const Level2_Transmission: React.FC = () => {
   const [simulating, setSimulating] = useState(false);
   const [result, setResult] = useState<{ success: boolean; msg: string } | null>(null);
   const [showText, setShowText] = useState(false);
-  const [showIntroReflection, setShowIntroReflection] = useState(false);
+  const [showSmartphoneResearch, setShowSmartphoneResearch] = useState(false);
 
   // Motor stats (Constant input)
   const MOTOR_TORQUE = 2; // Nm
@@ -37,15 +37,15 @@ const Level2_Transmission: React.FC = () => {
     setSimulating(false);
     setResult(null);
     setShowText(false);
-    setShowIntroReflection(false);
+    setShowSmartphoneResearch(false);
   };
 
   const handleStart = () => {
-    setShowIntroReflection(true);
+    setShowSmartphoneResearch(true);
   };
 
-  const startLevelReal = () => {
-    setShowIntroReflection(false);
+  const handleResearchComplete = () => {
+    setShowSmartphoneResearch(false);
     // Save state before advancing
     pushStateHistory();
     setLevelState('ACTIVE');
@@ -128,7 +128,7 @@ const Level2_Transmission: React.FC = () => {
                     definition="Verhältnis: wie oft sich der Motor dreht, wenn sich das Rad einmal dreht. Größere Übersetzung = mehr Kraft am Rad, aber weniger Geschwindigkeit."
                   />{" "}
                   zu groß wählst, hat der Transporter zwar viel Kraft, fährt aber sehr langsam. Dann braucht er
-                  ewig für die Strecke und der Warenfluss gerät ins Stocken.
+                  ewig für die Strecke und der Warenfluss gerät ebenfalls ins Stocken.
                 </p>
               </motion.div>
             )}
@@ -147,22 +147,80 @@ const Level2_Transmission: React.FC = () => {
           </div>
         </TerminalCard>
 
-        {/* Intro Reflection Chat */}
-        {showIntroReflection && (
-          <ReflectionChat
-            title="DISKUSSION IN DER KANTINE"
-            contextDescription="Mittagspause. Du hörst, wie zwei Kollegen über die Stausituation diskutieren. Ben wendet sich an dich:"
-            senderName="Kollege Ben"
-            senderTitle="Logistik"
-            avatarIcon="👨‍🔧"
-            message={`Hey, wenn wir einfach jedem Roboter eine riesige Übersetzung geben, haben die unendlich Kraft am Berg. Dann bleibt keiner mehr stehen und wir haben nie wieder Stau, oder?
+        {/* Smartphone Research */}
+        {showSmartphoneResearch && (
+          <SmartphoneResearch
+            searchQuery="Getriebe Drehmoment"
+            browserTitle="Suche - Getriebe"
+            searchResults={[
+              {
+                title: "Was ist Drehmoment?",
+                content: `Drehmoment beschreibt, wie stark eine Drehkraft ist.
+Es geht nicht nur darum, dass sich etwas dreht, sondern wie kräftig.
 
-Aber Sarah meint, das wäre Quatsch. Was meinst du dazu?`}
-            correctAnswer={`Eine zu hohe Übersetzung liefert zwar viel Kraft, macht den Roboter aber auf der Ebene extrem langsam. Er wird dann zum Verkehrshindernis und blockiert den Warenfluss genauso schlimm wie ein liegengebliebener Roboter.
+Stell dir einen Schraubenschlüssel vor:
+Wenn der Griff länger ist, kannst du dieselbe Schraube leichter lösen → mehr Drehmoment.
 
-Das Getriebe ist ein Kompromiss: Genug Kraft für den Berg, aber auch genug Geschwindigkeit auf der Ebene. Wir brauchen die perfekte Balance.`}
-            continueButtonText="Zum Getriebe-Terminal"
-            onComplete={startLevelReal}
+Beim Fahrrad:
+Wenn du fest aufs Pedal drückst, übst du Drehmoment auf die Kurbel aus.
+
+Merke:
+Viel Drehmoment = Es ist leichter, etwas zu drehen (z.B. ein Rad oder eine Welle).`
+              },
+              {
+                title: "Was ist ein Getriebe?",
+                content: `Ein Getriebe besteht meistens aus Zahnrädern, die ineinandergreifen.
+Es verbindet den Motor mit den Rädern.
+
+Ein Getriebe kann:
+• die Drehzahl ändern (wie schnell sich etwas dreht)
+• das Drehmoment ändern (wie kräftig sich etwas dreht)
+
+Beispiel Fahrrad:
+Wenn du den Gang wechselst, ändert sich das Verhältnis zwischen kleinem und großem Zahnrad.
+
+Das ist im Prinzip auch ein Getriebe.`
+              },
+              {
+                title: "Was bedeutet Übersetzung?",
+                content: `Die Übersetzung beschreibt das Verhältnis der Zahnräder im Getriebe.
+
+Einfach gesagt:
+Ein Zahnrad dreht sich schnell, das andere langsam.
+Oder umgekehrt.
+
+Beispiel:
+Kleines Zahnrad treibt ein großes an →
+Das große dreht sich langsamer, hat aber mehr Drehmoment.
+
+Großes Zahnrad treibt ein kleines an →
+Das kleine dreht sich schneller, hat aber weniger Drehmoment.
+
+Merke:
+Übersetzung bestimmt, wie viel Drehmoment und wie viel Geschwindigkeit an den Rädern ankommt.`
+              },
+              {
+                title: "Kraft oder Geschwindigkeit? – der Tausch",
+                content: `Bei Getrieben gibt es immer einen Tausch:
+• Mehr Drehmoment am Rad → weniger Geschwindigkeit
+• Mehr Geschwindigkeit am Rad → weniger Drehmoment
+
+Beispiele:
+
+Leichter Gang am Fahrrad:
+Du kommst den Berg hoch (viel Drehmoment),
+aber du bist langsam.
+
+Schwerer Gang:
+Du kannst schnell fahren (hohe Geschwindigkeit),
+aber es ist schwer, einen Berg hochzukommen (wenig Drehmoment).
+
+Merke:
+In Maschinen ist es genauso:
+Man kann nicht gleichzeitig maximale Kraft und maximale Geschwindigkeit haben.`
+              }
+            ]}
+            onComplete={handleResearchComplete}
           />
         )}
       </>

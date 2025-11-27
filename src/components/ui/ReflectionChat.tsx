@@ -67,7 +67,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
             {/* Message Bubble */}
             <div className="bg-slate-800/50 border border-slate-700 rounded-lg rounded-tl-none p-4 text-slate-200 relative ml-4">
               {/* Speech bubble arrow */}
-              <div className="absolute top-0 left-[-10px] w-0 h-0 border-t-[10px] border-t-slate-700 border-l-[10px] border-l-transparent rotate-0"></div>
+              <div className="absolute top-0 -left-2.5 w-0 h-0 border-t-10 border-t-slate-700 border-l-10 border-l-transparent rotate-0"></div>
               <p className="whitespace-pre-wrap leading-relaxed">{message}</p>
             </div>
 

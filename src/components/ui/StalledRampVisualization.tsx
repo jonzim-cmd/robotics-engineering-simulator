@@ -33,7 +33,7 @@ export const StalledRampVisualization: React.FC = () => {
     <div className="relative w-full h-full bg-slate-950/50 rounded border border-yellow-900/50 p-6 overflow-hidden">
       {/* Title */}
       <div className="text-lg text-yellow-500 font-mono mb-4 text-center uppercase tracking-widest font-bold flex items-center justify-center gap-4">
-        <span>!!! TRAFFIC JAM - SECTOR 4 !!!</span>
+        <span>!!! Stau im Lagersektor 4 !!!</span>
         <button
           onClick={restartAnimation}
           className="ml-auto text-slate-400 hover:text-cyan-400 transition-colors p-2 hover:bg-slate-800/50 rounded"

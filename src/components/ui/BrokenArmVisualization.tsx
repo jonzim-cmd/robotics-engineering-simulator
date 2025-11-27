@@ -5,19 +5,45 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const BrokenArmVisualization: React.FC = () => {
   const [crashInitiated, setCrashInitiated] = React.useState(false);
+  const [key, setKey] = React.useState(0);
+
+  const restartAnimation = () => {
+    setCrashInitiated(false);
+    setKey(prev => prev + 1);
+  };
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setCrashInitiated(true);
     }, 1500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [key]);
 
   return (
     <div className="relative w-full h-full bg-slate-950/50 rounded border border-red-900/50 p-6 overflow-hidden">
       {/* Title */}
-      <div className="text-lg text-red-500 font-mono mb-4 text-center uppercase tracking-widest font-bold">
-        !!! CRITICAL SYSTEM FAILURE !!!
+      <div className="text-lg text-red-500 font-mono mb-4 text-center uppercase tracking-widest font-bold flex items-center justify-center gap-4">
+        <span>!!! CRITICAL SYSTEM FAILURE !!!</span>
+        <button
+          onClick={restartAnimation}
+          className="ml-auto text-slate-400 hover:text-cyan-400 transition-colors p-2 hover:bg-slate-800/50 rounded"
+          title="Animation neu starten"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
       </div>
 
       {/* GRID Background */}
@@ -34,23 +60,50 @@ export const BrokenArmVisualization: React.FC = () => {
         {/* ROBOT BASE */}
         <div className="relative z-10 scale-125 -ml-64">
           {/* Base Stand */}
-          <div className="w-24 h-32 bg-red-900/40 border-4 border-red-500 rounded-sm relative">
+          <motion.div
+            className="w-40 h-40 rounded-sm relative"
+            initial={{ backgroundColor: 'rgba(71, 85, 105, 0.8)', borderColor: 'rgba(100, 116, 139, 1)' }}
+            animate={crashInitiated ? {
+              backgroundColor: 'rgba(127, 29, 29, 0.4)',
+              borderColor: 'rgba(239, 68, 68, 1)'
+            } : {}}
+            transition={{ duration: 0.5 }}
+            style={{ borderWidth: '4px', borderStyle: 'solid' }}
+          >
             {/* Base Details */}
-            <div className="absolute inset-x-3 top-3 h-2 bg-slate-900/50" />
-            <div className="absolute inset-x-6 bottom-6 h-12 border-2 border-red-700 bg-slate-900/50 flex items-center justify-center">
-              <motion.div
-                className="w-4 h-4 rounded-full bg-red-500"
-                animate={{ opacity: [1, 0.3, 1], scale: [1, 1.3, 1] }}
-                transition={{ duration: 0.4, repeat: Infinity }}
-              />
+            <div className="absolute inset-x-4 top-4 h-3 bg-slate-900/50 rounded" />
+            <div className="absolute inset-x-8 bottom-8 h-16 border-2 border-slate-600 bg-slate-900/50 flex items-center justify-center rounded-sm">
+              {crashInitiated && (
+                <motion.div
+                  className="w-6 h-6 rounded-full bg-red-500"
+                  animate={{ opacity: [1, 0.3, 1], scale: [1, 1.3, 1] }}
+                  transition={{ duration: 0.4, repeat: Infinity }}
+                />
+              )}
             </div>
 
-            {/* Massive Overheat Effect */}
-            <motion.div
-              className="absolute -inset-3 border-4 border-red-500/60 rounded-sm"
-              animate={{ opacity: [0, 1, 0], scale: [1, 1.2, 1] }}
-              transition={{ duration: 0.6, repeat: Infinity }}
-            />
+            {/* Massive Overheat Effect - only when crashed */}
+            {crashInitiated && (
+              <motion.div
+                className="absolute -inset-3 border-4 border-red-500/60 rounded-sm"
+                animate={{ opacity: [0, 1, 0], scale: [1, 1.2, 1] }}
+                transition={{ duration: 0.6, repeat: Infinity }}
+              />
+            )}
+          </motion.div>
+
+          {/* Wheels at the bottom */}
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-around px-4">
+            {/* Left Wheel */}
+            <div className="w-12 h-12 bg-slate-800 border-4 border-slate-600 rounded-full relative">
+              <div className="absolute inset-1.5 border-2 border-slate-500 rounded-full" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-slate-700 rounded-full" />
+            </div>
+            {/* Right Wheel */}
+            <div className="w-12 h-12 bg-slate-800 border-4 border-slate-600 rounded-full relative">
+              <div className="absolute inset-1.5 border-2 border-slate-500 rounded-full" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-slate-700 rounded-full" />
+            </div>
           </div>
 
           {/* Shoulder Joint */}
@@ -73,6 +126,7 @@ export const BrokenArmVisualization: React.FC = () => {
 
           {/* BROKEN ARM - Upper Segment (Stump) */}
           <motion.div
+            key={`upper-arm-${key}`}
             className="absolute top-2 left-1/2 origin-left z-10"
             animate={{ rotate: crashInitiated ? 20 : 0 }}
             transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
@@ -108,6 +162,7 @@ export const BrokenArmVisualization: React.FC = () => {
 
           {/* BROKEN ARM - Lower Segment (Falling) */}
           <motion.div
+            key={`lower-arm-${key}`}
             className="absolute left-32 top-2 w-32 h-10 bg-slate-700 border-4 border-red-600 origin-left -translate-y-1/2 z-10"
             initial={{ rotate: 0, y: 0, x: 0 }}
             animate={{
@@ -126,6 +181,7 @@ export const BrokenArmVisualization: React.FC = () => {
 
           {/* CONTAINER - On arm then falling */}
           <motion.div
+            key={`container-${key}`}
             className="absolute left-44 -top-16 z-15"
             initial={{ y: 0, rotate: 0 }}
             animate={{

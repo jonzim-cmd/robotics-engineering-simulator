@@ -28,7 +28,7 @@ export const GlossaryTooltip: React.FC<GlossaryTooltipProps> = ({ term, definiti
           >
             <span className="block font-bold text-cyan-400 mb-1">{term}</span>
             {definition}
-            <span className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-cyan-500/50 transform rotate-45 block"></span>
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-r border-b border-cyan-500/50 transform rotate-45 block"></span>
           </motion.span>
         )}
       </AnimatePresence>
