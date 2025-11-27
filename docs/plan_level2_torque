@@ -1,182 +1,141 @@
-Bitte mache dich mit meiner Codebasis vertraut. Analysiere insbesondere Level 2 und die Smartphone-Recherche, damit du weißt, worum es in Level 2 geht und was es zu lösen gilt.Nach der Smartphonerecherche startet aktuell ein Simulationsfenster, mit dem ich nicht zufrieden bin.
-Ich möchte, dass du dieses Simulationsfenster für Level 2 neu konzipierst und implementierst, mit folgenden Anforderungen:
+# Implementierungsplan: Level 2 - Getriebe-Simulation (The Cockpit)
 
-1. Didaktische Idee / Ziel
-* Die Schüler:innen sind in der 10. Jahrgangsstufe, haben keine Lust auf Formeln und sollen nicht selbst rechnen.
-* Sie sollen aber qualitativ verstehen:
-    * was Drehmoment ist,
-    * was ein Getriebe und eine Übersetzung machen,
-    * dass man zwischen Kraft am Rad und Geschwindigkeit einen Trade-off hat,
-    * dass eine Steigung (20°) mehr Kraft am Rad benötigt,
-    * und dass der Motor bei falscher Übersetzung überlastet / überhitzt werden kann.
-* Wichtig: Keine Zahlen, keine Einheiten nach außen. Alles Rechnen läuft im Hintergrund.
-Die Smartphone-Recherche (die schon existiert) liefert das theoretische Vorwissen.Danach sollen die Lernenden in einer vereinfachten Simulation die Einstellungen für das System (Getriebe + Motor) treffen und ausprobieren.
+Dieser Plan beschreibt die vollständige Neuentwicklung der Simulations-Phase in Level 2. Ziel ist ein interaktives "Tuning-Cockpit", das physikalische Zusammenhänge visuell erlebbar macht ("Show, don't tell"), anstatt nur Schieberegler zu bieten.
 
-2. Neuer Flow nach der Smartphone-Recherche
-Aktueller Stand:Nach der Smartphone-Recherche öffnet sich ein Simulationsfenster, das ich nicht gut finde.
-Zielzustand:
-1. Nach Abschluss / Schließen der Smartphone-Recherche öffnet sich ein neues Tuning/Simulations-UI, das du neu baust.
-2. Es gibt dort keine direkte Wahl einzelner Zahnräder mehr. Stattdessen:
-    * ein abstrakter Getriebe-Regler (Übersetzung),
-    * ein Motordrehzahl-Regler.
-3. Die Lernenden sehen live eine qualitative Anzeige:
-    * „Kraft am Rad:“ (Balken + verbale Stufe),
-    * „Geschwindigkeit:“ (Balken + verbale Stufe).
-4. Über einen Button „Testfahrt starten“ lösen sie eine Testfahrt aus (siehe Credits & Feedback unten).
-Bitte ersetze das bisherige Simulationsfenster in Level 2 durch dieses neue Tuning-/Test-UI und integriere es sauber in den bestehenden Flow.
+## 1. Zielsetzung & Didaktik
+*   **Lernziel:** Schüler (10. Klasse) sollen intuitiv verstehen, dass ein Getriebe Kraft (Drehmoment) gegen Geschwindigkeit tauscht.
+*   **Die Herausforderung:** Eine 20°-Rampe muss überwunden werden.
+    *   Zu wenig Übersetzung = Motor würgt ab (zu wenig Kraft).
+    *   Zu viel Übersetzung = Rover kriecht (zu langsam für den Warenfluss).
+    *   Zu wenig Gas = Ebenfalls zu langsam.
+*   **Methode:** Visuelles Feedback durch rotierende Zahnräder und Live-Telemetrie statt nackter Zahlen.
 
-3. UI-Details des neuen Simulationsfensters
-3.1. Regler
-Es soll mindestens zwei Regler geben:
-1. Getriebe (Übersetzung)
-    * Beschriftung z.B.:„Getriebe (Übersetzung): Mehr Geschwindigkeit ⇄ Mehr Kraft“
-    * Technisch: Ein Slider, der intern ein Übersetzungsverhältnis repräsentiert.
-    * Linkes Ende: eher auf Geschwindigkeit optimiert (kleinere Übersetzung, weniger Drehmoment am Rad).
-    * Rechtes Ende: eher auf Kraft optimiert (größere Übersetzung, mehr Drehmoment am Rad).
-2. Motordrehzahl
-    * Beschriftung z.B.:„Motordrehzahl: Niedrig ⇄ Hoch“
-    * Ebenfalls ein Slider, der intern die Motordrehzahl steuert (z.B. 0…1-Normierung oder reale Werte).
-3.2. Qualitative Anzeigen
-Darunter sollen zwei Ausgaben sichtbar sein, KEINE nackten Zahlen:
-* „Kraft am Rad:“
-    * Darstellung als Balken / Fortschrittsanzeige plus verbale Stufe, z.B.:
-        * „sehr gering“, „gering“, „mittel“, „hoch“, „sehr hoch“
-* „Geschwindigkeit:“
-    * ebenfalls Balken + verbale Stufe, z.B.:
-        * „sehr langsam“, „langsam“, „mittel“, „schnell“, „sehr schnell“
-Die verbalen Labels und Balken sollen aus den intern berechneten Werten abgeleitet werden (siehe Mathematik-Teil unten), aber für die Lernenden rein qualitativ bleiben.
-3.3. Testfahrt-Button (ohne direkte Animation)
-Es gibt einen Button, z.B.:
-* „Testfahrt starten (kostet 5 Credits)“
-Wichtig:
-* Nach Klick auf „Testfahrt starten“ soll nicht direkt eine aufwendige Animation ablaufen.
-* Stattdessen:
-    * Die Testfahrt wird intern berechnet / ausgewertet.
-    * Es erscheint eine prominent und „leuchtend“ gestaltete Meldung (Notification / Callout), die das Ergebnis beschreibt.
-        * Diese Meldung darf optisch auffallen (z.B. leicht pulsierend / leuchtender Rand / auffälliger Hintergrund).
-        * Kein komplexes Animations-Video nötig; Fokus auf Rückmeldungstext.
+## 2. UX Flow
+1.  **Start:** Nach der Smartphone-Recherche öffnet sich das `Level2TuningCockpit`.
+2.  **Interaktion:**
+    *   Spieler bedient einen "Schubhebel" (Motordrehzahl) und einen "Getriebe-Wahlhebel" (Übersetzung).
+    *   **Visuelles Feedback:** Zwei Zahnräder drehen sich live. Die Größe des abtreibenden Zahnrads ändert sich mit der Übersetzung.
+    *   **Telemetrie:** Anzeigen für "Kraft am Rad" und "Geschwindigkeit" reagieren sofort.
+3.  **Aktion:** Klick auf "TESTFAHRT STARTEN" (Kostet 5 Credits).
+4.  **Ergebnis:**
+    *   Simulation läuft intern.
+    *   Visuelle Rückmeldung (Erfolgs-Pop-up oder Fehler-Analyse).
+    *   Bei 0 Credits: Die "Chefin" erscheint (Game Over / Reset Loop).
 
-4. Testfahrt-Logik & Rückmeldungen
-Auf Basis der aktuellen Einstellungen (Getriebe-Regler + Motordrehzahl) soll die App intern entscheiden, in welche von drei didaktischen Kategorien das Ergebnis fällt:
-1. Zuwenig Kraft am Rad
-    * Interpretation: Das Drehmoment am Rad reicht nicht aus, um die 20°-Rampe zu bewältigen.
-    * Textbeispiel für die leuchtende Meldung (gern leicht variieren / an meinen Stil anpassen):
-        * „Unit-7 bleibt auf der Rampe hängen.“
-2. Genug Kraft, aber zu langsam
-    * Interpretation: Drehmoment reicht, aber die resultierende Geschwindigkeit ist so gering, dass der Warenfluss leidet.
-    * Textbeispiel:
-        * „Unit-7 schafft die Rampe, aber extrem langsam.“
-3. Ausreichende Kraft und akzeptable Geschwindigkeit (Zielzustand)
-    * Interpretation: Drehmoment ≥ Mindest-Drehmoment und Geschwindigkeit ≥ Mindestgeschwindigkeit.
-    * Textbeispiel:
-        * „Unit-7 meistert die 20°-Rampe und ist schnell genug unterwegs.Die Einstellungen sind für den Warenfluss gut geeignet.“
-Diese Meldung soll nach jeder Testfahrt in einer gut sichtbaren, „leuchtenden“ Notification angezeigt werden.
+## 3. Technische Spezifikation: Das Cockpit UI
 
-5. Credit-System für Testfahrten
-Ich möchte, dass Testfahrten „kosten“ und der/die Schüler:in begrenzt viele Versuche hat, bevor er/sie „zur Chefin muss“.
-5.1. Grundlogik
-* Der Spieler nehmen in Level 2 bereits 15 credits aus dem Vorlevel mit.
-* Jede Testfahrt kostet 5 Credits.
-    * Beim Klick auf „Testfahrt starten“:
-        * Wenn genügend Credits vorhanden sind (≥5):
-            * Ziehe 5 Credits ab.
-            * Führe die Testfahrt-Logik aus.
-            * Zeige die leuchtende Ergebnis-Meldung.
-        * Wenn nicht genügend Credits vorhanden sind (<5):
-            * Starte keine Testfahrt.
-            * Öffne stattdessen die „Chefin“-Modal (siehe unten).
-            * 
-5.2. Chefin-Modal bei 0 Credits
-Wenn der/die Spieler:in keine Credits mehr hat (z.B. 0) und erneut eine Testfahrt auslösen will:
-1. Öffne ein Modal mit einer „Chefin“, die unzufrieden ist.
-    * Darstellungsidee:
-        * Emoji, z.B. 😠 oder 😡
-        * Titelzeile, z.B.: „Chefin… (den Namen findest du in level 1)
-        * Kurzer, leicht „böser“ / genervter Text:
-            * z.B.:„Wie viele unnötigen Testfahrten wollen Sie noch machen?Sie haben Ihre Credits verbraucht. Überleg Sie sich Ihre Einstellungen besser,“
-2. Dieses Modal soll:
-    * die Credits wieder auf 15 setzen (von 0 auf 15),
-    * den/die Spieler:in sinngemäß „zurück auf Los“ schicken.
-3. Nach dem Schließen des Modals ist der/die Spieler:in wieder im Simulationsfenster mit:
-    * aktualisierter Credit-Anzeige (15),
-    * unveränderten Regler-Positionen (oder optional zurückgesetzt – du kannst das sinnvoll entscheiden, aber bitte im Code kommentieren).
-Wichtig:
-* Die Chefin soll als leicht fiese rüberkommen
-6. Mathematik und Physik im Hintergrund (vereinfac
+Erstelle eine neue Komponente `src/components/ui/Level2TuningCockpit.tsx`.
 
-htes Modell)
-Du kannst (und sollst) die Physik vereinfacht modellieren. Die Schüler:innen sehen weder Formeln noch Einheiten.
-6.1. Grundannahmen
-Definiere z.B. folgende Konstanten (Zahlenbeispiele, du kannst sie feinjustieren):
-* Masse des Transporters + Fracht: m
-* Erdbeschleunigung: g ≈ 9.81 m/s²
-* Steigungswinkel: alpha = 20°
-* Radradius: r
-* Max. Motordrehmoment: M_motor_max (konstant, z.B. 50 Nm)
-* Max. Motordrehzahl: omega_motor_max (z.B. in rad/s)
-Hangkraft:( F_\text{Hang} = m \cdot g \cdot \sin(\alpha) )
-Erforderliches Drehmoment am Rad für die 20°-Rampe:( M_\text{required} = F_\text{Hang} \cdot r )
-6.2. Modellierung von Getriebe & Motor
-Lass den Getriebe-Slider intern ein Übersetzungsverhältnis ( i ) zwischen einem Minimal- und Maximalwert setzen, z.B.:
-* i_min (eher „schnell“, wenig Drehmoment am Rad)
-* i_max (eher „kräftig“, viel Drehmoment am Rad)
-Dann:
-* Drehmoment am Rad:( M_\text{rad} = i \cdot M_\text{motor} )
-* Drehzahl am Rad:( \omega_\text{rad} = \dfrac{\omega_\text{motor}}{i} )
-Dabei kannst du den Motordrehzahl-Slider auf einen Faktor [0..1] mappen:
-* motorSpeedFactor ∈ [0, 1]
-* ( \omega_\text{motor} = motorSpeedFactor \cdot \omega_\text{motor_max} )
-Das Motordrehmoment kannst du:
-* entweder als konstant annehmen (M_motor = M_motor_max),
-* oder leicht abhängig von motorSpeedFactor modellieren (z.B. Drehmoment fällt bei sehr hohen Drehzahlen etwas ab).→ Keep it simple, nicht übertreiben.
-6.3. Entscheidung „schafft 20° / langsam / zu schnell“
-Definiere z.B.:
-const torqueRatio = M_rad / M_required;   // Verhältnis „Drehmoment am Rad vs. Mindest-Drehmoment“
-const speedRatio   = v / v_ref;           // v aus ω_rad * r; v_ref = „vernünftige Referenzgeschwindigkeit“
-Dann Kategorien:
-1. Zuwenig Kraft am Rad
-    * wenn torqueRatio < 1.0
-    * → Meldung: „bleibt hängen“
-2. Genug Kraft, aber zu langsam
-    * wenn torqueRatio >= 1.0 und speedRatio < speedThreshold (z.B. 0.5)
-    * → Meldung: „kommt hoch, aber zu langsam“
-3. Zielzustand
-    * wenn torqueRatio >= 1.0 und speedRatio >= speedThreshold
-    * → Meldung: „schafft die Rampe und ist schnell genug“
-Bitte mappe „Kraft am Rad“ und „Geschwindigkeit“ auf qualitative Stufen:
-Beispiel (Pseudocode):
-function toQualitativeLevel(valueRatio: number): "sehr gering" | "gering" | "mittel" | "hoch" | "sehr hoch" {
-  if (valueRatio < 0.4) return "sehr gering";
-  if (valueRatio < 0.8) return "gering";
-  if (valueRatio < 1.2) return "mittel";
-  if (valueRatio < 1.6) return "hoch";
-  return "sehr hoch";
-}
-Für die Anzeige „Geschwindigkeit: sehr langsam … sehr schnell“ analog, nur auf speedRatio gemappt.
-6.4. Bibliotheken
-* Du darfst einfache Math-/Physics-Hilfsfunktionen selbst schreiben.
-* Du kannst bei Bedarf kleine Bibliotheken verwenden (z.B. für numerische Hilfen), aber halte es schlank.
-* Wichtig ist Lesbarkeit und Dokumentation im Code (Kommentare), damit klar ist:
-    * welche Vereinfachungen gemacht wurden,
-    * wie aus Slider-Werten → physikalische Größen → qualitative Stufen → Rückmeldungen entstehen.
+### 3.1. Visualisierung (Die Zahnräder)
+Statt statischer Icons nutzen wir animierte SVGs.
+*   **Motor-Ritzel (Links):**
+    *   Feste Größe (klein).
+    *   Dreht sich basierend auf `motorSpeed`.
+    *   Farbe: Technisches Dunkelgrau/Metall.
+*   **Antriebs-Rad (Rechts):**
+    *   **Variable Größe:** Skaliert mit dem gewählten `gearRatio`.
+        *   Kleine Übersetzung -> Kleines Rad (schnell).
+        *   Große Übersetzung -> Großes Rad (langsam, kräftig).
+    *   Dreht sich basierend auf `motorSpeed / gearRatio`.
+    *   Verbindung: Angedeutete Kette oder direkter Kontakt.
 
-7. Implementierung & Integration
-* Orientiere dich am bereits bestehenden Tech-Stack (React/TypeScript oder was in der Codebasis verwendet wird).
-* Baue die neue Simulation so, dass sie:
-    * sauber an die bestehende Level-2-Logik anschließt,
-    * den bisherigen Einstieg über die Smartphone-Recherche beibehält,
-    * das alte Simulationsfenster vollständig ersetzt.
-* Struktur:
-    * eigene, klar benannte Komponenten (z.B. Level2SimulationPanel, CreditDisplay, BossModal, ResultNotification),
-    * zentraler State für:
-        * Slider-Werte,
-        * aktuelle Credits,
-        * letzten Testfahrt-Status (z.B. „ZU_WENIG_KRAFT“, „LANGSAM_OK“, „OK“),
-        * Sichtbarkeit des Boss-Modals.
-* Achte darauf, dass:
-    * die UI intuitiv ist,
-    * die Texte einfach und verständlich (10. Klasse),
-    * die „Chefin“ humorvoll-streng rüberkommt,
-    * die leuchtende Meldung nach „Testfahrt starten“ auffällig, aber nicht nervig ist.
+### 3.2. Controls (Industrial Design)
+*   **Getriebe-Hebel (Horizontal):**
+    *   Label: "GETRIEBE-RATIO"
+    *   Links: "SPEED" (Symbol: Hase/Blitz)
+    *   Rechts: "POWER" (Symbol: Gewicht/Berg)
+    *   Wertebereich intern: `3.0` bis `20.0`.
+*   **Motor-Throttle (Vertikal):**
+    *   Label: "MOTOR RPM"
+    *   Unten: 0%
+    *   Oben: 100% (Warnbereich oben rot markieren).
 
-Zusammengefasst:Bitte analysiere Level 2 und die bestehende Smartphone-Recherche, verstehe das Ziel des Szenarios, und implementiere dann das oben beschriebene neue Simulations-/Tuning-UI mit Getriebe- und Motordrehzahl-Regler, qualitativen Anzeigen für Kraft & Geschwindigkeit, dem Credit-System (15 Credits, 5 pro Testfahrt), der Chefin-Modal mit fiesem Emoji bei Credit-Reset und einem leuchtenden Ergebnis-Callout nach jeder Testfahrt, basierend auf einem einfachen, internen physikalischen Modell.
+### 3.3. Live-Telemetrie (Gauges)
+Verwende Balkenanzeigen mit Farbverlauf (Grün -> Gelb -> Rot oder umgekehrt, je nach Kontext).
+1.  **Drehmoment am Rad (Nm):**
+    *   Zeigt an, wie viel Kraft aktuell anliegt.
+    *   Markiere den "Benötigten Bereich" (Threshold) visuell (z.B. durch einen Strich im Balken). Ist der Balken darunter -> Rot.
+2.  **Geschwindigkeit (km/h):**
+    *   Zeigt die theoretische Endgeschwindigkeit an.
+    *   Markiere den "Minimum Bereich". Ist der Balken darunter -> Gelb/Orange.
+
+## 4. Physik-Engine (Hard Mode)
+
+Wir nutzen ein "Goldilocks"-Modell (genau die richtige Zone finden). Die Physik muss strenger sein als bisher.
+
+Implementiere/Aktualisiere diese Logik in `src/lib/physicsEngine.ts`:
+
+### 4.1. Konstanten & Setup
+```typescript
+const VEHICLE_MASS = 200;     // kg
+const GRAVITY = 9.81;         // m/s²
+const RAMP_ANGLE = 20;        // Grad
+const WHEEL_RADIUS = 0.25;    // Meter
+
+// Das Puzzle-Design (Die "Sweet Spot" Logik):
+// Ziel: Übersetzung muss zwischen ~9.0 und ~14.0 liegen.
+// Ziel: Motordrehzahl muss > 70% sein.
+
+const MAX_MOTOR_TORQUE = 20;  // Nm (Reduziert von 50!)
+const MAX_MOTOR_SPEED = 90;   // rad/s (Reduziert von 300!)
+
+// Physik-Berechnung:
+// 1. Hangabtriebskraft: F_hang = m * g * sin(20°) ≈ 671 N
+// 2. Benötigtes Drehmoment am Rad: M_req = F_hang * r ≈ 167.7 Nm
+// 3. Notwendige Übersetzung: i_min = M_req / M_motor = 167.7 / 20 ≈ 8.4
+```
+
+### 4.2. Simulations-Logik
+Eingabe: `gearRatio` (3-20), `motorSpeedFactor` (0-1).
+
+1.  **Kraft-Check (Stalling):**
+    *   `torqueAtWheel = MAX_MOTOR_TORQUE * gearRatio`
+    *   `requiredTorque = 168` (ca.)
+    *   **Logik:** Wenn `torqueAtWheel < requiredTorque` -> **FAIL: STALLED** ("Bleibt am Hang stehen").
+
+2.  **Geschwindigkeits-Check (Too Slow):**
+    *   `wheelRPM = (motorSpeedFactor * MAX_MOTOR_SPEED) / gearRatio`
+    *   `velocity = wheelRPM * WHEEL_RADIUS` (m/s)
+    *   `minVelocity = 1.5` m/s (ca. 5.4 km/h)
+    *   **Logik:** Wenn `velocity < minVelocity` -> **FAIL: TOO SLOW** ("Schleicht den Berg hoch").
+
+3.  **Erfolg:**
+    *   Wenn weder Stalled noch Too Slow -> **SUCCESS**.
+
+## 5. Game Loop & Credit System
+
+### 5.1. Der "Testfahrt"-Button
+*   Text: "TESTFAHRT STARTEN [-5 Credits]"
+*   Status: Deaktiviert, wenn Simulation läuft.
+
+### 5.2. Credit Logik
+*   Start-Credits: 15
+*   Kosten pro Versuch: 5
+*   Anzeige: Digitaler Counter (z.B. oben rechts im Panel).
+
+### 5.3. Das "Chefin"-Modal (Fail State)
+Triggert, wenn Credits < 5 und Spieler drückt Start.
+*   **Inhalt:**
+    *   Avatar/Icon: 😠 (Bazlin).
+    *   Headline: "Budget überschritten!"
+    *   Text: "Unit-7 steht immer noch? Wir verbrennen hier Geld! Ich setze Ihr Budget zurück, aber denken Sie diesmal erst nach, bevor Sie drücken!"
+*   **Aktion:**
+    *   Button: "Verstanden..."
+    *   Reset Credits auf 15.
+    *   Schließe Modal.
+
+## 6. UI Feedback (Nach dem Test)
+Verwende `framer-motion` für eine "Result Notification", die über dem Cockpit einblendet.
+
+*   **Szenario 1 (Stall):** Roter Alarm. "ANTRIEB ÜBERLASTET. Drehmoment reicht nicht für 20° Steigung."
+*   **Szenario 2 (Slow):** Gelber Warnhinweis. "TIMEOUT. Fahrzeug erreicht Ziel nicht rechtzeitig. Warenfluss stockt."
+*   **Szenario 3 (Success):** Grünes Erfolgs-Banner. "OPTIMALER BETRIEB. Steigung bewältigt, Zeitplan eingehalten."
+
+## 7. Zusammenfassung der Aufgaben für die KI
+1.  Aktualisiere `src/lib/physicsEngine.ts` mit den neuen, strengen Konstanten.
+2.  Erstelle `src/components/ui/Level2TuningCockpit.tsx` mit:
+    *   SVG-Zahnrad-Animation (Größe & Drehzahl gekoppelt an State).
+    *   Industrial-Style Slidern.
+    *   Live-Balken für Torque/Speed mit Markierungen für Soll-Werte.
+3.  Integriere das Credit-System und das Boss-Modal.
+4.  Baue die Simulations-Logik basierend auf den neuen Konstanten ein.
