@@ -9,11 +9,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Lock, Unlock, XCircle } from 'lucide-react';
 
 const Level5_Ethics: React.FC = () => {
-  const { credits, removeCredits, setLevelState, levelState, previousLevel } = useGameStore();
+  const {
+    credits,
+    removeCredits,
+    setLevelState,
+    levelState,
+    previousLevel,
+    pushStateHistory,
+    clearStateHistory
+  } = useGameStore();
   const [step, setStep] = useState<'DIAGNOSIS' | 'REPAIR' | 'LOCKDOWN' | 'DECISION'>('DIAGNOSIS');
   const [hacking, setHacking] = useState(false);
 
   const handleRepair = () => {
+    // Save state before deducting credits (for proper back navigation)
+    pushStateHistory();
     removeCredits(5);
     setStep('REPAIR');
     setTimeout(() => {

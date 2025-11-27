@@ -12,7 +12,17 @@ import { MATERIALS, calculateArmPhysics } from '@/lib/physicsEngine';
 import { motion } from 'framer-motion';
 
 const Level1_Mechanics: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, returnToDashboard, credits, removeCredits } = useGameStore();
+  const {
+    advanceLevel,
+    setLevelState,
+    levelState,
+    returnToDashboard,
+    credits,
+    removeCredits,
+    pushStateHistory,
+    popStateHistory,
+    clearStateHistory
+  } = useGameStore();
 
   // Input states
   const [inputDensity, setInputDensity] = useState('');
@@ -32,14 +42,20 @@ const Level1_Mechanics: React.FC = () => {
   const [showText, setShowText] = useState(false);
 
   const handleStart = () => {
+    // Save current state before advancing
+    pushStateHistory();
     setLevelState('ACTIVE');
   };
 
   const handleBack = () => {
     if (levelState === 'INTRO') {
+      // Clear history when leaving level entirely
+      clearStateHistory();
       returnToDashboard();
     } else {
-      setLevelState('INTRO');
+      // Go back one step and restore previous state
+      popStateHistory();
+      // Reset local state
       setShowText(false);
       setSimulationResult(null);
       setErrorMsg(null);
@@ -57,7 +73,7 @@ const Level1_Mechanics: React.FC = () => {
     // Allow comma as decimal separator for German users
     const densityStr = inputDensity.replace(',', '.');
     const stiffnessStr = inputStiffness.replace(',', '.');
-    
+
     const density = parseFloat(densityStr);
     const stiffness = parseFloat(stiffnessStr);
 
@@ -113,8 +129,9 @@ const Level1_Mechanics: React.FC = () => {
         );
         setLevelState('FAIL');
       } else {
-        // Deduct credits ONLY on success
-        // Actually, maybe deduct on attempt? No, that's too harsh for kids.
+        // Save state before deducting credits (for proper back navigation)
+        pushStateHistory();
+        // Deduct credits on success
         removeCredits(materialCost);
         setErrorMsg(
           `ERFOLG: Der Arm ist leicht genug (${result.mass.toFixed(0)}g) und stabil (${result.deflection.toFixed(2)}mm Durchbiegung). Konfiguration genehmigt! (Kosten: ${materialCost} CR)`
@@ -127,9 +144,9 @@ const Level1_Mechanics: React.FC = () => {
   };
 
   const handleRetry = () => {
+    // Simply reset to active without changing history - user stays on same step
     setLevelState('ACTIVE');
-    // Keep the visualization showing the failure until they simulate again
-    // But clear the error message to encourage retry
+    // Clear error message to encourage retry
     setErrorMsg(null);
   };
 
@@ -169,16 +186,17 @@ const Level1_Mechanics: React.FC = () => {
             >
               <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
               <p className="mb-2">
-                Unit-7 hat versucht, einen 5kg schweren Industrie-Container zu heben.
-                Dabei ist der Greifarm gebrochen. Das alte Material war zu schwach für diese Last.
+                Unit-7 hat versucht, einen schweren Industrie-Container zu heben.
+                Dabei ist der Greifarm gebrochen. Das Material war zu schwach für diese Last.
               </p>
 
               <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
               <p>
-                Konstruiere einen neuen Arm. Er muss <GlossaryTooltip term="steif" definition="Widerstand gegen Verformung" /> genug sein, um 5kg zu heben (max 2mm Biegung).
-                Aber Vorsicht: Wenn der Arm schwerer als 1000g ist, brennen die Motoren durch.
+                Der Roboterarm muss mit einem geeigneteren Material konstruiert werden. Es muss <GlossaryTooltip term="steif" definition="Widerstand gegen Verformung" /> genug sein, damit sich das Material bei 5 kg Last maximal 2 mm biegt.
               </p>
-              <p className="text-xs text-slate-500 mt-2 italic">Hinweis: Nutze die Datenbank, um ein passendes Material zu finden.</p>
+              <p className="mt-2">
+                Aber Vorsicht: Wenn der Arm mehr als 1000 g wiegt, brennen die Motoren durch.
+              </p>
             </motion.div>
           )}
 
