@@ -10,6 +10,11 @@ interface ReflectionChatProps {
   message: string;
   correctAnswer: string;
   onComplete: () => void;
+  // New optional props for modularity
+  title?: string;
+  contextDescription?: string;
+  avatarIcon?: string;
+  continueButtonText?: string;
 }
 
 export const ReflectionChat: React.FC<ReflectionChatProps> = ({
@@ -17,7 +22,11 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
   senderTitle,
   message,
   correctAnswer,
-  onComplete
+  onComplete,
+  title,
+  contextDescription,
+  avatarIcon = '👩‍💼',
+  continueButtonText = 'Weiter'
 }) => {
   const [input, setInput] = useState('');
   const [isSent, setIsSent] = useState(false);
@@ -31,12 +40,23 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
       <div className="max-w-2xl w-full">
-        <TerminalCard title={`NACHRICHT VON: ${senderName.toUpperCase()}`} borderColor="yellow">
+        <TerminalCard 
+          title={title || `NACHRICHT VON: ${senderName.toUpperCase()}`} 
+          borderColor="yellow"
+        >
           <div className="space-y-6 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900 pr-2">
+            
+            {/* Optional Context Description */}
+            {contextDescription && (
+              <div className="bg-slate-900/50 p-3 border-l-2 border-yellow-500 text-slate-400 text-sm italic mb-4">
+                {contextDescription}
+              </div>
+            )}
+
             {/* Sender Info */}
             <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
               <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-600 text-xl">
-                👩‍💼
+                {avatarIcon}
               </div>
               <div>
                 <div className="font-bold text-yellow-400">{senderName}</div>
@@ -114,7 +134,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
                   onClick={onComplete}
                   className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest shadow-[0_0_20px_rgba(34,197,94,0.4)]"
                 >
-                  Weiter zu Level 2
+                  {continueButtonText}
                 </motion.button>
               </motion.div>
             )}

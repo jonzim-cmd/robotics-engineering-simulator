@@ -40,8 +40,14 @@ const Level1_Mechanics: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showText, setShowText] = useState(false);
   const [showReflection, setShowReflection] = useState(false);
+  const [showIntroReflection, setShowIntroReflection] = useState(false);
 
   const handleStart = () => {
+    setShowIntroReflection(true);
+  };
+
+  const startLevelReal = () => {
+    setShowIntroReflection(false);
     // Save current state before advancing
     pushStateHistory();
     setLevelState('ACTIVE');
@@ -143,66 +149,87 @@ const Level1_Mechanics: React.FC = () => {
   // INTRO Screen
   if (levelState === 'INTRO') {
     return (
-      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={handleBack}>
-        <div className="space-y-4">
-          <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
-          <TypewriterText
-            text="Verbindung hergestellt... Unit-7 Status: KRITISCH."
-            speed={20}
-          />
+      <>
+        <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={handleBack}>
+          <div className="space-y-4">
+            <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
+            <TypewriterText
+              text="Verbindung hergestellt... Unit-7 Status: KRITISCH."
+              speed={20}
+            />
 
-          <div className="mt-6">
-            <BrokenArmVisualization />
+            <div className="mt-6">
+              <BrokenArmVisualization />
+            </div>
+
+            {!showText && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1, duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                className="text-center mt-4 text-slate-400 text-sm cursor-pointer"
+                onClick={handleShowText}
+              >
+                [ Klicken um fortzufahren... ]
+              </motion.div>
+            )}
+
+            {showText && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded"
+              >
+                <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
+                <p className="mb-2">
+                  Unit-7 hat versucht, einen schweren Industrie-Container zu heben.
+                  Dabei ist der Greifarm gebrochen. Das Material war zu schwach für diese Last.
+                </p>
+
+                <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
+                <p>
+                  Der Roboterarm muss mit einem geeigneteren Material konstruiert werden. Es muss <GlossaryTooltip term="steif" definition="Widerstand gegen Verformung" /> genug sein, damit sich das Material bei 5 kg Last maximal 2 mm biegt.
+                </p>
+                <p className="mt-2">
+                  Aber Vorsicht: Wenn der Arm mehr als 1000 kg wiegt, brennen die Motoren durch.
+                </p>
+              </motion.div>
+            )}
+
+            {showText && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                onClick={handleStart}
+                className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
+              >
+                Mission Starten
+              </motion.button>
+            )}
           </div>
+        </TerminalCard>
 
-          {!showText && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1, duration: 1, repeat: Infinity, repeatType: "reverse" }}
-              className="text-center mt-4 text-slate-400 text-sm cursor-pointer"
-              onClick={handleShowText}
-            >
-              [ Klicken um fortzufahren... ]
-            </motion.div>
-          )}
+        {/* Intro Reflection Chat */}
+        {showIntroReflection && (
+          <ReflectionChat
+            title="DIALOG AUF DEM FLUR"
+            contextDescription="Du und ein Mitarbeiter sind auf dem Weg zum Prüflabor, um ein geeignetes Material für den neuen Roboterarm auszuwählen. Auf dem Weg dorthin fragt er dich:"
+            senderName="Mitarbeiter"
+            senderTitle="Junior Engineer"
+            avatarIcon="👷"
+            message={`Du, Kollege Arianit meinte, wir sollen aufpassen, dass der neue Roboterarm nicht über 1000 kg wiegt, weil sonst die Motoren durchbrennen.
 
-          {showText && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded"
-            >
-              <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
-              <p className="mb-2">
-                Unit-7 hat versucht, einen schweren Industrie-Container zu heben.
-                Dabei ist der Greifarm gebrochen. Das Material war zu schwach für diese Last.
-              </p>
+Das habe ich nicht verstanden. Was meint er damit? Warum sollten die Motoren durchbrennen?`}
+            correctAnswer={`Wenn der Roboterarm zu schwer ist, benötigen die Motoren sehr viel Kraft (Drehmoment), um ihn zu bewegen.
 
-              <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
-              <p>
-                Der Roboterarm muss mit einem geeigneteren Material konstruiert werden. Es muss <GlossaryTooltip term="steif" definition="Widerstand gegen Verformung" /> genug sein, damit sich das Material bei 5 kg Last maximal 2 mm biegt.
-              </p>
-              <p className="mt-2">
-                Aber Vorsicht: Wenn der Arm mehr als 1000 kg wiegt, brennen die Motoren durch.
-              </p>
-            </motion.div>
-          )}
-
-          {showText && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              onClick={handleStart}
-              className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
-            >
-              Mission Starten
-            </motion.button>
-          )}
-        </div>
-      </TerminalCard>
+Dabei fließt sehr viel Strom. Wenn zu viel Strom fließt, werden die Motoren extrem heiß. Wenn sie zu heiß werden, schmilzt die Isolierung der Drähte und der Motor geht kaputt ("brennt durch").`}
+            continueButtonText="Weiter zum Labor"
+            onComplete={startLevelReal}
+          />
+        )}
+      </>
     );
   }
 
