@@ -16,6 +16,7 @@ const Level2_Transmission: React.FC = () => {
   const [simulating, setSimulating] = useState(false);
   const [result, setResult] = useState<{ success: boolean; msg: string } | null>(null);
   const [showText, setShowText] = useState(false);
+  const [showResearchIntro, setShowResearchIntro] = useState(false);
   const [showSmartphoneResearch, setShowSmartphoneResearch] = useState(false);
 
   // Motor stats (Constant input)
@@ -37,10 +38,16 @@ const Level2_Transmission: React.FC = () => {
     setSimulating(false);
     setResult(null);
     setShowText(false);
+    setShowResearchIntro(false);
     setShowSmartphoneResearch(false);
   };
 
   const handleStart = () => {
+    setShowResearchIntro(true);
+  };
+
+  const handleResearchIntroComplete = () => {
+    setShowResearchIntro(false);
     setShowSmartphoneResearch(true);
   };
 
@@ -146,6 +153,53 @@ const Level2_Transmission: React.FC = () => {
             )}
           </div>
         </TerminalCard>
+
+        {/* Research Intro */}
+        {showResearchIntro && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1, type: 'spring', damping: 20 }}
+              className="max-w-2xl w-full"
+            >
+              <TerminalCard title="VORBEREITUNG" borderColor="cyan">
+                <div className="space-y-6 py-4">
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">🔍</div>
+                  </div>
+
+                  <div className="bg-slate-900/50 border border-slate-800 rounded p-4 text-slate-300 leading-relaxed">
+                    <p className="mb-4">
+                      Bevor du das Getriebe konfigurierst, möchtest du dich absichern.
+                    </p>
+                    <p className="mb-4">
+                      Nach dem letzten Vorfall mit dem Roboterarm hat Chefin Bazlin deutlich gemacht, dass sie sehr genau auf Fehler achtet.
+                      Jede falsche Entscheidung könnte Konsequenzen haben.
+                    </p>
+                    <p className="text-cyan-400 font-medium">
+                      Du holst dein Smartphone heraus und recherchierst die wichtigsten Begriffe, um eine fundierte Entscheidung zu treffen.
+                    </p>
+                  </div>
+
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    onClick={handleResearchIntroComplete}
+                    className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(8,145,178,0.3)]"
+                  >
+                    Recherche starten
+                  </motion.button>
+                </div>
+              </TerminalCard>
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* Smartphone Research */}
         {showSmartphoneResearch && (
