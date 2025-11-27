@@ -1,64 +1,58 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface MaterialCardProps {
   name: string;
   density: number;
   stiffness: number;
+  cost: number;
   color: string;
   description: string;
-  cost: number;
 }
 
 export const MaterialCard: React.FC<MaterialCardProps> = ({
   name,
   density,
   stiffness,
+  cost,
   color,
-  description,
-  cost
+  description
 }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      className="bg-slate-900/80 border border-slate-700 rounded p-4 hover:border-cyan-500/50 transition-all"
-    >
-      {/* Material indicator bar */}
-      <div
-        className="h-1 w-full rounded mb-3"
-        style={{ backgroundColor: color }}
-      />
-
-      {/* Material name and cost */}
-      <div className="flex justify-between items-start mb-2">
-        <h4 className="text-cyan-400 font-bold font-mono text-sm flex-1">
-          {name}
-        </h4>
-        <div className="font-mono text-xs font-bold px-2 py-1 rounded bg-slate-800 text-slate-400">
+    <div className="bg-slate-950 border border-slate-800 p-3 rounded hover:border-slate-600 transition-colors group">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div 
+            className="w-3 h-3 rounded-full border border-slate-600 shadow-[0_0_5px_rgba(0,0,0,0.5)]" 
+            style={{ backgroundColor: color }} 
+          />
+          <span className="font-bold text-slate-200 text-sm group-hover:text-cyan-400 transition-colors">
+            {name}
+          </span>
+        </div>
+        <div className="text-xs font-mono bg-slate-900 px-1.5 py-0.5 rounded text-yellow-500 border border-yellow-900/30">
           {cost} CR
         </div>
       </div>
 
-      {/* Technical specs */}
-      <div className="space-y-1 mb-3 font-mono text-xs">
-        <div className="flex justify-between items-center">
-          <span className="text-slate-400">DICHTE (ρ):</span>
-          <span className="text-white font-bold">{density.toFixed(2)} g/cm³</span>
+      {/* Technical Data Grid */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs font-mono text-slate-400 mb-2 bg-slate-900/30 p-2 rounded">
+        <div className="flex justify-between">
+          <span>Dichte:</span>
+          <span className="text-slate-200">{density.toFixed(2)} <span className="text-[9px] text-slate-500">g/cm³</span></span>
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-slate-400">E-MODUL (E):</span>
-          <span className="text-white font-bold">{stiffness.toFixed(1)} GPa</span>
+        <div className="flex justify-between">
+          <span>E-Modul:</span>
+          <span className="text-slate-200">{stiffness.toFixed(1)} <span className="text-[9px] text-slate-500">GPa</span></span>
         </div>
       </div>
 
       {/* Description */}
-      <p className="text-slate-400 text-xs leading-relaxed border-t border-slate-800 pt-2">
+      <div className="text-[10px] text-slate-500 italic leading-tight border-t border-slate-800/50 pt-2">
         {description}
-      </p>
-    </motion.div>
+      </div>
+    </div>
   );
 };
