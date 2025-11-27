@@ -218,7 +218,7 @@ const Level1_Mechanics: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* LEFT SIDE: Material Database (Read-Only) */}
           <div className="space-y-4">
-            <div className="bg-slate-900/50 border border-slate-700 rounded p-3 h-full">
+            <div className="bg-slate-900/50 border border-slate-700 rounded px-3 pt-3 pb-1 h-full">
               <h3 className="text-cyan-400 font-bold font-mono text-sm mb-3 uppercase tracking-wider flex items-center border-b border-slate-800 pb-2">
                 <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2 animate-pulse" />
                 Material-Datenbank
@@ -274,7 +274,7 @@ const Level1_Mechanics: React.FC = () => {
                   <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">
                     <GlossaryTooltip
                       term="Dichte"
-                      definition="Masse pro Volumen. Bestimmt das Gewicht."
+                      definition="Masse pro Volumen. Bestimmt das Gewicht des Roboterarms."
                     />
                   </label>
                   <div className="flex items-center relative">
@@ -297,7 +297,7 @@ const Level1_Mechanics: React.FC = () => {
                   <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">
                     <GlossaryTooltip
                       term="E-Modul"
-                      definition="Steifigkeit des Materials. Bestimmt die Biegung."
+                      definition="Steifigkeit des Materials. Bestimmt wie sehr sich der Roboterarm unter Last biegt."
                     />
                   </label>
                   <div className="flex items-center relative">
@@ -372,7 +372,7 @@ const Level1_Mechanics: React.FC = () => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md"
         >
           <div className="max-w-lg w-full">
-            <TerminalCard title="MISSION COMPLETE" borderColor="green">
+            <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={handleBack}>
               <div className="text-center space-y-6 py-8 px-6">
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
