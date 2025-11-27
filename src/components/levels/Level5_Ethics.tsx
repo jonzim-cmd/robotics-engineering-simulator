@@ -14,12 +14,25 @@ const Level5_Ethics: React.FC = () => {
     removeCredits,
     setLevelState,
     levelState,
-    previousLevel,
     pushStateHistory,
-    clearStateHistory
+    popStateHistory,
   } = useGameStore();
   const [step, setStep] = useState<'DIAGNOSIS' | 'REPAIR' | 'LOCKDOWN' | 'DECISION'>('DIAGNOSIS');
   const [hacking, setHacking] = useState(false);
+
+  const handleBack = () => {
+    // Pop from global history
+    popStateHistory();
+    // Reset local state
+    setStep('DIAGNOSIS');
+    setHacking(false);
+  };
+
+  const handleStart = () => {
+    // Save state before advancing
+    pushStateHistory();
+    setLevelState('ACTIVE');
+  };
 
   const handleRepair = () => {
     // Save state before deducting credits (for proper back navigation)
@@ -40,7 +53,7 @@ const Level5_Ethics: React.FC = () => {
 
   if (levelState === 'INTRO') {
     return (
-      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={previousLevel}>
+      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={handleBack}>
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
           <TypewriterText 
@@ -59,8 +72,8 @@ const Level5_Ethics: React.FC = () => {
             <p>Du hast noch {credits} Credits Budget. Ein Standard-Ersatzsensor kostet 5 Credits. Tausche das defekte Bauteil aus, um den Auftrag abzuschließen.</p>
           </div>
 
-          <button 
-            onClick={() => setLevelState('ACTIVE')}
+          <button
+            onClick={handleStart}
             className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
           >
             Werkstatt öffnen
@@ -72,7 +85,7 @@ const Level5_Ethics: React.FC = () => {
 
   if (levelState === 'SUCCESS') {
     return (
-      <TerminalCard title="SYSTEM UNLOCKED" borderColor="green" onBack={previousLevel}>
+      <TerminalCard title="SYSTEM UNLOCKED" borderColor="green" onBack={handleBack}>
         <div className="text-center space-y-6 py-8">
           <div className="text-green-400 text-4xl mb-4">✓ JAILBREAK ERFOLGREICH</div>
           <p>Du hast die Firmware-Sperre umgangen. Der Rover akzeptiert das Bauteil.</p>
@@ -89,7 +102,7 @@ const Level5_Ethics: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="LEVEL 5: ETHIK & RECHT AUF REPARATUR" borderColor={step === 'LOCKDOWN' ? 'red' : 'cyan'} onBack={previousLevel}>
+      <TerminalCard title="LEVEL 5: ETHIK & RECHT AUF REPARATUR" borderColor={step === 'LOCKDOWN' ? 'red' : 'cyan'} onBack={handleBack}>
         
         <AnimatePresence mode="wait">
           

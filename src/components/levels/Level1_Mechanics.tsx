@@ -16,12 +16,10 @@ const Level1_Mechanics: React.FC = () => {
     advanceLevel,
     setLevelState,
     levelState,
-    returnToDashboard,
     credits,
     removeCredits,
     pushStateHistory,
     popStateHistory,
-    clearStateHistory
   } = useGameStore();
 
   // Input states
@@ -48,20 +46,15 @@ const Level1_Mechanics: React.FC = () => {
   };
 
   const handleBack = () => {
-    if (levelState === 'INTRO') {
-      // Clear history when leaving level entirely
-      clearStateHistory();
-      returnToDashboard();
-    } else {
-      // Go back one step and restore previous state
-      popStateHistory();
-      // Reset local state
-      setShowText(false);
-      setSimulationResult(null);
-      setErrorMsg(null);
-      setInputDensity('');
-      setInputStiffness('');
-    }
+    // Simply pop from global history - it handles everything (including level transitions!)
+    popStateHistory();
+
+    // Reset local state when going back
+    setShowText(false);
+    setSimulationResult(null);
+    setErrorMsg(null);
+    setInputDensity('');
+    setInputStiffness('');
   };
 
   const handleShowText = () => {
@@ -143,13 +136,6 @@ const Level1_Mechanics: React.FC = () => {
     }, 2500); // Longer delay for dramatic effect
   };
 
-  const handleRetry = () => {
-    // Simply reset to active without changing history - user stays on same step
-    setLevelState('ACTIVE');
-    // Clear error message to encourage retry
-    setErrorMsg(null);
-  };
-
   // INTRO Screen
   if (levelState === 'INTRO') {
     return (
@@ -195,7 +181,7 @@ const Level1_Mechanics: React.FC = () => {
                 Der Roboterarm muss mit einem geeigneteren Material konstruiert werden. Es muss <GlossaryTooltip term="steif" definition="Widerstand gegen Verformung" /> genug sein, damit sich das Material bei 5 kg Last maximal 2 mm biegt.
               </p>
               <p className="mt-2">
-                Aber Vorsicht: Wenn der Arm mehr als 1000 g wiegt, brennen die Motoren durch.
+                Aber Vorsicht: Wenn der Arm mehr als 1000 kg wiegt, brennen die Motoren durch.
               </p>
             </motion.div>
           )}

@@ -9,7 +9,7 @@ import { calculateTransmission } from '@/lib/physicsEngine';
 import { motion } from 'framer-motion';
 
 const Level2_Transmission: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, previousLevel } = useGameStore();
+  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory } = useGameStore();
   const [gearRatio, setGearRatio] = useState(1);
   const [simulating, setSimulating] = useState(false);
   const [result, setResult] = useState<{ success: boolean; msg: string } | null>(null);
@@ -19,13 +19,24 @@ const Level2_Transmission: React.FC = () => {
   const MOTOR_RPM = 3000; // RPM
 
   const { outputTorque, outputRPM } = calculateTransmission(MOTOR_TORQUE, MOTOR_RPM, gearRatio);
-  
+
   // Wheel diameter approx 0.5m -> Circumference ~ 1.57m
   // Speed (m/min) = RPM * 1.57
   // Speed (km/h) = (RPM * 1.57 * 60) / 1000
   const speedKmh = (outputRPM * 1.57 * 60) / 1000;
 
+  const handleBack = () => {
+    // Pop from global history
+    popStateHistory();
+    // Reset local state
+    setGearRatio(1);
+    setSimulating(false);
+    setResult(null);
+  };
+
   const handleStart = () => {
+    // Save state before advancing
+    pushStateHistory();
     setLevelState('ACTIVE');
   };
 
@@ -48,7 +59,7 @@ const Level2_Transmission: React.FC = () => {
 
   if (levelState === 'INTRO') {
     return (
-      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={previousLevel}>
+      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={handleBack}>
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
           <TypewriterText 
@@ -80,7 +91,7 @@ const Level2_Transmission: React.FC = () => {
 
   if (levelState === 'SUCCESS') {
     return (
-      <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={previousLevel}>
+      <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={handleBack}>
         <div className="text-center space-y-6 py-8">
           <div className="text-green-400 text-4xl mb-4">✓ ANTRIEB STABIL</div>
           <p>Der Rover hat die Rampe erfolgreich erklommen.</p>
@@ -97,7 +108,7 @@ const Level2_Transmission: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="LEVEL 2: GETRIEBE & ÜBERSETZUNG" borderColor={result?.success === false ? 'red' : 'cyan'} onBack={previousLevel}>
+      <TerminalCard title="LEVEL 2: GETRIEBE & ÜBERSETZUNG" borderColor={result?.success === false ? 'red' : 'cyan'} onBack={handleBack}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Controls */}

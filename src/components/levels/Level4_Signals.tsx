@@ -8,12 +8,23 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { motion } from 'framer-motion';
 
 const Level4_Signals: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, previousLevel } = useGameStore();
+  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory } = useGameStore();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [result, setResult] = useState<{ correct: boolean; msg: string; count: number } | null>(null);
 
+  const handleBack = () => {
+    // Pop from global history
+    popStateHistory();
+    // Reset local state
+    setSelectedOption(null);
+    setSimulating(false);
+    setResult(null);
+  };
+
   const handleStart = () => {
+    // Save state before advancing
+    pushStateHistory();
     setLevelState('ACTIVE');
   };
 
@@ -38,7 +49,7 @@ const Level4_Signals: React.FC = () => {
 
   if (levelState === 'INTRO') {
     return (
-      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={previousLevel}>
+      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={handleBack}>
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
           <TypewriterText 
@@ -70,7 +81,7 @@ const Level4_Signals: React.FC = () => {
 
   if (levelState === 'SUCCESS') {
     return (
-      <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={previousLevel}>
+      <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={handleBack}>
         <div className="text-center space-y-6 py-8">
           <div className="text-green-400 text-4xl mb-4">✓ SIGNAL SAUBER</div>
           <p>Der Zähler arbeitet präzise. Entprellung erfolgreich implementiert.</p>
@@ -87,7 +98,7 @@ const Level4_Signals: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="LEVEL 4: SIGNALVERARBEITUNG" borderColor={result?.correct === false ? 'red' : 'cyan'} onBack={previousLevel}>
+      <TerminalCard title="LEVEL 4: SIGNALVERARBEITUNG" borderColor={result?.correct === false ? 'red' : 'cyan'} onBack={handleBack}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Code Puzzle */}
