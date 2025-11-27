@@ -81,23 +81,21 @@ const SpinningGear: React.FC<SpinningGearProps> = ({ size, color, teeth, speed, 
 };
 
 // --- Sub-Component: Gauge ---
-const Gauge: React.FC<{ 
-  label: string; 
+const Gauge: React.FC<{
+  label: string;
   value: number; // 0-100
-  color: string; 
   displayValue: string;
-}> = ({ label, value, displayValue }) => { // Removed color from destructuring as it's no longer used for dynamic styling
+}> = ({ label, value }) => { // Removed displayValue from destructuring as it's no longer used
   return (
     <div className="flex flex-col gap-1 w-full">
       <div className="flex justify-between text-xs uppercase tracking-wider text-slate-400">
         <span>{label}</span>
-        <span className="text-green-500">{displayValue}</span> {/* Always green text */}
       </div>
       <div className="h-4 bg-slate-800 rounded-sm relative overflow-hidden border border-slate-700">
         
         {/* Bar */}
         <motion.div 
-          className="h-full bg-cyan-500"
+          className={`h-full bg-cyan-500`} 
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(100, Math.max(0, value))}%` }}
           transition={{ type: "spring", damping: 20 }}
@@ -106,7 +104,6 @@ const Gauge: React.FC<{
     </div>
   );
 };
-
 // --- Main Component ---
 export const Level2TuningCockpit: React.FC = () => {
   const { credits, setCredits, setLevelState } = useGameStore();
