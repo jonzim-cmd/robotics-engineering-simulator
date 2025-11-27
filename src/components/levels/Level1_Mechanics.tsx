@@ -10,6 +10,7 @@ import { RobotArmVisualization } from '@/components/ui/RobotArmVisualization';
 import { MaterialCard } from '@/components/ui/MaterialCard';
 import { MATERIALS, calculateArmPhysics } from '@/lib/physicsEngine';
 import { motion } from 'framer-motion';
+import { ReflectionChat } from '@/components/ui/ReflectionChat';
 
 const Level1_Mechanics: React.FC = () => {
   const {
@@ -38,6 +39,7 @@ const Level1_Mechanics: React.FC = () => {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showText, setShowText] = useState(false);
+  const [showReflection, setShowReflection] = useState(false);
 
   const handleStart = () => {
     // Save current state before advancing
@@ -416,7 +418,7 @@ const Level1_Mechanics: React.FC = () => {
                 </div>
 
                 <button
-                  onClick={() => advanceLevel(true)}
+                  onClick={() => setShowReflection(true)}
                   className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(22,163,74,0.4)] hover:shadow-[0_0_30px_rgba(22,163,74,0.6)]"
                 >
                   Nächstes Level Initialisieren
@@ -425,6 +427,30 @@ const Level1_Mechanics: React.FC = () => {
             </TerminalCard>
           </div>
         </motion.div>
+      )}
+
+      {/* Reflection Chat Overlay */}
+      {showReflection && (
+        <ReflectionChat
+          senderName="Chefin Bazlin"
+          senderTitle="Head of Engineering"
+          message={`Hallo Ingenieur*in,
+
+ich habe gesehen, dass Sie einen teuren Carbon-Roboterarm bestellt haben. Bitte erklären Sie mir kurz, warum Sie dieses Material gewählt haben und welche technischen Vorteile es bietet.
+
+Hätte Aluminium nicht gereicht?
+
+Beste Grüße
+Chefin Bazlin`}
+          correctAnswer={`Aluminium ist zwar günstiger, aber für Hochleistungsroboter oft zu schwer oder zu weich.
+
+Carbon (Kohlefaser) hat zwei entscheidende Vorteile:
+1. Es ist extrem leicht (geringe Dichte), wodurch sich der Arm schneller bewegen kann ohne die Motoren zu überlasten.
+2. Es ist extrem steif (hoher E-Modul), wodurch sich der Arm auch bei Belastung kaum verbiegt und sehr präzise bleibt.
+
+Die höheren Kosten lohnen sich durch die bessere Performance und Langlebigkeit.`}
+          onComplete={() => advanceLevel(true)}
+        />
       )}
     </div>
   );
