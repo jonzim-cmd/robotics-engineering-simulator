@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, useAnimationFrame, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useAnimationFrame, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import {
   calculateLevel2Physics,
@@ -118,6 +118,17 @@ export const Level2TuningCockpit: React.FC = () => {
   // Real-time physics calculation
   const physics = calculateLevel2Physics(gearRatio, motorSpeedFactor);
 
+  // Auto-hide test result after delay (except for SUCCESS)
+  useEffect(() => {
+    if (testResult && testResult.testResult !== 'SUCCESS') {
+      const timer = setTimeout(() => {
+        setTestResult(null);
+      }, 3500); // Hide after 3.5 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [testResult]);
+
   // Handlers
   const handleTestDrive = () => {
     if (credits < CREDITS_PER_TEST) {
@@ -200,18 +211,22 @@ export const Level2TuningCockpit: React.FC = () => {
           </div>
 
           {/* Result Overlay */}
-          {testResult && !isTestRunning && (
-             <motion.div 
-               initial={{ opacity: 0, scale: 0.9 }}
-               animate={{ opacity: 1, scale: 1 }}
-               className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-6"
-             >
-                <TestResultNotification 
-                  resultType={testResult.testResult} 
-                  message={testResult.resultMessage} 
-                />
-             </motion.div>
-          )}
+          <AnimatePresence>
+            {testResult && !isTestRunning && (
+               <motion.div
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 exit={{ opacity: 0, scale: 0.95 }}
+                 transition={{ duration: 0.3 }}
+                 className="absolute inset-0 z-20 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-6"
+               >
+                  <TestResultNotification
+                    resultType={testResult.testResult}
+                    message={testResult.resultMessage}
+                  />
+               </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
