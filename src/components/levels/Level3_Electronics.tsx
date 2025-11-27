@@ -132,7 +132,7 @@ const Level3_Electronics: React.FC = () => {
           <div className="text-green-400 text-4xl mb-4">✓ SPANNUNG STABIL</div>
           <p>Keine Brownouts detektiert. CPU läuft durchgehend stabil.</p>
           <button 
-            onClick={advanceLevel}
+            onClick={() => advanceLevel(true)}
             className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
           >
             Nächstes Level

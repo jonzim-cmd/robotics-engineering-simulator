@@ -25,7 +25,7 @@ interface GameState {
   pushStateHistory: () => void;
   popStateHistory: () => boolean; // Returns true if pop was successful
   clearStateHistory: () => void;
-  advanceLevel: () => void;
+  advanceLevel: (skipHistoryPush?: boolean) => void;
   previousLevel: () => void; // Deprecated: Use popStateHistory instead
   returnToDashboard: () => void;
   setUserName: (name: string) => void;
@@ -84,9 +84,11 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   clearStateHistory: () => set({ stateHistory: [] }),
 
-  advanceLevel: () => {
+  advanceLevel: (skipHistoryPush = false) => {
     // CRUCIAL: Save current state BEFORE advancing
-    get().pushStateHistory();
+    if (!skipHistoryPush) {
+      get().pushStateHistory();
+    }
     set((state) => ({
       currentLevel: state.currentLevel + 1,
       levelState: 'INTRO',

@@ -416,7 +416,7 @@ const Level1_Mechanics: React.FC = () => {
                 </div>
 
                 <button
-                  onClick={advanceLevel}
+                  onClick={() => advanceLevel(true)}
                   className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(22,163,74,0.4)] hover:shadow-[0_0_30px_rgba(22,163,74,0.6)]"
                 >
                   Nächstes Level Initialisieren

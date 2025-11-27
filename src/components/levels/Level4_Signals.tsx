@@ -86,7 +86,7 @@ const Level4_Signals: React.FC = () => {
           <div className="text-green-400 text-4xl mb-4">✓ SIGNAL SAUBER</div>
           <p>Der Zähler arbeitet präzise. Entprellung erfolgreich implementiert.</p>
           <button 
-            onClick={advanceLevel}
+            onClick={() => advanceLevel(true)}
             className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
           >
             Nächstes Level

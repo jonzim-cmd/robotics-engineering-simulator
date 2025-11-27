@@ -170,7 +170,7 @@ const Level0_Intro: React.FC = () => {
                 </div>
 
                 <button 
-                  onClick={advanceLevel}
+                  onClick={() => advanceLevel()}
                   className="w-full group relative px-8 py-4 bg-cyan-700 hover:bg-cyan-600 text-white font-bold rounded uppercase tracking-widest transition-all overflow-hidden"
                 >
                   <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
