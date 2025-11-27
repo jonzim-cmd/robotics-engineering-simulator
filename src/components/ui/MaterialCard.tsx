@@ -50,7 +50,7 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({
       </div>
 
       {/* Description */}
-      <div className="text-[10px] text-slate-500 italic leading-tight border-t border-slate-800/50 pt-2">
+      <div className="text-[11px] text-slate-500 italic leading-tight border-t border-slate-800/50 pt-2">
         {description}
       </div>
     </div>
