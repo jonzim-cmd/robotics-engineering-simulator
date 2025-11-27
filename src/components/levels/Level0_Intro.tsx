@@ -7,13 +7,25 @@ import { TypewriterText } from '@/components/ui/TypewriterText';
 import { motion } from 'framer-motion';
 
 const Level0_Intro: React.FC = () => {
-  const { advanceLevel, setUserName, userName, credits } = useGameStore();
+  const { advanceLevel, setUserName, userName, credits, skipAnimations, setSkipAnimations } = useGameStore();
   const [bootStep, setBootStep] = useState(0);
   const [inputName, setInputName] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
   const [textComplete, setTextComplete] = useState(false);
   const [showFinance, setShowFinance] = useState(false);
   const [showMission, setShowMission] = useState(false);
+
+  // Bei skipAnimations direkt alles anzeigen
+  useEffect(() => {
+    if (skipAnimations && userName) {
+      setLoggedIn(true);
+      setBootStep(3);
+      setTextComplete(true);
+      setShowFinance(true);
+      setShowMission(true);
+      setSkipAnimations(false); // Reset für nächstes Mal
+    }
+  }, [skipAnimations, userName, setSkipAnimations]);
 
   useEffect(() => {
     if (!loggedIn) return;

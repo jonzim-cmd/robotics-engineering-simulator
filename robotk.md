@@ -58,7 +58,7 @@ Hier sind die Anweisungen für jedes einzelne File.
 
 > **SYSTEM MELDUNG:** "Verbindung hergestellt... Unit-7 Status: KRITISCH."
 >
-> **SZENARIO:** "Wir haben ein Problem, Rookie. Unit-7 hat versucht, eine Gesteinsprobe zu heben. Dabei hat sich der Greifarm verbogen und ist nicht mehr in die Ausgangsposition zurückgefedert. Das alte Material war zu weich."
+> **SZENARIO:** "Wir haben ein Problem, Rookie. Unit-7 hat versucht, eine Gesteinsprobe zu heben. Dabei ist der Greifarm kaputt gegangen und baumelt jetzt verbogen in der falschen Position herum. Das alte Material war einfach zu schwach für diese Last."
 >
 > **AUFTRAG:** "Konstruiere einen neuen Arm. Er muss **steif** genug sein, um 5kg zu heben, ohne sich mehr als 2mm zu biegen. Aber Vorsicht: Wenn der Arm schwerer als 1000g ist, brennen die Schultermotoren durch."
 
@@ -199,26 +199,8 @@ Hier sind die Anweisungen für jedes einzelne File.
   * **Proprietär:** "Technik, die nur dem Hersteller gehört und verschlüsselt ist. Gegenteil von 'Open Source'."
   * **Firmware:** "Die fest eingebaute Software auf dem Chip."
 
-#### 3\. Implementierungs-Logik
-
-  * **Interaktion:**
-      * User klickt "Bauteil tauschen" (Kosten: 5 Credits).
-      * Animation: Löten erfolgreich.
-      * **Alert Popup:** "ERROR CODE 99: UNAUTHORIZED HARDWARE DETECTED. SYSTEM LOCKDOWN."
-  * **Story Twist:**
-      * Textnachricht vom Hersteller (AresCorp): *"Sie versuchen, ein nicht-zertifiziertes Bauteil zu nutzen. Bitte kaufen Sie das offizielle Mainboard für 500 Credits."*
-  * **Entscheidung:**
-      * Der User *kann* das Mainboard nicht kaufen (zu teuer).
-      * Er muss entscheiden: Den Roboter illegal hacken ("Jailbreak") oder die Mission abbrechen.
-      * Dies ist der emotionale Höhepunkt der Lektion über "Recht auf Reparatur".
 
 -----
-
-## 4\. Prompting-Strategie für die KI
-
-Wenn du das programmieren lässt, nutze **exakt diesen Prompt** für jedes Level-File:
-
-> "Erstelle die Datei `src/components/levels/Level[X]_[Name].tsx`.
 >
 > **Anforderungen:**
 >
@@ -230,6 +212,17 @@ Wenn du das programmieren lässt, nutze **exakt diesen Prompt** für jedes Level
 > 6.  Design: Nutze Dark Mode, Monospace Fonts für Daten, Cyan für Erfolge, Rot für Fehler.
 >
 > **Logik:**
-> [Hier den Abschnitt 'Implementierungs-Logik' aus dem Plan einfügen]"
+> #### 5\. Implementierungs-Logik
+
+  * **Interaktion:**
+      * User klickt "Bauteil tauschen" (Kosten: 5 Credits).
+      * Animation: Löten erfolgreich.
+      * **Alert Popup:** "ERROR CODE 99: UNAUTHORIZED HARDWARE DETECTED. SYSTEM LOCKDOWN."
+  * **Story Twist:**
+      * Textnachricht vom Hersteller (AresCorp): *"Sie versuchen, ein nicht-zertifiziertes Bauteil zu nutzen. Bitte kaufen Sie das offizielle Mainboard für 500 Credits."*
+  * **Entscheidung:**
+      * Der User *kann* das Mainboard nicht kaufen (zu teuer).
+      * Er muss entscheiden: Den Roboter illegal hacken ("Jailbreak") oder die Mission abbrechen.
+      * Dies ist der emotionale Höhepunkt der Lektion über "Recht auf Reparatur".
 
 Damit hast du die perfekte Balance: Maximale Flexibilität durch einzelne Dateien, aber ein extrem dichtes und geführtes Story-Erlebnis für die Schüler.
