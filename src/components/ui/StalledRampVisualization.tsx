@@ -5,6 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const StalledRampVisualization: React.FC = () => {
   const [phase, setPhase] = React.useState<'move' | 'climb' | 'stall' | 'overheat'>('move');
+  const [key, setKey] = React.useState(0);
+
+  const restartAnimation = () => {
+    setPhase('move');
+    setKey(prev => prev + 1);
+  };
 
   React.useEffect(() => {
     const timeline = [
@@ -18,7 +24,7 @@ export const StalledRampVisualization: React.FC = () => {
     );
 
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [key]);
 
   const isStalled = phase === 'stall' || phase === 'overheat';
   const isOverheating = phase === 'overheat';
@@ -26,8 +32,28 @@ export const StalledRampVisualization: React.FC = () => {
   return (
     <div className="relative w-full h-full bg-slate-950/50 rounded border border-yellow-900/50 p-6 overflow-hidden">
       {/* Title */}
-      <div className="text-lg text-yellow-500 font-mono mb-4 text-center uppercase tracking-widest font-bold">
-        !!! TRAFFIC JAM - SECTOR 4 !!!
+      <div className="text-lg text-yellow-500 font-mono mb-4 text-center uppercase tracking-widest font-bold flex items-center justify-center gap-4">
+        <span>!!! TRAFFIC JAM - SECTOR 4 !!!</span>
+        <button
+          onClick={restartAnimation}
+          className="ml-auto text-slate-400 hover:text-cyan-400 transition-colors p-2 hover:bg-slate-800/50 rounded"
+          title="Animation neu starten"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
       </div>
 
       {/* GRID Background */}
@@ -43,16 +69,16 @@ export const StalledRampVisualization: React.FC = () => {
       </div>
 
       {/* Main Scene */}
-      <div className="flex items-end justify-center h-96 relative">
+      <div className="flex items-end justify-center h-64 relative mb-20">
         {/* RAMP - Steep incline */}
-        <div className="absolute bottom-0 left-0 right-0 h-80 z-0">
+        <div className="absolute bottom-0 left-0 right-0 h-56 z-0">
           <svg
             viewBox="0 0 800 400"
             className="w-full h-full"
             preserveAspectRatio="none"
           >
             {/* Flat ground on left */}
-            <rect x="0" y="350" width="200" height="50" fill="rgb(71, 85, 105)" />
+            <rect x="0" y="385" width="200" height="20" fill="rgb(71, 85, 105)" />
             {/* Ramp */}
             <polygon
               points="200,400 800,400 800,100"
@@ -76,13 +102,14 @@ export const StalledRampVisualization: React.FC = () => {
 
         {/* UNIT-7 HERO ROBOT */}
         <motion.div
-          className="absolute bottom-16 z-20"
+          key={key}
+          className="absolute bottom-12 z-20"
           initial={{ x: -200 }}
           animate={{
             x: phase === 'move' ? 0 : phase === 'climb' ? 120 : 120,
-            y: phase === 'move' ? 0 : phase === 'climb' ? -60 : -60,
+            y: phase === 'move' ? 0 : phase === 'climb' ? -50 : -50,
           }}
-          transition={{ duration: 1.5, ease: 'easeOut' }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
         >
           {/* Chassis - Main body */}
           <div className="relative">
@@ -106,9 +133,35 @@ export const StalledRampVisualization: React.FC = () => {
                 />
               )}
 
-              {/* Arm (simplified) on top */}
-              <div className="absolute -top-6 right-6 w-16 h-8 bg-slate-700 border-2 border-cyan-600 rounded-sm flex items-center justify-center">
-                <div className="w-2 h-4 bg-cyan-500 rounded" />
+              {/* Robotic Arm (horizontal - like from Level 1) */}
+              <div className="absolute -top-8 right-8 z-30">
+                {/* Shoulder Joint */}
+                <div className="w-6 h-6 bg-slate-800 border-2 border-cyan-600 rounded-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                </div>
+
+                {/* Upper Arm - horizontal */}
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-12 bg-slate-700 border-2 border-cyan-600 rounded-sm">
+                  <div className="h-full w-1 bg-cyan-600/30 ml-2" />
+                </div>
+
+                {/* Elbow Joint */}
+                <div className="absolute left-14 top-1/2 -translate-y-1/2 w-5 h-5 bg-slate-800 border-2 border-cyan-600 rounded-full flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-cyan-500 rounded-full" />
+                </div>
+
+                {/* Lower Arm - horizontal */}
+                <div className="absolute left-16 top-1/2 -translate-y-1/2 h-2.5 w-8 bg-slate-700 border-2 border-cyan-600 rounded-sm">
+                  <div className="h-full w-0.5 bg-cyan-600/30 ml-1" />
+                </div>
+
+                {/* Gripper - horizontal */}
+                <div className="absolute left-24 top-1/2 -translate-y-1/2 -mt-1">
+                  <div className="h-4 w-6 border-2 border-cyan-600 bg-slate-800 rounded-sm flex flex-row justify-between px-1 py-0.5">
+                    <div className="h-full w-1 bg-cyan-500" />
+                    <div className="h-full w-1 bg-cyan-500" />
+                  </div>
+                </div>
               </div>
 
               {/* Warning symbol */}
@@ -205,7 +258,8 @@ export const StalledRampVisualization: React.FC = () => {
             <>
               {/* Bot 1 */}
               <motion.div
-                className="absolute bottom-8 z-15"
+                key={`bot1-${key}`}
+                className="absolute bottom-4 z-15"
                 initial={{ x: -300 }}
                 animate={{ x: -60 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -230,7 +284,8 @@ export const StalledRampVisualization: React.FC = () => {
 
               {/* Bot 2 */}
               <motion.div
-                className="absolute bottom-8 z-14"
+                key={`bot2-${key}`}
+                className="absolute bottom-4 z-14"
                 initial={{ x: -350 }}
                 animate={{ x: -130 }}
                 transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
@@ -255,7 +310,8 @@ export const StalledRampVisualization: React.FC = () => {
 
               {/* Bot 3 - Further back */}
               <motion.div
-                className="absolute bottom-8 z-13"
+                key={`bot3-${key}`}
+                className="absolute bottom-4 z-13"
                 initial={{ x: -400 }}
                 animate={{ x: -190 }}
                 transition={{ duration: 1.2, ease: 'easeOut', delay: 0.4 }}
@@ -287,7 +343,7 @@ export const StalledRampVisualization: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-4 left-4 right-4 bg-slate-900/90 border-2 border-yellow-700 p-4 rounded font-mono text-sm"
+          className="absolute bottom-2 left-4 right-4 bg-slate-900/90 border-2 border-yellow-700 p-3 rounded font-mono text-sm z-50"
         >
           <div className="grid grid-cols-2 gap-6">
             <div>
