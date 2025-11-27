@@ -69,13 +69,40 @@ const Level2_Transmission: React.FC = () => {
           
           <div className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded">
             <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
-            <p className="mb-2">Der Arm ist repariert. Gute Arbeit. Jetzt muss Unit-7 die Fracht zur Verladestation bringen. Der Weg führt über die steile Rampe zu Sektor 4. Steigung: 20 Grad.</p>
-            
+            <p className="mb-2">
+              Der Arm ist ausgetauscht. Gute Arbeit. Jetzt muss Unit-7 die Fracht zur Verladestation bringen.
+              Der Weg führt über die steile Rampe zu Sektor 4. Steigung: 20 Grad.
+            </p>
+
             <strong className="text-red-400 block mb-2 mt-4">PROBLEM:</strong>
-            <p className="mb-2">Im aktuellen Zustand bleibt der Transporter mitten am Hang stehen. Der Motor dreht sich, aber die Räder bewegen sich nicht. Ihm fehlt die Kraft für diese Steigung.</p>
+            <p className="mb-2">
+              Im aktuellen Zustand ist das Getriebe auf hohe Geschwindigkeit ausgelegt. Auf der Rampe reicht
+              die Kraft aber nicht: Der Motor dreht, aber die Räder kommen nicht von der Stelle. Das{" "}
+              <GlossaryTooltip
+                term="Drehmoment"
+                definition="Wie stark sich etwas drehen kann. Am Rad: wie kräftig das Rad den Boden nach hinten schiebt, damit der Transporter nach vorne gedrückt wird."
+              />{" "}
+              am Rad ist zu gering.
+            </p>
 
             <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
-            <p>Passe das Getriebe an. Wir brauchen mehr Kraft (<GlossaryTooltip term="Drehmoment" definition="Die Drehkraft der Achse. Wichtig für Steigungen." />) am Rad. Aber Achtung: Wenn du die <GlossaryTooltip term="Übersetzung" definition="Verhältnis Motorumdrehungen zu Radumdrehungen (Gear Ratio)." /> zu hoch wählst, wird der Transporter zu langsam und blockiert den Warenfluss.</p>
+            <p>
+              Passe das Getriebe an. Wir brauchen mehr{" "}
+              <GlossaryTooltip
+                term="Drehmoment"
+                definition="Drehmoment ist die Drehkraft. Je mehr Drehmoment am Rad ankommt, desto leichter kommt der Transporter eine Steigung hoch."
+              />{" "}
+              am Rad, damit der Transporter die 20°-Rampe hochfahren kann, ohne stehenzubleiben.
+            </p>
+            <p className="mt-2">
+              Aber Achtung: Wenn du die{" "}
+              <GlossaryTooltip
+                term="Übersetzung"
+                definition="Verhältnis: wie oft sich der Motor dreht, wenn sich das Rad einmal dreht. Größere Übersetzung = mehr Kraft am Rad, aber weniger Geschwindigkeit."
+              />{" "}
+              zu groß wählst, hat der Transporter zwar viel Kraft, fährt aber sehr langsam. Dann braucht er
+              ewig für die Strecke und der Warenfluss gerät ins Stocken.
+            </p>
           </div>
 
           <button 
