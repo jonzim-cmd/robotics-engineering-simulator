@@ -47,10 +47,8 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
-  // Scroll to top when dialog opens
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  // Scroll handled by parent component for smoother transition
+
 
   // Simulate typing indicator before showing correct answer
   useEffect(() => {
@@ -172,7 +170,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="max-w-2xl w-full bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative self-start mt-16"
+      className="max-w-2xl w-full bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative self-start"
       style={{ height: 'auto' }}
     >
       {/* Header */}
@@ -273,7 +271,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/90 backdrop-blur-md py-4 px-3 md:px-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/90 backdrop-blur-md pt-24 pb-4 px-3 md:px-4 overflow-y-auto">
       {onBack && (
         <button
           onClick={onBack}

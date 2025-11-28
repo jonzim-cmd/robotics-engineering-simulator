@@ -96,13 +96,22 @@ const Level3_Mechanisms: React.FC = () => {
 
   const handleStart = () => {
     pushStateHistory();
-    setShowDialog(true);
+    // First scroll up smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Show dialog after scroll initiates
+    setTimeout(() => {
+      setShowDialog(true);
+    }, 500);
   };
 
   const handleDialogComplete = () => {
     setShowDialog(false);
     setLevelState('ACTIVE');
     setSubStep(0);
+    // Smooth transition to top of configurator
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   };
 
   const handleSimulate = () => {
