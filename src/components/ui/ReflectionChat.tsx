@@ -27,10 +27,19 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
   avatarIcon = '👩‍💼',
   continueButtonText = 'Weiter'
 }) => {
+  const [messageOpened, setMessageOpened] = useState(false);
+  const [isVibrating, setIsVibrating] = useState(true);
   const [input, setInput] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+
+  // Stop vibration after message is opened
+  useEffect(() => {
+    if (messageOpened) {
+      setIsVibrating(false);
+    }
+  }, [messageOpened]);
 
   // Simulate typing indicator before showing correct answer
   useEffect(() => {
@@ -43,6 +52,10 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
       return () => clearTimeout(timer);
     }
   }, [isSent]);
+
+  const handleOpenMessage = () => {
+    setMessageOpened(true);
+  };
 
   const handleSend = () => {
     if (input.trim().length > 0) {
@@ -59,13 +72,116 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-      {/* Modern Chat Window */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: 'spring', damping: 25 }}
-        className="max-w-2xl w-full h-[85vh] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden"
-      >
+      <AnimatePresence mode="wait">
+        {!messageOpened ? (
+          // Phase 1: Incoming Message Notification
+          <motion.div
+            key="notification"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              rotate: isVibrating ? [0, -1, 1, -1, 1, 0] : 0,
+              x: isVibrating ? [0, -2, 2, -2, 2, 0] : 0
+            }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{
+              opacity: { duration: 0.3 },
+              y: { duration: 0.3 },
+              rotate: { duration: 0.4, repeat: Infinity, repeatDelay: 0.2 },
+              x: { duration: 0.4, repeat: Infinity, repeatDelay: 0.2 }
+            }}
+            className="relative max-w-sm w-full"
+          >
+            {/* Smartphone Frame */}
+            <div className="bg-slate-950 rounded-[3rem] p-4 shadow-2xl border-8 border-slate-800 relative overflow-hidden">
+              {/* Screen */}
+              <div className="bg-linear-to-b from-slate-900 to-slate-800 rounded-[2.5rem] overflow-hidden relative aspect-9/19">
+                {/* Notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-950 rounded-b-3xl z-10 flex items-center justify-center gap-2">
+                  <div className="w-12 h-1 bg-slate-700 rounded-full"></div>
+                  <div className="w-2 h-2 bg-slate-700 rounded-full"></div>
+                </div>
+
+                {/* Lock Screen with Notification */}
+                <div className="relative h-full flex flex-col items-center justify-between py-16 px-6 bg-linear-to-br from-cyan-950/40 via-slate-900 to-slate-900">
+
+                  {/* Time Display */}
+                  <div className="text-white text-5xl font-thin tracking-wider">
+                    {new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+
+                  {/* Message Notification Card */}
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.2, type: 'spring', damping: 15 }}
+                    onClick={handleOpenMessage}
+                    className="w-full cursor-pointer"
+                  >
+                    <div className="bg-slate-800/90 backdrop-blur-lg rounded-2xl p-4 border border-slate-700/50 shadow-2xl">
+                      {/* Notification Header */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/40 flex items-center justify-center text-xl shrink-0 shadow-md">
+                          {avatarIcon}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-white font-semibold text-sm">{senderName}</div>
+                          <div className="text-slate-400 text-xs">{senderTitle}</div>
+                        </div>
+                        {title && (
+                          <div className="bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+                            <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider">{title}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Message Preview */}
+                      <div className="text-slate-300 text-sm leading-relaxed line-clamp-3">
+                        {message}
+                      </div>
+                    </div>
+
+                    {/* Glow Effect */}
+                    <motion.div
+                      animate={{
+                        opacity: [0.3, 0.6, 0.3],
+                        scale: [0.98, 1, 0.98]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity
+                      }}
+                      className="absolute inset-0 bg-cyan-500/10 rounded-2xl blur-xl pointer-events-none"
+                    />
+                  </motion.div>
+
+                  {/* Tap to Open Hint */}
+                  <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-slate-400 text-sm font-light flex items-center gap-2"
+                  >
+                    <span>📱</span>
+                    <span>Tippen zum Öffnen</span>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Phone Home Button */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-slate-700 rounded-full"></div>
+            </div>
+          </motion.div>
+        ) : (
+          // Phase 2: Chat Window
+          <motion.div
+            key="chat"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ type: 'spring', damping: 25 }}
+            className="max-w-2xl w-full h-[85vh] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden"
+          >
         {/* Chat Header */}
         <div className="bg-linear-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 flex items-center gap-4 shadow-lg">
           {/* Avatar */}
@@ -111,7 +227,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
             transition={{ delay: 0.2 }}
             className="flex gap-3 items-start"
           >
-            <div className="w-10 h-10 rounded-full bg-linear-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 flex items-center justify-center text-xl flex-shrink-0 shadow-md">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 flex items-center justify-center text-xl shrink-0 shadow-md">
               {avatarIcon}
             </div>
             <div className="flex flex-col gap-1 max-w-[80%]">
@@ -156,7 +272,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
                 exit={{ opacity: 0, y: -10 }}
                 className="flex gap-3 items-start"
               >
-                <div className="w-10 h-10 rounded-full bg-linear-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 flex items-center justify-center text-xl flex-shrink-0 shadow-md">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 flex items-center justify-center text-xl shrink-0 shadow-md">
                   {avatarIcon}
                 </div>
                 <div className="bg-slate-800 border border-slate-700/50 rounded-2xl rounded-tl-md p-4 px-6 shadow-lg">
@@ -191,7 +307,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
                 exit={{ opacity: 0 }}
                 className="flex gap-3 items-start"
               >
-                <div className="w-10 h-10 rounded-full bg-linear-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 flex items-center justify-center text-xl flex-shrink-0 shadow-md">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/40 flex items-center justify-center text-xl shrink-0 shadow-md">
                   {avatarIcon}
                 </div>
                 <div className="flex flex-col gap-1 max-w-[80%]">
@@ -223,7 +339,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
               >
                 <div className="relative">
                   <textarea
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl p-4 pr-24 text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none min-h-[80px] max-h-[150px] resize-none transition-all"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl p-4 pr-24 text-white placeholder-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none min-h-20 max-h-[150px] resize-none transition-all"
                     placeholder="Schreibe deine Antwort..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -266,7 +382,9 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
             ) : null}
           </AnimatePresence>
         </div>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

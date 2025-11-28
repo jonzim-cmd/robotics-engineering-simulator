@@ -469,7 +469,7 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
 
 ich habe gesehen, dass Sie einen teuren Carbon-Roboterarm bestellt haben. Bitte erklären Sie mir kurz, warum Sie dieses Material gewählt haben und welche technischen Vorteile es bietet.
 
-Hätte Aluminium nicht gereicht?
+Hätte Aluminium nicht gereicht, das ist deutlich billiger?
 
 Beste Grüße
 Chefin Bazlin`}
