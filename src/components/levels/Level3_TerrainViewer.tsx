@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -9,6 +9,22 @@ interface Level3_TerrainViewerProps {
   className?: string;
   autoRotate?: boolean;
 }
+
+type StoneInstance = {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: number;
+  color: string;
+};
+
+const pseudoRandom = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
+const randomInRange = (seed: number, min: number, max: number) => {
+  return min + pseudoRandom(seed) * (max - min);
+};
 
 // TerrainFloor: Unebener Boden mit integrierten Pfützen
 function TerrainFloor() {
@@ -24,7 +40,7 @@ function TerrainFloor() {
       // "Noise"-Simulation durch Sinus-Wellenüberlagerung
       let z = Math.sin(x * 0.3) * Math.cos(y * 0.3) * 0.5;
       z += Math.sin(x * 1.2 + y * 0.8) * 0.1;
-      z += (Math.random() - 0.5) * 0.05; // Rauschen
+      z += (pseudoRandom(x * 12.9898 + y * 78.233) - 0.5) * 0.05; // Rauschen
       
       // Pfützen-Bereiche flach drücken (wo z < -0.2 ist)
       if (z < -0.2) {
@@ -66,42 +82,71 @@ function TerrainFloor() {
 }
 
 // Obstacles: Steine und Geröll
-function Obstacles() {
-  const stones = useMemo(() => {
-    const positions: Array<{ pos: [number, number, number]; scale: number; color: string; rot: [number, number, number] }> = [];
+function InstancedObstacles() {
+  const stones = useMemo<StoneInstance[]>(() => {
+    const positions: StoneInstance[] = [];
     const colors = ['#64748b', '#475569', '#334155'];
 
-    // Mehr Steine für "Geröll"-Look
     for (let i = 0; i < 40; i++) {
-      // Zufällige Position im Radius 8
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 2 + Math.random() * 6;
+      const angle = randomInRange(i * 1.7, 0, Math.PI * 2);
+      const radius = randomInRange(i * 2.3 + 5, 2, 8);
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius;
-      
-      // Nicht in Pfützen (grob geschätzt durch Noise-Logik, hier zufällig)
-      // Einfachheitshalber überall
-      
-      const scale = 0.1 + Math.random() * 0.4;
+
+      const scale = randomInRange(i * 3.1 + 9, 0.1, 0.5);
       positions.push({
-        pos: [x, scale * 0.5 - 0.2, z], // Leicht im Boden
+        position: [x, scale * 0.5 - 0.2, z],
         scale,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rot: [Math.random() * 3, Math.random() * 3, Math.random() * 3]
+        color: colors[Math.floor(randomInRange(i * 4.7 + 11, 0, colors.length))],
+        rotation: [
+          randomInRange(i * 5.3 + 13, 0, 3),
+          randomInRange(i * 6.1 + 17, 0, 3),
+          randomInRange(i * 7.9 + 19, 0, 3),
+        ],
       });
     }
     return positions;
   }, []);
 
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  const tempColor = useMemo(() => new THREE.Color(), []);
+  const geometry = useMemo(() => new THREE.DodecahedronGeometry(1, 0), []);
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        roughness: 0.8,
+        vertexColors: true,
+      }),
+    []
+  );
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
+
+    stones.forEach((stone, idx) => {
+      tempObject.position.set(...stone.position);
+      tempObject.rotation.set(...stone.rotation);
+      tempObject.scale.setScalar(stone.scale);
+      tempObject.updateMatrix();
+      mesh.setMatrixAt(idx, tempObject.matrix);
+      mesh.setColorAt(idx, tempColor.set(stone.color));
+    });
+
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) {
+      mesh.instanceColor.needsUpdate = true;
+    }
+  }, [stones, tempColor, tempObject]);
+
   return (
-    <group>
-      {stones.map((stone, idx) => (
-        <mesh key={idx} position={stone.pos} rotation={stone.rot} scale={stone.scale} castShadow receiveShadow>
-          <dodecahedronGeometry args={[1, 0]} />
-          <meshStandardMaterial color={stone.color} roughness={0.8} />
-        </mesh>
-      ))}
-    </group>
+    <instancedMesh
+      ref={meshRef}
+      args={[geometry, material, stones.length]}
+      castShadow
+      receiveShadow
+    />
   );
 }
 
@@ -139,7 +184,12 @@ function Targets() {
 export function Level3_TerrainViewer({ className, autoRotate = false }: Level3_TerrainViewerProps) {
   return (
     <div className={className}>
-      <Canvas shadows camera={{ position: [8, 6, 8], fov: 45 }}>
+      <Canvas
+        shadows
+        camera={{ position: [8, 6, 8], fov: 45 }}
+        dpr={[1, 2]}
+        frameloop={autoRotate ? 'always' : 'demand'}
+      >
         <color attach="background" args={['#0f172a']} />
         
         {/* Environment */}
@@ -158,7 +208,7 @@ export function Level3_TerrainViewer({ className, autoRotate = false }: Level3_T
         {/* World */}
         <group position={[0, -0.5, 0]}>
           <TerrainFloor />
-          <Obstacles />
+          <InstancedObstacles />
           <Targets />
         </group>
 

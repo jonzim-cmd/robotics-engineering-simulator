@@ -96,10 +96,10 @@ const Level3_Mechanisms: React.FC = () => {
 
           <div className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded">
             <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
-            <p className="mb-2">Das Getriebe ist optimiert. Jetzt muss Unit-7 in die Außenwelt. Das Zielgebiet ist eine alte Deponie: Schlamm, Geröll und steile Anstiege. Die Aufgabe: Schwere Stahl-Container bergen.</p>
+            <p className="mb-2">Das Getriebe ist optimiert. Jetzt muss Unit-7 in die Außenwelt. Das Zielgebiet ist eine alte Deponie. Die Aufgabe: Container bergen.</p>
 
             <strong className="text-red-400 block mb-2 mt-4">ANFORDERUNG:</strong>
-            <p className="mb-2">Der Standard-Radantrieb wird steckenbleiben. Die Standard-Greifvorrichtungen sind zu schwach.</p>
+            <p className="mb-2">Der Standard-Radantrieb sowie Standard-Greifvorrichtungen werden für diese Aufgaben nicht ausreichen.</p>
 
             <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
             <p>Wähle die korrekte <GlossaryTooltip term="Kinematik" definition="Lehre der Bewegung von Körpern (hier: Wie sich der Roboter bewegt)." />. Konfiguriere Antrieb und Greifer für <strong>schweres Gelände</strong> und <strong>schwere Lasten</strong>.</p>
