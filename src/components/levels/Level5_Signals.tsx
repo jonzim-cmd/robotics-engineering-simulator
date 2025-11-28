@@ -7,7 +7,7 @@ import { TypewriterText } from '@/components/ui/TypewriterText';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { motion } from 'framer-motion';
 
-const Level4_Signals: React.FC = () => {
+const Level5_Signals: React.FC = () => {
   const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep } = useGameStore();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
@@ -58,7 +58,7 @@ const Level4_Signals: React.FC = () => {
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
           <TypewriterText 
-            text="Ebene 3 Diagnostik: OK. Sensor-Kalibrierung erforderlich..." 
+            text="Ebene 4 Diagnostik: OK. Sensor-Kalibrierung erforderlich..." 
             speed={20}
           />
           
@@ -103,7 +103,7 @@ const Level4_Signals: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="LEVEL 4: SIGNALVERARBEITUNG" borderColor={result?.correct === false ? 'red' : 'cyan'} onBack={handleBack}>
+      <TerminalCard title="LEVEL 5: SIGNALVERARBEITUNG" borderColor={result?.correct === false ? 'red' : 'cyan'} onBack={handleBack}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Code Puzzle */}
@@ -200,4 +200,4 @@ const Level4_Signals: React.FC = () => {
   );
 };
 
-export default Level4_Signals;
+export default Level5_Signals;

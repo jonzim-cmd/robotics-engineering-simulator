@@ -5,9 +5,10 @@ import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import Level1_Mechanics from '@/components/levels/Level1_Mechanics';
 import Level2_Transmission from '@/components/levels/Level2_Transmission';
-import Level3_Electronics from '@/components/levels/Level3_Electronics';
-import Level4_Signals from '@/components/levels/Level4_Signals';
-import Level5_Ethics from '@/components/levels/Level5_Ethics';
+import Level3_Mechanisms from '@/components/levels/Level3_Mechanisms';
+import Level4_Electronics from '@/components/levels/Level4_Electronics';
+import Level5_Signals from '@/components/levels/Level5_Signals';
+import Level6_Ethics from '@/components/levels/Level6_Ethics';
 import Level0_Intro from '@/components/levels/Level0_Intro';
 
 export default function Home() {
@@ -18,9 +19,10 @@ export default function Home() {
       case 0: return <Level0_Intro />;
       case 1: return <Level1_Mechanics />;
       case 2: return <Level2_Transmission />;
-      case 3: return <Level3_Electronics />;
-      case 4: return <Level4_Signals />;
-      case 5: return <Level5_Ethics />;
+      case 3: return <Level3_Mechanisms />;
+      case 4: return <Level4_Electronics />;
+      case 5: return <Level5_Signals />;
+      case 6: return <Level6_Ethics />;
       default: return (
         <div className="text-center p-10 text-cyan-500">
           <h1 className="text-2xl font-bold mb-4">ALL SYSTEMS OPERATIONAL</h1>
@@ -41,7 +43,7 @@ export default function Home() {
         </div>
         <div className="flex gap-4 font-mono text-sm">
           <div className="bg-slate-900 border border-slate-800 px-3 py-1 rounded text-cyan-400">
-            LEVEL: <span className="text-white">{currentLevel}/5</span>
+            LEVEL: <span className="text-white">{currentLevel}/6</span>
           </div>
           <div className="bg-slate-900 border border-slate-800 px-3 py-1 rounded text-yellow-400">
             CREDITS: <span className="text-white">{credits}</span>

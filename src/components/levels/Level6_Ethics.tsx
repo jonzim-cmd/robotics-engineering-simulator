@@ -8,7 +8,7 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Lock, Unlock, XCircle } from 'lucide-react';
 
-const Level5_Ethics: React.FC = () => {
+const Level6_Ethics: React.FC = () => {
   const {
     credits,
     removeCredits,
@@ -61,7 +61,7 @@ const Level5_Ethics: React.FC = () => {
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
           <TypewriterText 
-            text="Ebene 4 Diagnostik: OK. WARNUNG: GYROSKOP FEHLER." 
+            text="Ebene 5 Diagnostik: OK. WARNUNG: GYROSKOP FEHLER." 
             speed={20}
           />
           
@@ -106,7 +106,7 @@ const Level5_Ethics: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="LEVEL 5: ETHIK & RECHT AUF REPARATUR" borderColor={currentStep === 'LOCKDOWN' ? 'red' : 'cyan'} onBack={handleBack}>
+      <TerminalCard title="LEVEL 6: ETHIK & RECHT AUF REPARATUR" borderColor={currentStep === 'LOCKDOWN' ? 'red' : 'cyan'} onBack={handleBack}>
         
         <AnimatePresence mode="wait">
           
@@ -223,4 +223,4 @@ const Level5_Ethics: React.FC = () => {
   );
 };
 
-export default Level5_Ethics;
+export default Level6_Ethics;

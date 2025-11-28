@@ -8,7 +8,7 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { motion } from 'framer-motion';
 
-const Level3_Electronics: React.FC = () => {
+const Level4_Electronics: React.FC = () => {
   const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep } = useGameStore();
   const [batteryType, setBatteryType] = useState<'cheap' | 'performance' | null>(null);
   const [capacitorAdded, setCapacitorAdded] = useState(false);
@@ -104,7 +104,7 @@ const Level3_Electronics: React.FC = () => {
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
           <TypewriterText 
-            text="Ebene 2 Diagnostik: OK. Analysiere Stromversorgung..." 
+            text="Ebene 3 Diagnostik: OK. Analysiere Stromversorgung..." 
             speed={20}
           />
           
@@ -149,7 +149,7 @@ const Level3_Electronics: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="LEVEL 3: ELEKTRONIK & SPANNUNGSABFALL" borderColor={errorMsg ? 'red' : 'cyan'} onBack={handleBack}>
+      <TerminalCard title="LEVEL 4: ELEKTRONIK & SPANNUNGSABFALL" borderColor={errorMsg ? 'red' : 'cyan'} onBack={handleBack}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Controls */}
@@ -258,4 +258,4 @@ const Level3_Electronics: React.FC = () => {
   );
 };
 
-export default Level3_Electronics;
+export default Level4_Electronics;
