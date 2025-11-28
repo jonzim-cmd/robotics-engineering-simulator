@@ -35,7 +35,7 @@ const RotatingModel = ({ type }: { type: ComponentType }) => {
     accent: new THREE.MeshStandardMaterial({ color: '#f59e0b', roughness: 0.3, metalness: 0.3 }), // Industrial Orange
     glow: new THREE.MeshStandardMaterial({ color: '#00ffff', emissive: '#00ffff', emissiveIntensity: 0.8 }),
     coil: new THREE.MeshStandardMaterial({ color: '#ef4444', roughness: 0.4 }), // Bright Red
-    soft: new THREE.MeshStandardMaterial({ color: '#3b82f6', transmission: 0.2, opacity: 0.7, transparent: true, roughness: 0.1 }), // Blue Glassy
+    soft: new THREE.MeshPhysicalMaterial({ color: '#3b82f6', transmission: 0.2, opacity: 0.7, transparent: true, roughness: 0.1 }), // Blue Glassy
     gold: new THREE.MeshStandardMaterial({ color: '#fbbf24', metalness: 1, roughness: 0.1 }), // Gold
   };
 
@@ -68,22 +68,78 @@ const RotatingModel = ({ type }: { type: ComponentType }) => {
       case 'tracks':
         return (
           <group>
-            {/* Top Flat Part */}
-            <mesh position={[0, 0.5, 0]} material={mat.rubber}>
-               <boxGeometry args={[1.6, 0.1, 1]} />
-            </mesh>
-            {/* Bottom Flat Part */}
-            <mesh position={[0, -0.5, 0]} material={mat.rubber}>
-               <boxGeometry args={[1.6, 0.1, 1]} />
-            </mesh>
-            {/* Front Curve */}
-            <mesh position={[-0.8, 0, 0]} rotation={[Math.PI/2, 0, 0]} material={mat.rubber}>
-               <cylinderGeometry args={[0.45, 0.45, 1, 32, 1, false]} />
-            </mesh>
-            {/* Rear Curve */}
-            <mesh position={[0.8, 0, 0]} rotation={[Math.PI/2, 0, 0]} material={mat.rubber}>
-               <cylinderGeometry args={[0.45, 0.45, 1, 32, 1, false]} />
-            </mesh>
+            {/* Continuous rubber belt around the wheels */}
+            {(() => {
+               const sprocketOffset = 0.8;
+               const wheelRadius = 0.35;
+               const radius = wheelRadius + 0.3; // keep belt clearly outside the sprockets
+               const beltRadius = 0.08;
+               const samplesPerLine = 14;
+               const samplesPerArc = 20;
+
+               const points: THREE.Vector3[] = [];
+               const addPoint = (p: THREE.Vector3) => {
+                  if (!points.length || !points[points.length - 1].equals(p)) {
+                     points.push(p);
+                  }
+               };
+
+               // top run
+               for (let i = 0; i <= samplesPerLine; i++) {
+                  const t = i / samplesPerLine;
+                  addPoint(new THREE.Vector3(-sprocketOffset + 2 * sprocketOffset * t, radius, 0));
+               }
+               // back arc (right side)
+               for (let i = 0; i <= samplesPerArc; i++) {
+                  const angle = Math.PI / 2 - (Math.PI * i) / samplesPerArc;
+                  addPoint(new THREE.Vector3(sprocketOffset + radius * Math.cos(angle), radius * Math.sin(angle), 0));
+               }
+               // bottom run
+               for (let i = 0; i <= samplesPerLine; i++) {
+                  const t = i / samplesPerLine;
+                  addPoint(new THREE.Vector3(sprocketOffset - 2 * sprocketOffset * t, -radius, 0));
+               }
+               // front arc (left side)
+               for (let i = 0; i <= samplesPerArc; i++) {
+                  const angle = -Math.PI / 2 + (Math.PI * i) / samplesPerArc;
+                  addPoint(new THREE.Vector3(-sprocketOffset - radius * Math.cos(angle), radius * Math.sin(angle), 0));
+               }
+
+               const trackCurve = new THREE.CatmullRomCurve3(points, true);
+               trackCurve.tension = 0;
+
+               const belt = (
+                  <mesh material={mat.rubber}>
+                     <tubeGeometry args={[trackCurve, 150, beltRadius, 16, true]} />
+                  </mesh>
+               );
+
+               const treadCount = 38;
+               const treads = Array.from({ length: treadCount }).map((_, i) => {
+                  const t = i / treadCount;
+                  const point = trackCurve.getPointAt(t);
+                  const tangent = trackCurve.getTangentAt(t).normalize();
+                  const angle = Math.atan2(tangent.y, tangent.x);
+
+                  return (
+                     <mesh
+                        key={i}
+                        position={[point.x, point.y, point.z]}
+                        rotation={[0, 0, angle]}
+                        material={mat.metalDark}
+                     >
+                        <boxGeometry args={[0.16, 0.06, 1.02]} />
+                     </mesh>
+                  );
+               });
+
+               return (
+                  <>
+                     {belt}
+                     {treads}
+                  </>
+               );
+            })()}
 
             {/* Drive Sprocket - Front (Orange) */}
             <mesh position={[-0.8, 0, 0]} rotation={[Math.PI / 2, 0, 0]} material={mat.accent}>
@@ -109,20 +165,6 @@ const RotatingModel = ({ type }: { type: ComponentType }) => {
                <cylinderGeometry args={[0.2, 0.2, 1.05, 16]} />
             </mesh>
 
-            {/* Pronounced Treads */}
-            {[...Array(12)].map((_, i) => {
-               const treadX = -0.7 + i * 0.2; // Adjusted distribution for new length
-               return (
-                  <group key={i}>
-                     <mesh position={[treadX, 0.5, 0]} material={mat.metalDark}>
-                        <boxGeometry args={[0.05, 0.05, 1.02]} />
-                     </mesh>
-                     <mesh position={[treadX, -0.5, 0]} material={mat.metalDark}>
-                        <boxGeometry args={[0.05, 0.05, 1.02]} />
-                     </mesh>
-                  </group>
-               )
-            })}
           </group>
         );
       case 'legs':
