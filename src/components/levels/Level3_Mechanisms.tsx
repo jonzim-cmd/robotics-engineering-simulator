@@ -5,6 +5,7 @@ import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
+import { Level3_TerrainViewer } from './Level3_TerrainViewer';
 import { motion } from 'framer-motion';
 import { Cog, Snowflake, MousePointer2 } from 'lucide-react';
 
@@ -80,23 +81,31 @@ const Level3_Mechanisms: React.FC = () => {
       <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={handleBack}>
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
-          <TypewriterText 
-            text="Ebene 2 Diagnostik: OK. Lade Missionsparameter..." 
+          <TypewriterText
+            text="Ebene 2 Diagnostik: OK. Lade Missionsparameter..."
             speed={20}
           />
-          
+
+          {/* 3D Terrain Preview - Emotionalisierung */}
+          <div className="relative h-80 rounded-lg overflow-hidden border border-cyan-900/50 bg-slate-950">
+            <Level3_TerrainViewer autoRotate={true} className="w-full h-full" />
+            <div className="absolute bottom-2 right-2 text-xs text-cyan-400/60 bg-slate-900/80 px-2 py-1 rounded">
+              🖱️ Ziehen zum Drehen, Scrollen zum Zoomen
+            </div>
+          </div>
+
           <div className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded">
             <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
             <p className="mb-2">Das Getriebe ist optimiert. Jetzt muss Unit-7 in die Außenwelt. Das Zielgebiet ist eine alte Deponie: Schlamm, Geröll und steile Anstiege. Die Aufgabe: Schwere Stahl-Container bergen.</p>
-            
+
             <strong className="text-red-400 block mb-2 mt-4">ANFORDERUNG:</strong>
-            <p className="mb-2">Der Standard-Radantrieb wird steckenbleiben. Die Standard-Hände sind zu schwach.</p>
+            <p className="mb-2">Der Standard-Radantrieb wird steckenbleiben. Die Standard-Greifvorrichtungen sind zu schwach.</p>
 
             <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
-            <p>Wähle die korrekte <GlossaryTooltip term="Kinematik" definition="Lehre der Bewegung von Körpern (hier: Wie sich der Roboter bewegt)." />. Konfiguriere Antrieb und Greifer für <strong>schweres Gelände</strong> und <strong>ferromagnetische Lasten</strong>.</p>
+            <p>Wähle die korrekte <GlossaryTooltip term="Kinematik" definition="Lehre der Bewegung von Körpern (hier: Wie sich der Roboter bewegt)." />. Konfiguriere Antrieb und Greifer für <strong>schweres Gelände</strong> und <strong>schwere Lasten</strong>.</p>
           </div>
 
-          <button 
+          <button
             onClick={handleStart}
             className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
           >
@@ -127,6 +136,14 @@ const Level3_Mechanisms: React.FC = () => {
   return (
     <div className="space-y-6">
       <TerminalCard title="LEVEL 3: MECHANISMEN & AKTUATOREN" borderColor={result && !result.success ? 'red' : 'cyan'} onBack={handleBack}>
+        {/* 3D Terrain Viewer - Analyse */}
+        <div className="relative h-64 rounded-lg overflow-hidden border border-cyan-900/50 bg-slate-950 mb-6">
+          <Level3_TerrainViewer autoRotate={false} className="w-full h-full" />
+          <div className="absolute top-2 left-2 text-xs text-cyan-400 bg-slate-900/80 px-2 py-1 rounded">
+            💡 Analysiere das Gelände und wähle passende Mechanismen
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Drive Selection */}
