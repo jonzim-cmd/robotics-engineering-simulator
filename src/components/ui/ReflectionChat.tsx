@@ -201,8 +201,6 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
                   </div>
                   <div className="bg-linear-to-br from-green-900/40 to-emerald-900/40 border-2 border-green-500/40 rounded-2xl rounded-tl-md p-4 shadow-xl">
                     <div className="flex items-start gap-3 mb-2">
-                      <div className="text-2xl">💡</div>
-                      <div className="font-bold text-green-300 text-sm uppercase tracking-wider">Technische Erklärung</div>
                     </div>
                     <p className="text-slate-200 leading-relaxed whitespace-pre-wrap ml-9">{correctAnswer}</p>
                   </div>

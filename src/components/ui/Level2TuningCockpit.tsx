@@ -147,7 +147,7 @@ export const Level2TuningCockpit: React.FC = () => {
       setIsTestRunning(false);
 
       if (result.testResult === 'SUCCESS') {
-        setTimeout(() => setLevelState('SUCCESS'), 4000);
+        setTimeout(() => setLevelState('SUCCESS'), 2000);
       }
     }, 1500);
   };

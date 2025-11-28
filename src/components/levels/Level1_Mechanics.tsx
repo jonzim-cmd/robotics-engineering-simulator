@@ -473,7 +473,7 @@ Hätte Aluminium nicht gereicht?
 
 Beste Grüße
 Chefin Bazlin`}
-          correctAnswer={`Aluminium ist zwar günstiger, aber für Hochleistungsroboter oft zu schwer oder zu weich.
+          correctAnswer={`Das macht Sinn. Aluminium ist zwar günstiger, aber für Hochleistungsroboter oft zu schwer oder zu weich.
 
 Carbon (Kohlefaser) hat zwei entscheidende Vorteile:
 1. Es ist extrem leicht (geringe Dichte), wodurch sich der Arm schneller bewegen kann ohne die Motoren zu überlasten.

@@ -8,6 +8,7 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { StalledRampVisualization } from '@/components/ui/StalledRampVisualization';
 import { SmartphoneResearch } from '@/components/ui/SmartphoneResearch';
 import { Level2TuningCockpit } from '@/components/ui/Level2TuningCockpit';
+import { ReflectionCall } from '@/components/ui/ReflectionCall';
 import { motion } from 'framer-motion';
 
 const Level2_Transmission: React.FC = () => {
@@ -255,18 +256,19 @@ Man kann nicht gleichzeitig maximale Kraft und maximale Geschwindigkeit haben.`
 
   if (levelState === 'SUCCESS') {
     return (
-      <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={handleBack}>
-        <div className="text-center space-y-6 py-8">
-          <div className="text-green-400 text-4xl mb-4">✓ ANTRIEB STABIL</div>
-          <p>Der Rover hat die Rampe erfolgreich erklommen.</p>
-          <button
-            onClick={() => advanceLevel(true)}
-            className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
-          >
-            Nächstes Level
-          </button>
-        </div>
-      </TerminalCard>
+      <ReflectionCall
+        callerName="Chefin Bazlin"
+        callerTitle="Head of Engineering"
+        callerAvatar="👩‍💼"
+        question="Hervorragende Arbeit! Der Transporter hat die Rampe geschafft. Können Sie mir kurz erklären, welche Einstellungen Sie vorgenommen haben, damit der Roboter jetzt schnell genug hochkommt?"
+        correctAnswer="Sie haben also die richtige Balance gefunden:
+
+Das Getriebe musste so eingestellt werden, dass genug Drehmoment am Rad ankommt, um die 20°-Steigung zu bewältigen, aber die Übersetzung durfte nicht zu groß sein, sonst wäre der Transporter zu langsam gewesen.
+
+Eine größere Übersetzung bedeutet mehr Kraft, aber weniger Geschwindigkeit. Sie haben den Sweet Spot gefunden, wo beides ausreichend ist. Genau so funktioniert es!"
+        continueButtonText="Nächstes Level"
+        onComplete={() => advanceLevel(true)}
+      />
     );
   }
 
