@@ -4,7 +4,7 @@ Dieser Plan beschreibt die Schritte zur Integration eines Schüler-Logins, eines
 
 ## 1. Datenbank-Setup (Vercel Postgres)
 
-Wir verwenden Vercel Postgres als Datenbank.
+Wir verwenden **Vercel Postgres** (basiert auf Neon). Dies integriert sich nahtlos in Vercel und Next.js.
 
 ### Schema
 
@@ -64,13 +64,14 @@ Wir müssen an strategischen Stellen Events senden.
 
 ## 6. Ablaufplan der Umsetzung
 
-1.  **Dependencies:** `npm install @vercel/postgres` (falls noch nicht vorhanden).
-2.  **Datenbank:** Setup lokal simulieren oder direkt mit Vercel verknüpfen (Environment Variables `POSTGRES_URL` etc.).
-3.  **Server Actions:** Erstellen von `src/app/actions.ts`.
-4.  **Admin Icon:** Icon in `src/app/page.tsx` Header einfügen (Lock Icon).
-5.  **Admin Page:** Seite erstellen und PIN-Logik implementieren.
-6.  **Login Screen:** Startbildschirm anpassen.
-7.  **Tracking Hooks:** `ReflectionChat` und `gameStore` mit Tracking versehen.
+1.  **Dependencies:** `npm install @vercel/postgres` installieren.
+2.  **Environment Variables:** Nutzer nach `POSTGRES_URL` fragen und in `.env.local` eintragen.
+3.  **Datenbank Init:** Ein Skript oder eine Route erstellen, um die Tabellen (`users`, `progress`) initial anzulegen.
+4.  **Server Actions:** Erstellen von `src/app/actions.ts`.
+5.  **Admin Icon:** Icon in `src/app/page.tsx` Header einfügen (Lock Icon).
+6.  **Admin Page:** Seite erstellen und PIN-Logik implementieren.
+7.  **Login Screen:** Startbildschirm anpassen.
+8.  **Tracking Hooks:** `ReflectionChat` und `gameStore` mit Tracking versehen.
 
 ## Hinweise zur Sicherheit & Performance
 
