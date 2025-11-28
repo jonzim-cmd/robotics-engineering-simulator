@@ -12,6 +12,7 @@ import {
 import { BossModal } from './BossModal';
 import { TestResultNotification } from './TestResultNotification';
 import { assetPath } from '@/lib/basePath';
+import { trackEvent } from '@/app/actions';
 
 const CREDITS_PER_TEST = 5;
 
@@ -107,7 +108,7 @@ const Gauge: React.FC<{
 };
 // --- Main Component ---
 export const Level2TuningCockpit: React.FC = () => {
-  const { credits, setCredits, setLevelState, setSubStep } = useGameStore();
+  const { credits, setCredits, setLevelState, setSubStep, userId, currentLevel } = useGameStore();
   
   // States
   const [gearRatio, setGearRatio] = useState<number>(8.0);
@@ -131,11 +132,28 @@ export const Level2TuningCockpit: React.FC = () => {
   }, [testResult]);
 
   // Handlers
+  const logEvent = (eventType: string, payload: Record<string, unknown>) => {
+    if (!userId) return;
+    trackEvent(userId, currentLevel, eventType, payload).catch((err) => console.error('Tracking error', err));
+  };
+
   const handleTestDrive = () => {
     if (credits < CREDITS_PER_TEST) {
+      logEvent('LEVEL2_TEST_DENIED', {
+        reason: 'insufficient_credits',
+        credits,
+        gearRatio,
+        motorSpeedFactor,
+      });
       setShowBossModal(true);
       return;
     }
+
+    logEvent('LEVEL2_TEST_STARTED', {
+      creditsBefore: credits,
+      gearRatio,
+      motorSpeedFactor,
+    });
 
     setCredits(credits - CREDITS_PER_TEST);
     setIsTestRunning(true);
@@ -146,6 +164,14 @@ export const Level2TuningCockpit: React.FC = () => {
       const result = calculateLevel2Physics(gearRatio, motorSpeedFactor);
       setTestResult(result);
       setIsTestRunning(false);
+
+      logEvent('LEVEL2_TEST_RESULT', {
+        gearRatio,
+        motorSpeedFactor,
+        result: result.testResult,
+        torqueRatio: result.torqueRatio,
+        speedRatio: result.speedRatio,
+      });
 
       if (result.testResult === 'SUCCESS') {
         setTimeout(() => {

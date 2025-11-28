@@ -11,11 +11,12 @@ import {
 } from '@/lib/physicsEngine';
 import { BossModal } from './BossModal';
 import { TestResultNotification } from './TestResultNotification';
+import { trackEvent } from '@/app/actions';
 
 const CREDITS_PER_TEST = 5;
 
 export const Level2TuningSimulation: React.FC = () => {
-  const { credits, setCredits, setLevelState } = useGameStore();
+  const { credits, setCredits, setLevelState, userId, currentLevel } = useGameStore();
 
   // Slider states
   const [gearRatio, setGearRatio] = useState<number>(10); // Middle value
@@ -30,13 +31,30 @@ export const Level2TuningSimulation: React.FC = () => {
   const currentPhysics = calculateLevel2Physics(gearRatio, motorSpeedFactor);
 
   // Handle test drive
+  const logEvent = (eventType: string, payload: Record<string, unknown>) => {
+    if (!userId) return;
+    trackEvent(userId, currentLevel, eventType, payload).catch((err) => console.error('Tracking error', err));
+  };
+
   const handleTestDrive = () => {
     // Check if player has enough credits
     if (credits < CREDITS_PER_TEST) {
       // Show boss modal and reset credits
+      logEvent('LEVEL2_TEST_DENIED', {
+        reason: 'insufficient_credits',
+        credits,
+        gearRatio,
+        motorSpeedFactor,
+      });
       setShowBossModal(true);
       return;
     }
+
+    logEvent('LEVEL2_TEST_STARTED', {
+      creditsBefore: credits,
+      gearRatio,
+      motorSpeedFactor,
+    });
 
     // Deduct credits
     setCredits(credits - CREDITS_PER_TEST);
@@ -50,6 +68,14 @@ export const Level2TuningSimulation: React.FC = () => {
       const result = calculateLevel2Physics(gearRatio, motorSpeedFactor);
       setTestResult(result);
       setIsTestRunning(false);
+
+      logEvent('LEVEL2_TEST_RESULT', {
+        gearRatio,
+        motorSpeedFactor,
+        result: result.testResult,
+        torqueRatio: result.torqueRatio,
+        speedRatio: result.speedRatio,
+      });
 
       // If success, advance to SUCCESS state after a delay
       if (result.testResult === 'SUCCESS') {

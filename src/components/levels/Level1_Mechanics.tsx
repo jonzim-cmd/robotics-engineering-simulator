@@ -9,6 +9,7 @@ import { BrokenArmVisualization } from '@/components/ui/BrokenArmVisualization';
 import { RobotArmVisualization } from '@/components/ui/RobotArmVisualization';
 import { MaterialCard } from '@/components/ui/MaterialCard';
 import { MATERIALS, calculateArmPhysics } from '@/lib/physicsEngine';
+import { trackEvent } from '@/app/actions';
 import { motion } from 'framer-motion';
 import { ReflectionChat } from '@/components/ui/ReflectionChat';
 import { ReflectionDialog } from '@/components/ui/ReflectionDialog';
@@ -24,6 +25,8 @@ const Level1_Mechanics: React.FC = () => {
     popStateHistory,
     subStep,
     setSubStep,
+    userId,
+    currentLevel,
   } = useGameStore();
 
   // Input states
@@ -70,7 +73,12 @@ const Level1_Mechanics: React.FC = () => {
     setShowText(true);
   };
 
-  const handleSimulate = () => {
+  const logEvent = (eventType: string, payload: Record<string, unknown>) => {
+    if (!userId) return;
+    trackEvent(userId, currentLevel, eventType, payload).catch((err) => console.error('Tracking error', err));
+  };
+
+  const handleSimulate = async () => {
     // Validate inputs
     // Allow comma as decimal separator for German users
     const densityStr = inputDensity.replace(',', '.');
@@ -81,11 +89,13 @@ const Level1_Mechanics: React.FC = () => {
 
     if (isNaN(density) || density <= 0) {
       setErrorMsg('FEHLER: Ungültige Dichte-Eingabe. Bitte Zahl > 0 eingeben.');
+      logEvent('LEVEL1_SIMULATION_INPUT_ERROR', { density: densityStr, stiffness: stiffnessStr, reason: 'invalid_density' });
       return;
     }
 
     if (isNaN(stiffness) || stiffness <= 0) {
       setErrorMsg('FEHLER: Ungültiger E-Modul. Bitte Zahl > 0 eingeben.');
+      logEvent('LEVEL1_SIMULATION_INPUT_ERROR', { density: densityStr, stiffness: stiffnessStr, reason: 'invalid_stiffness' });
       return;
     }
 
@@ -113,12 +123,20 @@ const Level1_Mechanics: React.FC = () => {
         setErrorMsg(
           `FEHLER: Die eingegebenen Werte (${density} / ${stiffness}) stimmen nicht mit einem Material aus der Datenbank überein. Bitte trage die Werte exakt aus der Materialdatenbank ein.`
         );
+        logEvent('LEVEL1_SIMULATION_RESULT', {
+          density,
+          stiffness,
+          status: 'NO_MATCH',
+          creditsBefore: credits,
+        });
         setLevelState('FAIL');
         setSimulating(false);
         return;
       }
 
       const materialCost = matchingMaterial.cost;
+
+      let resultStatus: string = result.status;
 
       if (result.status === 'FAIL_MASS' || result.status === 'FAIL_BOTH') {
         setErrorMsg(
@@ -138,6 +156,7 @@ const Level1_Mechanics: React.FC = () => {
         );
         setLevelState('FAIL');
         setSubStep(0);
+        resultStatus = 'FAIL_BUDGET';
       } else {
         // Deduct credits on success
         removeCredits(materialCost);
@@ -146,7 +165,18 @@ const Level1_Mechanics: React.FC = () => {
         );
         setLevelState('SUCCESS');
         setSubStep(1);
+        resultStatus = 'SUCCESS';
       }
+
+      logEvent('LEVEL1_SIMULATION_RESULT', {
+        density,
+        stiffness,
+        resultStatus,
+        materialCost,
+        creditsBefore: credits,
+        mass: result.mass,
+        deflection: result.deflection,
+      });
 
       setSimulating(false);
     }, 2500); // Longer delay for dramatic effect

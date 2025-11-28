@@ -251,6 +251,43 @@ export default function AdminPage() {
                  Waiting for incoming transmissions from student terminals...
                </div>
             )}
+
+            {/* Global Event Log */}
+            <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3 border-b border-slate-800 pb-2">
+                <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
+                <h3 className="font-bold text-slate-200 uppercase text-sm">Event Log (letzte 50)</h3>
+              </div>
+              <div className="space-y-3 max-h-[420px] overflow-y-auto">
+                {progress.length === 0 && (
+                  <div className="text-slate-500 text-sm">Keine Events erfasst.</div>
+                )}
+                {progress.slice(0, 50).map((evt) => {
+                  const payloadText =
+                    typeof evt.payload === 'string'
+                      ? evt.payload
+                      : JSON.stringify(evt.payload);
+
+                  return (
+                    <div key={evt.id} className="bg-slate-950 p-3 rounded border border-slate-800">
+                      <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+                        <span className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-200">{evt.user_name}</span>
+                          <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-[10px] tracking-wide text-slate-200">
+                            {evt.event_type}
+                          </span>
+                          <span className="text-slate-500">Level {evt.level_id}</span>
+                        </span>
+                        <span className="opacity-60">{new Date(evt.created_at).toLocaleString()}</span>
+                      </div>
+                      <div className="text-slate-300 text-sm break-words">
+                        {payloadText}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 

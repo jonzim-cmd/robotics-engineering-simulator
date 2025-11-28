@@ -7,9 +7,10 @@ import { TypewriterText } from '@/components/ui/TypewriterText';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { motion } from 'framer-motion';
+import { trackEvent } from '@/app/actions';
 
 const Level4_Electronics: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep } = useGameStore();
+  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep, userId, currentLevel } = useGameStore();
   const [batteryType, setBatteryType] = useState<'cheap' | 'performance' | null>(null);
   const [capacitorAdded, setCapacitorAdded] = useState(false);
   const [simulating, setSimulating] = useState(false);
@@ -70,11 +71,24 @@ const Level4_Electronics: React.FC = () => {
     return { data, minV };
   };
 
+  const logEvent = (eventType: string, payload: Record<string, unknown>) => {
+    if (!userId) return;
+    trackEvent(userId, currentLevel, eventType, payload).catch((err) => console.error('Tracking error', err));
+  };
+
   const handleSimulate = () => {
-    if (!batteryType) return;
+    if (!batteryType) {
+      logEvent('LEVEL4_SIMULATION_INPUT_ERROR', { reason: 'battery_missing', capacitorAdded });
+      return;
+    }
     setSimulating(true);
     setErrorMsg(null);
     setChartData([]);
+
+    logEvent('LEVEL4_SIMULATION_STARTED', {
+      batteryType,
+      capacitorAdded,
+    });
 
     setTimeout(() => {
       const { data, minV } = generateData();
@@ -88,11 +102,23 @@ const Level4_Electronics: React.FC = () => {
         setErrorMsg(`CRITICAL ALERT: Voltage Low (${minV.toFixed(2)}V). CPU Reset triggered. Brownout detected.`);
         setTimeout(() => setLevelState('FAIL'), 2000);
         setSubStep(0);
+        logEvent('LEVEL4_SIMULATION_RESULT', {
+          status: 'FAIL',
+          batteryType,
+          capacitorAdded,
+          minVoltage: minV,
+        });
       } else {
         setTimeout(() => {
           setSubStep(1);
           setLevelState('SUCCESS');
         }, 1000);
+        logEvent('LEVEL4_SIMULATION_RESULT', {
+          status: 'SUCCESS',
+          batteryType,
+          capacitorAdded,
+          minVoltage: minV,
+        });
       }
       setSimulating(false);
     }, 1000);
