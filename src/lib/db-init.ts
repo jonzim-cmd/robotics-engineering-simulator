@@ -1,4 +1,14 @@
+import { loadEnvConfig } from '@next/env';
 import { sql } from './db';
+
+function ensureEnv() {
+  // Load Next.js-style env files (e.g., .env.local) so the CLI script can use them.
+  loadEnvConfig(process.cwd());
+
+  if (!process.env.POSTGRES_URL) {
+    throw new Error('POSTGRES_URL fehlt. Bitte in .env.local setzen (Vercel Postgres Connection String).');
+  }
+}
 
 async function createTables() {
   try {
@@ -36,6 +46,7 @@ async function createTables() {
 
 async function main() {
   console.log('Attempting to create database tables...');
+  ensureEnv();
   await createTables();
   console.log('Database tables created successfully.');
   process.exit(0);
