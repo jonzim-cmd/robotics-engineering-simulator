@@ -96,12 +96,7 @@ const Level3_Mechanisms: React.FC = () => {
 
   const handleStart = () => {
     pushStateHistory();
-    // First scroll up smoothly
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Show dialog after scroll initiates
-    setTimeout(() => {
-      setShowDialog(true);
-    }, 500);
+    setShowDialog(true);
   };
 
   const handleDialogComplete = () => {

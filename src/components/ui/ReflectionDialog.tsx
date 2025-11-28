@@ -47,7 +47,10 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
-  // Scroll handled by parent component for smoother transition
+  // Scroll to top when dialog opens
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
 
   // Simulate typing indicator before showing correct answer
