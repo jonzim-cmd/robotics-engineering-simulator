@@ -5,9 +5,9 @@ import * as THREE from 'three';
 
 // Static barrel-shaped roller geometry for mecanum wheels
 const mecanumRollerGeom = (() => {
-  const halfLength = 0.32;
-  const midRadius = 0.16;
-  const endRadius = 0.08;
+  const halfLength = 0.38; // Increased length (wider)
+  const midRadius = 0.2;    // Increased radius (thicker)
+  const endRadius = 0.1;    // Increased radius (thicker)
   const profile = [
     new THREE.Vector2(endRadius, -halfLength),
     new THREE.Vector2(midRadius, -halfLength * 0.3),
@@ -46,6 +46,7 @@ const RotatingModel = ({ type }: { type: ComponentType }) => {
     metalBright: new THREE.MeshStandardMaterial({ color: '#f0f0f0', roughness: 0.2, metalness: 0.8 }), // Shiny Silver
     metalDark: new THREE.MeshStandardMaterial({ color: '#4a5568', roughness: 0.5, metalness: 0.5 }), // Gunmetal Grey
     rubber: new THREE.MeshStandardMaterial({ color: '#1a202c', roughness: 0.9, metalness: 0.1 }), // Almost Black
+    rubberLight: new THREE.MeshStandardMaterial({ color: '#34495e', roughness: 0.9, metalness: 0.1 }), // Slightly lighter gray
     accent: new THREE.MeshStandardMaterial({ color: '#f59e0b', roughness: 0.3, metalness: 0.3 }), // Industrial Orange
     glow: new THREE.MeshStandardMaterial({ color: '#00ffff', emissive: '#00ffff', emissiveIntensity: 0.8 }),
     coil: new THREE.MeshStandardMaterial({ color: '#ef4444', roughness: 0.4 }), // Bright Red
@@ -217,7 +218,7 @@ const RotatingModel = ({ type }: { type: ComponentType }) => {
           <group>
             {(() => {
                const radius = 1;
-               const width = 0.55;
+               const width = 0.8;
                const rollerCount = 12;
                const tiltDeg = 45;
                const rollerMidRadius = 0.16;
@@ -225,15 +226,16 @@ const RotatingModel = ({ type }: { type: ComponentType }) => {
                const hubRadius = radius * 0.65;
                const plateThickness = 0.05;
                const tilt = (tiltDeg * Math.PI) / 180;
-               const rollerHalfLen = 0.32;
+               const rollerHalfLen = 0.38;
 
                const rollers = Array.from({ length: rollerCount }).map((_, i) => {
                   const angle = (i / rollerCount) * Math.PI * 2;
+                  const rollerMaterial = i % 2 === 0 ? mat.rubber : mat.rubberLight;
                   return (
                      <group key={i} rotation={[angle, 0, 0]}>
                         <group position={[0, rollerOffset, 0]} rotation={[0, tilt, Math.PI / 2]}>
                            <mesh
-                              material={mat.rubber}
+                              material={rollerMaterial}
                               geometry={mecanumRollerGeom}
                            />
                            {/* Roller Mount Discs (Endcaps) */}

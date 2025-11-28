@@ -250,27 +250,27 @@ const Level3_Mechanisms: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <SelectionCard 
                 type="wheels" title="4x4 Radantrieb" 
-                description="Standard. Schnell auf Asphalt, aber geringe Traktion im Schlamm."
+                description="Standard (z.B. Auto). Optimiert für hohe Endgeschwindigkeit und ruhigen Lauf bei direkter Kraftübertragung."
                 selected={driveType === 'wheels'} onSelect={() => setDriveType('wheels')} 
               />
               <SelectionCard 
                 type="tracks" title="Kettenantrieb" 
-                description="Hohe Auflagefläche. Ideal für Schlamm & unebenes Gelände. Langsam."
+                description="Große Kontaktfläche. Optimiert für weiche und anspruchsvolle Oberflächen. Langsam."
                 selected={driveType === 'tracks'} onSelect={() => setDriveType('tracks')} 
               />
               <SelectionCard 
                 type="mecanum" title="Mecanum-Räder" 
-                description="Omnidirektional (Seitwärtsfahren). Rollen verstopfen leicht bei Schmutz."
+                description="Ermöglicht Seitwärtsbewegungen. Benötigt zwingend gleichmäßigen Bodenkontakt. Die offene Rollenmechanik verstopft leicht."
                 selected={driveType === 'mecanum'} onSelect={() => setDriveType('mecanum')} 
               />
               <SelectionCard 
                 type="legs" title="Hexapod-Beine" 
-                description="Klettert über hohe Hindernisse. Instabil bei hoher Last. Komplex."
+                description="Klettert über hohe Hindernisse. Instabil bei Belastung. Komplex."
                 selected={driveType === 'legs'} onSelect={() => setDriveType('legs')} 
               />
               <SelectionCard 
                 type="hover" title="Hover-Turbine" 
-                description="Schwebt über Hindernisse. Hoher Energieverbrauch. Instabil bei Last."
+                description="Schwebt über Hindernisse. Hoher Energieverbrauch. Instabil bei Belastung."
                 selected={driveType === 'hover'} onSelect={() => setDriveType('hover')} 
               />
             </div>
@@ -289,22 +289,22 @@ const Level3_Mechanisms: React.FC = () => {
               />
               <SelectionCard 
                 type="magnetic" title="Elektromagnet" 
-                description="Maximale Haltekraft für Eisenmetalle. Keine beweglichen Teile."
+                description="Maximale Haltekraft für magnetische Stoffe. Keine beweglichen Teile."
                 selected={gripperType === 'magnetic'} onSelect={() => setGripperType('magnetic')} 
               />
               <SelectionCard 
                 type="vacuum" title="Vakuum-Sauger" 
-                description="Für glatte Flächen (Glas). Versagt bei Staub, Rost oder Beulen."
+                description="Für glatte Flächen. Versagt bei Staub, Rost oder Beulen."
                 selected={gripperType === 'vacuum'} onSelect={() => setGripperType('vacuum')} 
               />
               <SelectionCard 
                 type="soft" title="Soft-Gripper" 
-                description="Flexible Finger für empfindliche Objekte (Obst). Zu schwach für Schwerlast."
+                description="Flexible Finger für empfindliche Objekte. Hohe Kräfte nicht möglich."
                 selected={gripperType === 'soft'} onSelect={() => setGripperType('soft')} 
               />
               <SelectionCard 
                 type="needle" title="Nadel-Greifer" 
-                description="Dringt in Stoffe/Schaum ein. Zerstört harte Oberflächen oder bricht."
+                description="Dringt in Stoffe ein. Zerstört harte Oberflächen oder bricht."
                 selected={gripperType === 'needle'} onSelect={() => setGripperType('needle')} 
               />
             </div>
