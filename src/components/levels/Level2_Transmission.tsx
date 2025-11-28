@@ -93,7 +93,7 @@ const Level2_Transmission: React.FC = () => {
                 <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
                 <p className="mb-2">
                   Unit-7 blockiert Sektor 4. Der Anstieg ist zu steil für das aktuelle Getriebe.
-                  Motoren überhitzen bei 20° Steigung. Der gesamte Warenfluss steht still.
+                  Motoren überhitzen bei 20° Steigung. Es entsteht Stau – andere Transportroboter mit Waren kommen nicht mehr vorbei.
                 </p>
 
                 <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
@@ -112,7 +112,7 @@ const Level2_Transmission: React.FC = () => {
                     definition="Verhältnis: wie oft sich der Motor dreht, wenn sich das Rad einmal dreht. Größere Übersetzung = mehr Kraft am Rad, aber weniger Geschwindigkeit."
                   />{" "}
                   zu groß wählst, hat der Transporter zwar viel Kraft, fährt aber sehr langsam. Dann braucht er
-                  ewig für die Strecke und der Warenfluss gerät ebenfalls ins Stocken.
+                  ewig für die Strecke und es kommt ebenfalls zu Stau.
                 </p>
               </motion.div>
             )}

@@ -11,6 +11,7 @@ import {
 } from '@/lib/physicsEngine';
 import { BossModal } from './BossModal';
 import { TestResultNotification } from './TestResultNotification';
+import { assetPath } from '@/lib/basePath';
 
 const CREDITS_PER_TEST = 5;
 
@@ -173,6 +174,7 @@ export const Level2TuningCockpit: React.FC = () => {
   // Lets map Ratio 3 -> 100px, Ratio 20 -> 280px
   const drivenSize = 100 + ((gearRatio - GEAR_RATIO_MIN) / (GEAR_RATIO_MAX - GEAR_RATIO_MIN)) * 180;
   const drivenSpeed = driverSpeed / gearRatio * 4; // x4 just to make it visually perceivable relative to driver
+  const gridBg = assetPath('/grid.svg');
 
   return (
     <div className="flex flex-col gap-6">
@@ -181,7 +183,10 @@ export const Level2TuningCockpit: React.FC = () => {
         {/* Visualization Panel */}
         <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden min-h-[300px] sm:min-h-[350px] md:min-h-[400px] flex items-center justify-center">
           {/* Background Grid */}
-          <div className="absolute inset-0 opacity-10 bg-[url('/grid.svg')] bg-center" />
+          <div
+            className="absolute inset-0 opacity-10 bg-center"
+            style={{ backgroundImage: `url(${gridBg})` }}
+          />
 
           {/* Connection Chain (Visual Only - simple line) */}
           <div className="absolute h-2 md:h-3 bg-slate-800/80 border-y border-slate-600 top-1/2 -translate-y-1/2 w-[40%] md:w-[280px] max-w-[280px]" />

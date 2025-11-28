@@ -268,7 +268,7 @@ const Level3_Mechanisms: React.FC = () => {
             recipientName="Du"
             recipientAvatar="👨‍💼"
             message="Sehr gut, dass Sie so schnell hier sind. Sie haben sich die Videoaufnahmen des Depots angesehen. Welche Bedingungen sind dort vorzufinden? Was fällt Ihnen auf?"
-            correctAnswer="Vielen Dank für die Einschätzung. Bitte konfigurieren Sie nun den Roboter entsprechend den Anforderungen. Nutzen Sie die Konfigurator-Oberfläche."
+            correctAnswer="Das klingt ja nicht gerade nach einem einfachen Gelände. Wählen Sie jetzt bitte die passende Konfiguration für den Roboter, damit wir die Container da raus schaffen können. Morgen kommt die Umweltaufsicht, da müssen die Container weg sein."
             onComplete={handleDialogComplete}
             onBack={() => setShowDialog(false)}
             title="MISSION BRIEFING"
@@ -286,7 +286,7 @@ const Level3_Mechanisms: React.FC = () => {
       <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={handleBack}>
         <div className="text-center space-y-6 py-8">
           <div className="text-green-400 text-4xl mb-4">✓ MISSION ERFOLGREICH</div>
-          <p>Unit-7 hat das Zielgebiet erreicht und die Fracht gesichert.</p>
+          <p>Unit-7 hat das Zielgebiet erreicht und die Container gesichert. Wir brauchen keine Bedenken mehr haben hinsichtlich der Umweltaufsicht.</p>
           <button 
             onClick={() => advanceLevel()}
             className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"

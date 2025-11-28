@@ -150,7 +150,8 @@ const Level0_Intro: React.FC = () => {
                        <h4 className="text-yellow-500 text-xs font-bold mb-1">FINANZ-STATUS</h4>
                        <p className="text-slate-400 text-sm">
                           Budget-Zuweisung: <span className="text-white font-bold">{credits} Credits</span>.
-                          Nutzen Sie diese Ressourcen weise für Ersatzteile und Reparaturen. Unnötige Ausgaben gefährden die Projekt-Marge.
+                          Nutzen Sie diese Ressourcen weise für Ersatzteile und Reparaturen. Wenn wir Geld für Sachen ausgeben, die wir nicht wirklich brauchen,
+verdienen wir weniger Gewinn mit dem Projekt.
                        </p>
                     </div>
                  </div>
@@ -165,7 +166,7 @@ const Level0_Intro: React.FC = () => {
                 <div className="bg-slate-900 p-4 rounded border-l-2 border-cyan-500 mb-6">
                   <h4 className="text-cyan-500 text-xs font-bold mb-1">AKTUELLER AUFTRAG</h4>
                   <p className="text-slate-400 text-sm">
-                    Unit-7 (Schwerlast-Greifer) meldet Abweichungen bei der Materialfestigkeit. Überprüfen Sie die physikalischen Parameter und stellen Sie den Betrieb sicher.
+                    Unit-7 (Schwerlast-Greifer) meldet Auffälligkeiten. Überprüfen Sie alle wichtigen Werte und stellen Sie sicher, dass er einwandfrei arbeiten kann.
                   </p>
                 </div>
 

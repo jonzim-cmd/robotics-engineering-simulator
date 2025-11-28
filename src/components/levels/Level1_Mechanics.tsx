@@ -228,10 +228,10 @@ const Level1_Mechanics: React.FC = () => {
             senderAvatar="👷🏾"
             recipientName="Du"
             recipientAvatar="👨‍💼"
-            message={`Kollege Arianit meinte, wir sollen aufpassen, dass der neue Roboterarm nicht über 1000 kg wiegt, weil sonst die Stützmotoren des Arms durchbrennen.
+            message={`Kollege Arianit hat gesagt, wir müssen darauf achten, dass der neue Roboterarm nicht mehr als 1000 kg wiegt, sonst könnten die Stützmotoren des Arms durchbrennen.
 
-Ich verstehe das nicht. Was meint er damit genau? Warum sollten die Motoren durchbrennen, nur weil der Arm schwerer ist?`}
-            correctAnswer={`Ah, jetzt verstehe ich. Wenn der Roboterarm sehr schwer ist, müssen die Motoren viel Kraft (Drehmoment) aufbringen, um ihn zu bewegen oder zu halten.
+Ich verstehe das noch nicht so richtig. Was meint er damit genau? Warum würden die Motoren kaputtgehen, nur weil der Arm schwerer ist?`}
+correctAnswer={`Ah, jetzt verstehe ich. Wenn der Roboterarm sehr schwer ist, müssen die Motoren viel Kraft (Drehmoment) aufbringen, um ihn zu bewegen oder zu halten.
 
 Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie stark erhitzt. Wenn sie zu heiß werden, kann die Isolierung der Drähte im Motor schmelzen und der Motor wird beschädigt bzw. "brennt durch".`}
 
@@ -487,11 +487,11 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
           senderTitle="Head of Engineering"
           message={`Hallo Ingenieur*in,
 
-ich habe gesehen, dass Sie einen teuren Carbon-Roboterarm bestellt haben. Bitte erklären Sie mir kurz, warum Sie dieses Material gewählt haben und welche technischen Vorteile es bietet.
+ich habe gesehen, dass Sie einen teuren Carbon-Roboterarm bestellt haben. Bitte erklären Sie mir unverzüglich, warum Sie dieses Material gewählt haben und welche technischen Vorteile es bietet.
 
 Hätte Aluminium nicht gereicht, das ist deutlich billiger?
 
-Beste Grüße
+Freundlichst
 Chefin Bazlin`}
           correctAnswer={`Das macht Sinn. Aluminium ist zwar günstiger, aber für Hochleistungsroboter oft zu schwer oder zu weich.
 
