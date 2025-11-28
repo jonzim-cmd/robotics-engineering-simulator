@@ -190,7 +190,7 @@ export function Level3_TerrainViewer({ className, autoRotate = false }: Level3_T
         dpr={[1, 2]}
         frameloop={autoRotate ? 'always' : 'demand'}
       >
-        <color attach="background" args={['#0f172a']} />
+        <color attach="background" args={['#1e293b']} />
         
         {/* Environment */}
         <ambientLight intensity={0.5} />
@@ -203,7 +203,7 @@ export function Level3_TerrainViewer({ className, autoRotate = false }: Level3_T
            <orthographicCamera attach="shadow-camera" args={[-10, 10, 10, -10]} />
         </directionalLight>
         
-        <fog attach="fog" args={['#0f172a', 8, 25]} />
+        <fog attach="fog" args={['#1e293b', 8, 25]} />
 
         {/* World */}
         <group position={[0, -0.5, 0]}>
