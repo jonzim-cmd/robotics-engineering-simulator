@@ -47,6 +47,11 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
+  // Scroll to top when dialog opens
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Simulate typing indicator before showing correct answer
   useEffect(() => {
     if (isSent) {
@@ -167,7 +172,8 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="max-w-3xl w-full h-[70vh] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative"
+      className="max-w-2xl w-full bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative self-start mt-16"
+      style={{ height: 'auto' }}
     >
       {/* Header */}
       <div className="bg-linear-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 shrink-0">
@@ -175,7 +181,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
       </div>
 
       {/* Door View */}
-      <div className="flex-1 relative overflow-hidden bg-linear-to-b from-slate-800 to-slate-900">
+      <div className="relative overflow-hidden bg-linear-to-b from-slate-800 to-slate-900" style={{ height: '500px' }}>
         {/* Door Frame */}
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.div
@@ -190,7 +196,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
             className="relative w-[60%] h-[80%] max-w-md"
           >
             {/* Door */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 rounded-lg shadow-2xl border-4 border-slate-600">
+            <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-800 rounded-lg shadow-2xl border-4 border-slate-600">
               {/* Door panels */}
               <div className="absolute inset-6 border-2 border-slate-600/50 rounded"></div>
               <div className="absolute inset-6 top-1/2 border-t-2 border-slate-600/50"></div>
@@ -251,7 +257,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md px-4"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-md px-4"
         >
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -267,11 +273,11 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-3 md:p-4">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/90 backdrop-blur-md py-4 px-3 md:px-4 overflow-y-auto">
       {onBack && (
         <button
           onClick={onBack}
-          className="absolute left-4 top-4 text-sm text-slate-300 hover:text-white bg-slate-800/70 border border-slate-700 px-3 py-2 rounded flex items-center gap-2 transition-colors z-50"
+          className="fixed left-4 top-4 text-sm text-slate-300 hover:text-white bg-slate-800/70 border border-slate-700 px-3 py-2 rounded flex items-center gap-2 transition-colors z-50"
         >
           <span className="text-lg">←</span>
           Zurück

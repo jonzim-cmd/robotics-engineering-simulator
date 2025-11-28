@@ -10,18 +10,34 @@ interface TypewriterTextProps {
   className?: string;
 }
 
-export const TypewriterText: React.FC<TypewriterTextProps> = ({ 
-  text, 
-  speed = 30, 
+export const TypewriterText: React.FC<TypewriterTextProps> = ({
+  text,
+  speed = 30,
   onComplete,
-  className = "" 
+  className = ""
 }) => {
   const [displayedText, setDisplayedText] = useState("");
   const onCompleteRef = useRef(onComplete);
+  const textRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+
+  // Auto-scroll to keep the cursor in view (respecting parent padding)
+  useEffect(() => {
+    if (textRef.current) {
+      let currentEl: HTMLElement | null = textRef.current.parentElement;
+      while (currentEl) {
+        const style = window.getComputedStyle(currentEl);
+        if (style.overflowY === 'scroll' || style.overflowY === 'auto') {
+          currentEl.scrollTop = currentEl.scrollHeight;
+          break;
+        }
+        currentEl = currentEl.parentElement;
+      }
+    }
+  }, [displayedText]);
 
   useEffect(() => {
     setDisplayedText("");
@@ -42,7 +58,7 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
   }, [text, speed]);
 
   return (
-    <span className={className}>
+    <span ref={textRef} className={className}>
       {displayedText}
       <motion.span
         animate={{ opacity: [0, 1, 0] }}

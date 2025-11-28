@@ -8,6 +8,7 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { Level3_TerrainViewer } from './Level3_TerrainViewer';
 import { Level3_ComponentPreview } from './Level3_ComponentPreview';
 import { ReflectionDialog } from '@/components/ui/ReflectionDialog';
+import { HaraldDialog } from '@/components/ui/HaraldDialog';
 import { motion } from 'framer-motion';
 import { Cog, MousePointer2 } from 'lucide-react';
 
@@ -15,20 +16,38 @@ import { Cog, MousePointer2 } from 'lucide-react';
 type DriveType = 'wheels' | 'tracks' | 'legs' | 'mecanum' | 'hover';
 type GripperType = 'claw' | 'vacuum' | 'magnetic' | 'soft' | 'needle';
 
+// Cost definitions
+const DRIVE_COSTS: Record<DriveType, number> = {
+  wheels: 120,
+  tracks: 350, // Expensive but correct
+  mecanum: 200,
+  legs: 500,
+  hover: 800
+};
+
+const GRIPPER_COSTS: Record<GripperType, number> = {
+  claw: 150,
+  vacuum: 180,
+  magnetic: 300, // Expensive but correct
+  soft: 250,
+  needle: 120
+};
+
 interface SelectionCardProps {
   selected: boolean;
   onSelect: () => void;
   title: string;
   description: string;
   type: DriveType | GripperType;
+  cost?: number;
 }
 
-const SelectionCard: React.FC<SelectionCardProps> = ({ selected, onSelect, title, description, type }) => (
+const SelectionCard: React.FC<SelectionCardProps> = ({ selected, onSelect, title, description, type, cost }) => (
   <button
     onClick={onSelect}
     className={`relative w-full rounded-lg border text-left transition-all overflow-hidden group ${
-      selected 
-        ? 'bg-cyan-900/30 border-cyan-500 ring-1 ring-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]' 
+      selected
+        ? 'bg-cyan-900/30 border-cyan-500 ring-1 ring-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
         : 'bg-slate-900 border-slate-700 hover:border-slate-500 hover:bg-slate-800'
     }`}
   >
@@ -41,22 +60,30 @@ const SelectionCard: React.FC<SelectionCardProps> = ({ selected, onSelect, title
         </div>
       )}
     </div>
-    
+
     {/* Content */}
     <div className="p-4">
-      <div className={`font-bold text-lg mb-1 ${selected ? 'text-cyan-400' : 'text-slate-200'}`}>{title}</div>
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <div className={`font-bold text-lg ${selected ? 'text-cyan-400' : 'text-slate-200'}`}>{title}</div>
+        {cost !== undefined && (
+          <div className={`text-xs font-mono px-2 py-1 rounded ${selected ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800 text-slate-400'}`}>
+            {cost} CR
+          </div>
+        )}
+      </div>
       <div className="text-sm text-slate-400 leading-relaxed">{description}</div>
     </div>
   </button>
 );
 
 const Level3_Mechanisms: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep } = useGameStore();
+  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep, credits, addCredits, removeCredits } = useGameStore();
   const [driveType, setDriveType] = useState<DriveType | null>(null);
   const [gripperType, setGripperType] = useState<GripperType | null>(null);
   const [simulating, setSimulating] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; msg: string } | null>(null);
+  const [result, setResult] = useState<{ success: boolean; msg: string; needsFunding?: boolean } | null>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [showHaraldDialog, setShowHaraldDialog] = useState(false);
 
   const handleBack = () => {
     popStateHistory();
@@ -85,7 +112,6 @@ const Level3_Mechanisms: React.FC = () => {
 
     setTimeout(() => {
       // Mission: Rough Terrain (Mud/Rocks) + Heavy Ferromagnetic Crates
-      let success = false;
       let msg = "";
       let driveOk = false;
       let gripperOk = false;
@@ -120,23 +146,62 @@ const Level3_Mechanisms: React.FC = () => {
         msg += "GREIFER: Magnet hält die ferromagnetische Last absolut sicher. ";
       }
 
-      if (driveOk && gripperOk) {
-        success = true;
-        msg = "MISSION ERFOLGREICH! " + msg;
-      } else {
-        msg = "MISSION GESCHEITERT: " + msg;
-      }
+      // Calculate total cost
+      const totalCost = DRIVE_COSTS[driveType] + GRIPPER_COSTS[gripperType];
+      const canAfford = credits >= totalCost;
 
-      setResult({ success, msg });
-      
-      if (success) {
+      if (!driveOk || !gripperOk) {
+        // Scenario A: Incorrect Selection
+        msg = "MISSION GESCHEITERT: " + msg;
+        setResult({ success: false, msg });
+      } else if (canAfford) {
+        // Scenario B: Correct Selection + Can Afford
+        msg = "MISSION ERFOLGREICH! " + msg;
+        removeCredits(totalCost);
+        setResult({ success: true, msg });
         setTimeout(() => {
           setLevelState('SUCCESS');
         }, 2500);
+      } else {
+        // Scenario C: Correct Selection + Cannot Afford
+        // Create a detailed justification for why this configuration is optimal
+        let justification = "";
+        if (driveType === 'tracks') {
+          justification += "Der Kettenantrieb sorgt dafür, dass der Roboter auch auf schlammigem und unebenem Boden gut fährt und nicht so leicht rutscht. ";
+        }
+        if (gripperType === 'magnetic') {
+          justification += "Der Elektromagnet kann schwere Stahlcontainer aus Metall sicher anheben.";
+        } else if (gripperType === 'claw') {
+          justification += "Die mechanische Klaue kann viele verschiedene schwere Lasten sicher festhalten.";
+        }
+
+        msg = "OPTIMAL|KONFIGURATION OPTIMAL. SYSTEM BEREIT.\n\n" + justification + "\n\nERROR: INSUFFICIENT CREDITS.\n\nBenötigt: " + totalCost + " CR | Verfügbar: " + credits + " CR";
+        setResult({ success: false, msg, needsFunding: true });
       }
-      
+
       setSimulating(false);
     }, 1500);
+  };
+
+  const handleHaraldApproval = () => {
+    setShowHaraldDialog(false);
+
+    // Calculate shortfall and grant only what's needed + small buffer
+    if (driveType && gripperType) {
+      const totalCost = DRIVE_COSTS[driveType] + GRIPPER_COSTS[gripperType];
+      const shortfall = totalCost - credits;
+
+      // Grant shortfall + 50 credits buffer
+      if (shortfall > 0) {
+        addCredits(shortfall + 50);
+      }
+
+      // Now purchase the parts
+      removeCredits(totalCost);
+    }
+
+    // Set success
+    setLevelState('SUCCESS');
   };
 
   if (levelState === 'INTRO') {
@@ -248,30 +313,35 @@ const Level3_Mechanisms: React.FC = () => {
                <Cog className="animate-spin-slow" size={20}/> ANTRIEBSSYSTEM
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <SelectionCard 
-                type="wheels" title="4x4 Radantrieb" 
+              <SelectionCard
+                type="wheels" title="4x4 Radantrieb"
                 description="Standard (z.B. Auto). Optimiert für hohe Endgeschwindigkeit und ruhigen Lauf bei direkter Kraftübertragung."
-                selected={driveType === 'wheels'} onSelect={() => setDriveType('wheels')} 
+                selected={driveType === 'wheels'} onSelect={() => setDriveType('wheels')}
+                cost={DRIVE_COSTS.wheels}
               />
-              <SelectionCard 
-                type="tracks" title="Kettenantrieb" 
+              <SelectionCard
+                type="tracks" title="Kettenantrieb"
                 description="Große Kontaktfläche. Optimiert für weiche und anspruchsvolle Oberflächen. Langsam."
-                selected={driveType === 'tracks'} onSelect={() => setDriveType('tracks')} 
+                selected={driveType === 'tracks'} onSelect={() => setDriveType('tracks')}
+                cost={DRIVE_COSTS.tracks}
               />
-              <SelectionCard 
-                type="mecanum" title="Mecanum-Räder" 
+              <SelectionCard
+                type="mecanum" title="Mecanum-Räder"
                 description="Ermöglicht Seitwärtsbewegungen. Benötigt zwingend gleichmäßigen Bodenkontakt. Die offene Rollenmechanik verstopft leicht."
-                selected={driveType === 'mecanum'} onSelect={() => setDriveType('mecanum')} 
+                selected={driveType === 'mecanum'} onSelect={() => setDriveType('mecanum')}
+                cost={DRIVE_COSTS.mecanum}
               />
-              <SelectionCard 
-                type="legs" title="Hexapod-Beine" 
+              <SelectionCard
+                type="legs" title="Hexapod-Beine"
                 description="Klettert über hohe Hindernisse. Instabil bei Belastung. Komplex."
-                selected={driveType === 'legs'} onSelect={() => setDriveType('legs')} 
+                selected={driveType === 'legs'} onSelect={() => setDriveType('legs')}
+                cost={DRIVE_COSTS.legs}
               />
-              <SelectionCard 
-                type="hover" title="Hover-Turbine" 
+              <SelectionCard
+                type="hover" title="Hover-Turbine"
                 description="Schwebt über Hindernisse. Hoher Energieverbrauch. Instabil bei Belastung."
-                selected={driveType === 'hover'} onSelect={() => setDriveType('hover')} 
+                selected={driveType === 'hover'} onSelect={() => setDriveType('hover')}
+                cost={DRIVE_COSTS.hover}
               />
             </div>
           </div>
@@ -282,30 +352,35 @@ const Level3_Mechanisms: React.FC = () => {
                <MousePointer2 size={20}/> GREIF-MECHANIK
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <SelectionCard 
-                type="claw" title="Servo-Klaue" 
+              <SelectionCard
+                type="claw" title="Servo-Klaue"
                 description="Universell. Greift fast alles. Benötigt hohe Kraft für schwere Objekte."
-                selected={gripperType === 'claw'} onSelect={() => setGripperType('claw')} 
+                selected={gripperType === 'claw'} onSelect={() => setGripperType('claw')}
+                cost={GRIPPER_COSTS.claw}
               />
-              <SelectionCard 
-                type="magnetic" title="Elektromagnet" 
+              <SelectionCard
+                type="magnetic" title="Elektromagnet"
                 description="Maximale Haltekraft für magnetische Stoffe. Keine beweglichen Teile."
-                selected={gripperType === 'magnetic'} onSelect={() => setGripperType('magnetic')} 
+                selected={gripperType === 'magnetic'} onSelect={() => setGripperType('magnetic')}
+                cost={GRIPPER_COSTS.magnetic}
               />
-              <SelectionCard 
-                type="vacuum" title="Vakuum-Sauger" 
+              <SelectionCard
+                type="vacuum" title="Vakuum-Sauger"
                 description="Für glatte Flächen. Versagt bei Staub, Rost oder Beulen."
-                selected={gripperType === 'vacuum'} onSelect={() => setGripperType('vacuum')} 
+                selected={gripperType === 'vacuum'} onSelect={() => setGripperType('vacuum')}
+                cost={GRIPPER_COSTS.vacuum}
               />
-              <SelectionCard 
-                type="soft" title="Soft-Gripper" 
+              <SelectionCard
+                type="soft" title="Soft-Gripper"
                 description="Flexible Finger für empfindliche Objekte. Hohe Kräfte nicht möglich."
-                selected={gripperType === 'soft'} onSelect={() => setGripperType('soft')} 
+                selected={gripperType === 'soft'} onSelect={() => setGripperType('soft')}
+                cost={GRIPPER_COSTS.soft}
               />
-              <SelectionCard 
-                type="needle" title="Nadel-Greifer" 
+              <SelectionCard
+                type="needle" title="Nadel-Greifer"
                 description="Dringt in Stoffe ein. Zerstört harte Oberflächen oder bricht."
-                selected={gripperType === 'needle'} onSelect={() => setGripperType('needle')} 
+                selected={gripperType === 'needle'} onSelect={() => setGripperType('needle')}
+                cost={GRIPPER_COSTS.needle}
               />
             </div>
           </div>
@@ -313,8 +388,24 @@ const Level3_Mechanisms: React.FC = () => {
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-800 sticky bottom-0 bg-slate-950/90 p-4 backdrop-blur-sm border-t-cyan-900/50 z-10">
+          {/* Budget Display */}
+          <div className="mb-4 flex items-center justify-between gap-4 p-3 bg-slate-900/70 border border-slate-700 rounded">
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-slate-400">Verfügbare Credits:</div>
+              <div className="text-xl font-bold font-mono text-cyan-400">{credits} CR</div>
+            </div>
+            {driveType && gripperType && (
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-slate-400">Gesamtkosten:</div>
+                <div className={`text-xl font-bold font-mono ${credits >= (DRIVE_COSTS[driveType] + GRIPPER_COSTS[gripperType]) ? 'text-green-400' : 'text-red-400'}`}>
+                  {DRIVE_COSTS[driveType] + GRIPPER_COSTS[gripperType]} CR
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-col md:flex-row items-center gap-4">
-             <button 
+             <button
                 onClick={handleSimulate}
                 disabled={!driveType || !gripperType || simulating}
                 className={`flex-1 w-full py-4 font-bold text-lg rounded uppercase tracking-widest transition-colors ${
@@ -328,17 +419,56 @@ const Level3_Mechanisms: React.FC = () => {
           </div>
 
           {result && (
-             <motion.div 
+             <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                className={`mt-4 p-4 rounded border text-center font-mono ${result.success ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-red-900/20 border-red-500 text-red-400'}`}
              >
-                {result.msg}
+                <div className="whitespace-pre-wrap">
+                  {result.msg.includes('OPTIMAL|') ? (
+                    // Split message into optimal part (green) and error part (red)
+                    <>
+                      {result.msg.split('OPTIMAL|')[1].split('\n\nERROR:')[0].split('\n').map((line, idx) => (
+                        <div key={idx} className={idx === 0 ? 'text-green-400 font-bold' : 'text-slate-300 text-sm mt-2'}>
+                          {line}
+                        </div>
+                      ))}
+                      <div className="text-red-400 font-bold mt-4">
+                        ERROR: INSUFFICIENT CREDITS.
+                      </div>
+                      <div className="text-red-400 text-sm mt-2">
+                        {result.msg.split('ERROR: INSUFFICIENT CREDITS.\n\n')[1]}
+                      </div>
+                    </>
+                  ) : (
+                    result.msg
+                  )}
+                </div>
+                {result.needsFunding && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 }}
+                    onClick={() => setShowHaraldDialog(true)}
+                    className="mt-4 px-6 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded uppercase tracking-wide transition-colors"
+                  >
+                    Termin mit Finanzbuchhalter Harald Schuldenbremse vereinbaren
+                  </motion.button>
+                )}
              </motion.div>
           )}
         </div>
 
       </TerminalCard>
+
+      {/* Harald Dialog */}
+      {showHaraldDialog && (
+        <HaraldDialog
+          onApproved={handleHaraldApproval}
+          onCancel={() => setShowHaraldDialog(false)}
+          totalCost={driveType && gripperType ? DRIVE_COSTS[driveType] + GRIPPER_COSTS[gripperType] : 0}
+        />
+      )}
     </div>
   );
 };
