@@ -179,27 +179,27 @@ export const Level2TuningCockpit: React.FC = () => {
       {/* Top: Results Overlay Area (Conceptually) */}
       <div className="relative">
         {/* Visualization Panel */}
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-10 relative overflow-hidden min-h-[400px] flex items-center justify-center">
+        <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden min-h-[300px] sm:min-h-[350px] md:min-h-[400px] flex items-center justify-center">
           {/* Background Grid */}
           <div className="absolute inset-0 opacity-10 bg-[url('/grid.svg')] bg-center" />
 
           {/* Connection Chain (Visual Only - simple line) */}
-          <div className="absolute h-3 bg-slate-800/80 border-y border-slate-600 top-1/2 -translate-y-1/2 w-[280px]" />
+          <div className="absolute h-2 md:h-3 bg-slate-800/80 border-y border-slate-600 top-1/2 -translate-y-1/2 w-[40%] md:w-[280px] max-w-[280px]" />
 
           {/* Gears Container */}
-          <div className="flex items-center gap-20 relative z-10">
+          <div className="flex items-center gap-4 sm:gap-8 md:gap-12 lg:gap-20 relative z-10">
             {/* Motor Side */}
-            <div className="flex flex-col items-center gap-6">
-              <div className="text-sm font-mono text-cyan-400 uppercase tracking-widest font-bold">Motor</div>
+            <div className="flex flex-col items-center gap-3 sm:gap-4 md:gap-6">
+              <div className="text-xs sm:text-sm font-mono text-cyan-400 uppercase tracking-widest font-bold">Motor</div>
               <div className="relative">
                 <SpinningGear size={driverSize} color="#22d3ee" teeth={8} speed={driverSpeed} />
               </div>
-              <div className="text-sm font-mono text-slate-400">{Math.round(motorSpeedFactor * 100)}% RPM</div>
+              <div className="text-xs sm:text-sm font-mono text-slate-400">{Math.round(motorSpeedFactor * 100)}% RPM</div>
             </div>
 
             {/* Wheel Side */}
-            <div className="flex flex-col items-center gap-6 h-[300px] justify-center w-[300px]">
-              <div className="text-sm font-mono text-cyan-400 uppercase tracking-widest font-bold">Antrieb</div>
+            <div className="flex flex-col items-center gap-3 sm:gap-4 md:gap-6 min-h-[200px] sm:min-h-[250px] md:min-h-[300px] justify-center w-[150px] sm:w-[200px] md:w-[250px] lg:w-[300px]">
+              <div className="text-xs sm:text-sm font-mono text-cyan-400 uppercase tracking-widest font-bold">Antrieb</div>
               <div className="relative flex items-center justify-center transition-all duration-500 ease-out">
                 <SpinningGear
                   size={drivenSize}
@@ -209,7 +209,7 @@ export const Level2TuningCockpit: React.FC = () => {
                   direction={-1}
                 />
               </div>
-              <div className="text-sm font-mono text-slate-400 font-bold">1:{gearRatio.toFixed(1)}</div>
+              <div className="text-xs sm:text-sm font-mono text-slate-400 font-bold">1:{gearRatio.toFixed(1)}</div>
             </div>
           </div>
 
@@ -246,8 +246,8 @@ export const Level2TuningCockpit: React.FC = () => {
           {/* Gear Ratio Slider */}
           <div>
             <div className="flex justify-between mb-2 text-sm font-medium text-slate-300">
-              <span>Speed (3:1)</span>
-              <span>Kraft (20:1)</span>
+              <span>Geschwindigkeit</span>
+              <span>Kraft</span>
             </div>
             <input
               type="range"
@@ -267,8 +267,8 @@ export const Level2TuningCockpit: React.FC = () => {
           {/* Motor RPM Slider */}
           <div>
             <div className="flex justify-between mb-2 text-sm font-medium text-slate-300">
-              <span>Motor Idle</span>
-              <span>Max Power</span>
+              <span>Motor Stopp</span>
+              <span>Max. Drehzahl</span>
             </div>
             <input
               type="range"

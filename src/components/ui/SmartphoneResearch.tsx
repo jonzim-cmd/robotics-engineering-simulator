@@ -109,23 +109,23 @@ export const SmartphoneResearch: React.FC<SmartphoneResearchProps> = ({
   const currentResult = searchResults[currentPage];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4">
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="relative"
+        className="relative w-full max-w-sm"
       >
         {/* Smartphone Frame */}
-        <div className="w-[375px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl border-8 border-slate-800">
+        <div className="w-full bg-slate-900 rounded-2xl sm:rounded-[3rem] p-2 sm:p-3 shadow-2xl border-4 sm:border-8 border-slate-800">
           {/* Notch */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-slate-900 rounded-b-3xl z-10 flex items-center justify-center gap-2">
-            <div className="w-12 h-1 bg-slate-800 rounded-full mt-2" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 sm:w-40 h-6 sm:h-7 bg-slate-900 rounded-b-2xl sm:rounded-b-3xl z-10 flex items-center justify-center gap-2">
+            <div className="w-10 sm:w-12 h-1 bg-slate-800 rounded-full mt-2" />
             <div className="w-2 h-2 bg-slate-700 rounded-full mt-2" />
           </div>
 
           {/* Screen */}
-          <div className="bg-white rounded-[2.5rem] overflow-hidden shadow-inner h-[667px] flex flex-col">
+          <div className="bg-white rounded-xl sm:rounded-[2.5rem] overflow-hidden shadow-inner h-[75vh] sm:h-[80vh] max-h-[667px] flex flex-col">
             {/* Browser UI */}
             <div className="bg-slate-100 border-b border-slate-300">
               {/* Tab Bar */}
@@ -200,22 +200,22 @@ export const SmartphoneResearch: React.FC<SmartphoneResearchProps> = ({
               <button
                 onClick={handlePrevious}
                 disabled={isFirstPage}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all ${
                   isFirstPage
                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                    : 'bg-slate-600 text-white hover:bg-slate-700 shadow-sm'
+                    : 'bg-slate-600 text-white hover:bg-slate-700 active:bg-slate-800 shadow-sm'
                 }`}
               >
                 ← Zurück
               </button>
 
-              <div className="text-sm font-mono text-slate-600">
+              <div className="text-xs sm:text-sm font-mono text-slate-600">
                 {currentPage + 1} / {searchResults.length}
               </div>
 
               <button
                 onClick={handleNext}
-                className="px-4 py-2 rounded-lg font-medium text-sm transition-all bg-cyan-600 text-white hover:bg-cyan-700 shadow-sm"
+                className="px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all bg-cyan-600 text-white hover:bg-cyan-700 active:bg-cyan-800 shadow-sm"
               >
                 {isLastPage ? 'Weiter →' : 'Nächste →'}
               </button>

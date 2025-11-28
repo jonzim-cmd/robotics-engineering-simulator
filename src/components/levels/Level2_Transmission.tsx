@@ -264,7 +264,7 @@ Man kann nicht gleichzeitig maximale Kraft und maximale Geschwindigkeit haben.`
         callerName="Chefin Bazlin"
         callerTitle="Head of Engineering"
         callerAvatar="👩‍💼"
-        question="Hervorragende Arbeit! Der Transporter hat die Rampe geschafft. Können Sie mir kurz erklären, welche Einstellungen Sie vorgenommen haben, damit der Roboter jetzt schnell genug hochkommt?"
+        question="Hervorragende Arbeit! Der Roboter schafft die Rampe nun schnell genug. Können Sie mir kurz erklären, welche Einstellungen Sie vorgenommen haben, damit der Roboter jetzt schnell genug hochkommt?"
         correctAnswer="Sie haben also die richtige Balance gefunden:
 
 Das Getriebe musste so eingestellt werden, dass genug Drehmoment am Rad ankommt, um die 20°-Steigung zu bewältigen, aber die Übersetzung durfte nicht zu groß sein, sonst wäre der Transporter zu langsam gewesen.

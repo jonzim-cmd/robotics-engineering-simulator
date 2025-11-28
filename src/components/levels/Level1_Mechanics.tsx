@@ -209,7 +209,7 @@ const Level1_Mechanics: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.4 }}
                 onClick={handleStart}
-                className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
+                className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white font-bold rounded uppercase tracking-widest transition-colors"
               >
                 Mission Starten
               </motion.button>
@@ -268,7 +268,7 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
         borderColor={isFail ? 'red' : 'cyan'}
         onBack={handleBack}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* LEFT SIDE: Material Database (Read-Only) */}
           <div className="space-y-4">
             <div className="bg-slate-900/50 border border-slate-700 rounded px-3 pt-3 pb-2 h-full flex flex-col">
@@ -378,7 +378,7 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
                     ? 'bg-yellow-600 text-white animate-pulse cursor-wait'
                     : !inputDensity || !inputStiffness
                     ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                    : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.3)] hover:shadow-[0_0_20px_rgba(8,145,178,0.5)]'
+                    : 'bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white shadow-[0_0_15px_rgba(8,145,178,0.3)] hover:shadow-[0_0_20px_rgba(8,145,178,0.5)]'
                 }`}
               >
                 {simulating ? 'TEST LÄUFT...' : 'SIMULATION STARTEN'}
@@ -470,7 +470,7 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
 
                 <button
                   onClick={() => setSubStep(2)}
-                  className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(22,163,74,0.4)] hover:shadow-[0_0_30px_rgba(22,163,74,0.6)]"
+                  className="w-full py-4 bg-green-600 hover:bg-green-500 active:bg-green-700 text-white font-bold rounded uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(22,163,74,0.4)] hover:shadow-[0_0_30px_rgba(22,163,74,0.6)]"
                 >
                   Nächstes Level Initialisieren
                 </button>

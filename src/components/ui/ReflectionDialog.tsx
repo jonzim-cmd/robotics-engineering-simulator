@@ -65,7 +65,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -86,14 +86,14 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
       className="max-w-4xl w-full h-[70vh] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 shrink-0">
+      <div className="bg-linear-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 shrink-0">
         <h3 className="text-xl font-bold text-white text-center">Gespräch auf dem Flur</h3>
       </div>
 
       {/* Hallway Background */}
-      <div className="flex-1 relative overflow-hidden bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950">
+      <div className="flex-1 relative overflow-hidden bg-linear-to-b from-slate-800 via-slate-900 to-slate-950">
         {/* Floor */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-slate-950 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-linear-to-t from-slate-950 to-transparent">
           <div className="absolute inset-0 opacity-20" style={{
             backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,255,255,0.03) 50px, rgba(255,255,255,0.03) 100px)'
           }}></div>
@@ -101,8 +101,8 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
 
         {/* Walls with perspective */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute left-0 top-0 bottom-1/3 w-1/4 bg-gradient-to-r from-slate-700 to-transparent"></div>
-          <div className="absolute right-0 top-0 bottom-1/3 w-1/4 bg-gradient-to-l from-slate-700 to-transparent"></div>
+          <div className="absolute left-0 top-0 bottom-1/3 w-1/4 bg-linear-to-r from-slate-700 to-transparent"></div>
+          <div className="absolute right-0 top-0 bottom-1/3 w-1/4 bg-linear-to-l from-slate-700 to-transparent"></div>
         </div>
 
         {/* Characters */}
@@ -151,7 +151,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleStartDialog}
-            className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl uppercase tracking-wider shadow-lg shadow-cyan-900/30 transition-all"
+            className="w-full py-4 bg-linear-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:from-cyan-700 active:to-blue-700 text-white font-bold rounded-xl uppercase tracking-wider shadow-lg shadow-cyan-900/30 transition-all"
           >
             Gespräch beginnen
           </motion.button>
@@ -170,12 +170,12 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
       className="max-w-3xl w-full h-[70vh] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative"
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 shrink-0">
+      <div className="bg-linear-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 shrink-0">
         <h3 className="text-xl font-bold text-white text-center">Besuch im Büro</h3>
       </div>
 
       {/* Door View */}
-      <div className="flex-1 relative overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900">
+      <div className="flex-1 relative overflow-hidden bg-linear-to-b from-slate-800 to-slate-900">
         {/* Door Frame */}
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.div
@@ -262,7 +262,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleStartDialog}
-            className="w-full py-4 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold rounded-xl uppercase tracking-wider shadow-lg shadow-yellow-900/30 transition-all"
+            className="w-full py-4 bg-linear-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 active:from-yellow-700 active:to-orange-700 text-white font-bold rounded-xl uppercase tracking-wider shadow-lg shadow-yellow-900/30 transition-all"
           >
             Herein!
           </motion.button>
@@ -482,7 +482,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
                       placeholder="Erkläre, was du darüber weißt..."
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
+                      onKeyDown={handleKeyDown}
                     />
                     <motion.button
                       whileHover={{ scale: 1.05 }}

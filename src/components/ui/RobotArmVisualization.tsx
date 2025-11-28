@@ -73,7 +73,7 @@ export const RobotArmVisualization: React.FC<RobotArmVisualizationProps> = ({
 
       {/* Main Scene */}
       <div className="flex items-center justify-center h-64 relative">
-        
+
         {/* GRID Background */}
         <div className="absolute inset-0 opacity-10 pointer-events-none">
            <div className="absolute inset-0" style={{
@@ -83,7 +83,7 @@ export const RobotArmVisualization: React.FC<RobotArmVisualizationProps> = ({
         </div>
 
         {/* ROBOT BASE (Common) */}
-        <div className="relative z-10 mr-32">
+        <div className="relative z-10 mr-8 sm:mr-16 md:mr-24 lg:mr-32">
            {/* Base Stand */}
            <div className={`w-16 h-24 border-2 rounded-sm relative transition-colors duration-500 ${
              !isSafeMass ? 'bg-red-900/30 border-red-500' : 'bg-slate-800 border-slate-600'
