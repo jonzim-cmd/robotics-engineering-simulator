@@ -197,11 +197,6 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
 
               {/* Door handle */}
               <div className="absolute right-8 top-1/2 -translate-y-1/2 w-12 h-3 bg-slate-500 rounded-full shadow-lg"></div>
-
-              {/* Door sign */}
-              <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-slate-600 px-4 py-2 rounded border border-slate-500 shadow-lg">
-                <div className="text-xs text-slate-300 font-mono">BÜRO</div>
-              </div>
             </div>
 
             {/* Knock sound waves */}
@@ -232,7 +227,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
           }}
           className="absolute top-1/4 left-1/2 -translate-x-1/2 text-4xl"
         >
-          🚪 knock knock
+          🚪 Klopf Klopf
         </motion.div>
 
         {/* Visitor info card */}
