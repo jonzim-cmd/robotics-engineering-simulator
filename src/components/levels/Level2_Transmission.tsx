@@ -12,10 +12,17 @@ import { ReflectionCall } from '@/components/ui/ReflectionCall';
 import { motion } from 'framer-motion';
 
 const Level2_Transmission: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setCredits } = useGameStore();
+  const {
+    advanceLevel,
+    setLevelState,
+    levelState,
+    pushStateHistory,
+    popStateHistory,
+    setCredits,
+    subStep,
+    setSubStep
+  } = useGameStore();
   const [showText, setShowText] = useState(false);
-  const [showResearchIntro, setShowResearchIntro] = useState(false);
-  const [showSmartphoneResearch, setShowSmartphoneResearch] = useState(false);
 
   // Set initial credits when level starts
   useEffect(() => {
@@ -28,24 +35,21 @@ const Level2_Transmission: React.FC = () => {
     popStateHistory();
     // Reset local state
     setShowText(false);
-    setShowResearchIntro(false);
-    setShowSmartphoneResearch(false);
   };
 
   const handleStart = () => {
-    setShowResearchIntro(true);
+    setSubStep(1);
   };
 
   const handleResearchIntroComplete = () => {
-    setShowResearchIntro(false);
-    setShowSmartphoneResearch(true);
+    setSubStep(2);
   };
 
   const handleResearchComplete = () => {
-    setShowSmartphoneResearch(false);
     // Save state before advancing
     pushStateHistory();
     setLevelState('ACTIVE');
+    setSubStep(0);
   };
 
   const handleShowText = () => {
@@ -128,7 +132,7 @@ const Level2_Transmission: React.FC = () => {
         </TerminalCard>
 
         {/* Research Intro */}
-        {showResearchIntro && (
+        {subStep === 1 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -175,7 +179,7 @@ const Level2_Transmission: React.FC = () => {
         )}
 
         {/* Smartphone Research */}
-        {showSmartphoneResearch && (
+        {subStep === 2 && (
           <SmartphoneResearch
             searchQuery="Getriebe Drehmoment"
             browserTitle="Suche - Getriebe"
@@ -267,7 +271,11 @@ Das Getriebe musste so eingestellt werden, dass genug Drehmoment am Rad ankommt,
 
 Eine größere Übersetzung bedeutet mehr Kraft, aber weniger Geschwindigkeit. Sie haben den Sweet Spot gefunden, wo beides ausreichend ist. Genau so funktioniert es!"
         continueButtonText="Nächstes Level"
-        onComplete={() => advanceLevel(true)}
+        onBack={() => {
+          setLevelState('ACTIVE');
+          setSubStep(0);
+        }}
+        onComplete={() => advanceLevel()}
       />
     );
   }

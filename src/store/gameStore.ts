@@ -8,6 +8,7 @@ interface StateHistoryEntry {
   currentLevel: number;
   levelState: LevelState;
   credits: number;
+  subStep: number;
 }
 
 interface GameState {
@@ -16,12 +17,14 @@ interface GameState {
   levelState: LevelState;
   userName: string;
   skipAnimations: boolean;
+  subStep: number;
   stateHistory: StateHistoryEntry[];
   setLevel: (level: number) => void;
   setCredits: (credits: number) => void;
   addCredits: (amount: number) => void;
   removeCredits: (amount: number) => void;
   setLevelState: (state: LevelState) => void;
+  setSubStep: (step: number) => void;
   pushStateHistory: () => void;
   popStateHistory: () => boolean; // Returns true if pop was successful
   clearStateHistory: () => void;
@@ -38,19 +41,22 @@ export const useGameStore = create<GameState>((set, get) => ({
   levelState: 'INTRO',
   userName: '',
   skipAnimations: false,
+  subStep: 0,
   stateHistory: [],
 
-  setLevel: (level) => set({ currentLevel: level, levelState: 'INTRO', skipAnimations: false, stateHistory: [] }),
+  setLevel: (level) => set({ currentLevel: level, levelState: 'INTRO', skipAnimations: false, subStep: 0, stateHistory: [] }),
   setCredits: (credits) => set({ credits }),
   addCredits: (amount) => set((state) => ({ credits: state.credits + amount })),
   removeCredits: (amount) => set((state) => ({ credits: Math.max(0, state.credits - amount) })),
   setLevelState: (state) => set({ levelState: state }),
+  setSubStep: (step) => set({ subStep: step }),
 
   pushStateHistory: () => set((state) => {
     const newEntry: StateHistoryEntry = {
       currentLevel: state.currentLevel,
       levelState: state.levelState,
       credits: state.credits,
+      subStep: state.subStep,
     };
 
     let newHistory = [...state.stateHistory, newEntry];
@@ -77,6 +83,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentLevel: previousState.currentLevel,
       levelState: previousState.levelState,
       credits: previousState.credits,
+      subStep: previousState.subStep,
     });
 
     return true; // Pop was successful
@@ -92,7 +99,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((state) => ({
       currentLevel: state.currentLevel + 1,
       levelState: 'INTRO',
-      skipAnimations: false
+      skipAnimations: false,
+      subStep: 0
       // DO NOT clear stateHistory - this is the key to global history!
     }));
   },
@@ -105,7 +113,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       set((state) => ({
         currentLevel: Math.max(0, state.currentLevel - 1),
         levelState: 'INTRO',
-        skipAnimations: false
+        skipAnimations: false,
+        subStep: 0
       }));
     }
   },
@@ -113,7 +122,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   returnToDashboard: () => {
     // Save state before returning to dashboard
     get().pushStateHistory();
-    set({ currentLevel: 0, levelState: 'INTRO', skipAnimations: true });
+    set({ currentLevel: 0, levelState: 'INTRO', skipAnimations: true, subStep: 0 });
   },
 
   setUserName: (name) => set({ userName: name }),

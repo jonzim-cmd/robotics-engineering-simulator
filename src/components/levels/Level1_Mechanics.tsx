@@ -22,6 +22,8 @@ const Level1_Mechanics: React.FC = () => {
     removeCredits,
     pushStateHistory,
     popStateHistory,
+    subStep,
+    setSubStep,
   } = useGameStore();
 
   // Input states
@@ -40,18 +42,16 @@ const Level1_Mechanics: React.FC = () => {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showText, setShowText] = useState(false);
-  const [showReflection, setShowReflection] = useState(false);
-  const [showIntroReflection, setShowIntroReflection] = useState(false);
 
   const handleStart = () => {
-    setShowIntroReflection(true);
+    setSubStep(1);
   };
 
   const startLevelReal = () => {
-    setShowIntroReflection(false);
     // Save current state before advancing
     pushStateHistory();
     setLevelState('ACTIVE');
+    setSubStep(0);
   };
 
   const handleBack = () => {
@@ -94,6 +94,7 @@ const Level1_Mechanics: React.FC = () => {
     pushStateHistory();
 
     setSimulating(true);
+    setSubStep(0);
     setErrorMsg(null);
     setSimulationResult(null); // Reset previous result
 
@@ -124,16 +125,19 @@ const Level1_Mechanics: React.FC = () => {
           `WARNUNG: Der Arm ist zu schwer (${result.mass.toFixed(0)}g statt max. 1000g). Die Motoren werden durchbrennen! (Dichte zu hoch)`
         );
         setLevelState('FAIL');
+        setSubStep(0);
       } else if (result.status === 'FAIL_DEFLECTION') {
         setErrorMsg(
           `WARNUNG: Das Material verbiegt sich zu sehr (${result.deflection.toFixed(2)}mm statt max. 2.00mm). Strukturversagen droht! (E-Modul zu niedrig)`
         );
         setLevelState('FAIL');
+        setSubStep(0);
       } else if (materialCost > credits) {
         setErrorMsg(
           `WARNUNG: Budget überschritten! Das Material kostet ${materialCost} CR, du hast nur ${credits} CR. Wähle ein günstigeres Material.`
         );
         setLevelState('FAIL');
+        setSubStep(0);
       } else {
         // Deduct credits on success
         removeCredits(materialCost);
@@ -141,6 +145,7 @@ const Level1_Mechanics: React.FC = () => {
           `ERFOLG: Der Arm ist leicht genug (${result.mass.toFixed(0)}g) und stabil (${result.deflection.toFixed(2)}mm Durchbiegung). Konfiguration genehmigt! (Kosten: ${materialCost} CR)`
         );
         setLevelState('SUCCESS');
+        setSubStep(1);
       }
 
       setSimulating(false);
@@ -213,8 +218,9 @@ const Level1_Mechanics: React.FC = () => {
         </TerminalCard>
 
         {/* Intro Reflection Dialog */}
-        {showIntroReflection && (
+        {subStep === 1 && (
           <ReflectionDialog
+            introType="hallway"
             title="DIALOG AUF DEM FLUR"
             contextDescription="Du und ein Mitarbeiter sind auf dem Weg zum Prüflabor, um ein geeignetes Material für den neuen Roboterarm auszuwählen. Auf dem Weg dorthin fragt er dich:"
             senderName="Mitarbeiter Yazid"
@@ -230,6 +236,7 @@ Ich verstehe das nicht. Was meint er damit genau? Warum sollten die Motoren durc
 Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie stark erhitzt. Wenn sie zu heiß werden, kann die Isolierung der Drähte im Motor schmelzen und der Motor wird beschädigt bzw. "brennt durch".`}
 
             continueButtonText="Weiter zum Labor"
+            onBack={() => setSubStep(0)}
             onComplete={startLevelReal}
           />
         )}
@@ -240,6 +247,19 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
   // Define state flags
   const isSuccess = levelState === 'SUCCESS';
   const isFail = levelState === 'FAIL';
+  const showSuccessOverlay = isSuccess;
+  const showOutroReflection = isSuccess && subStep === 2;
+  const parsedDensity = parseFloat(inputDensity.replace(',', '.'));
+  const parsedStiffness = parseFloat(inputStiffness.replace(',', '.'));
+  const matchedMaterial = !Number.isNaN(parsedDensity) && !Number.isNaN(parsedStiffness)
+    ? Object.values(MATERIALS).find(
+        (m) => Math.abs(m.density - parsedDensity) < 0.1 && Math.abs(m.stiffness - parsedStiffness) < 5
+      )
+    : null;
+  const massDisplay = simulationResult ? `${simulationResult.mass.toFixed(0)}g` : '—';
+  const deflectionDisplay = simulationResult ? `${simulationResult.deflection.toFixed(2)}mm` : '—';
+  const costDisplay = matchedMaterial ? `${matchedMaterial.cost} CR` : '—';
+  const materialNameDisplay = matchedMaterial?.name ?? 'Carbon Fiber';
 
   return (
     <div className="space-y-6">
@@ -398,7 +418,7 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
       </TerminalCard>
 
       {/* SUCCESS Overlay */}
-      {isSuccess && simulationResult && (
+      {showSuccessOverlay && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -427,29 +447,29 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
                   
                   <div className="grid grid-cols-2 gap-y-3">
                     <div className="text-slate-400">Material:</div>
-                    <div className="text-green-400 font-bold text-right">Carbon Fiber</div>
+                    <div className="text-green-400 font-bold text-right">{materialNameDisplay}</div>
                     
                     <div className="text-slate-400">Masse:</div>
                     <div className="text-right">
-                      <span className="text-green-400 font-bold">{simulationResult.mass.toFixed(0)}g</span>
+                      <span className="text-green-400 font-bold">{massDisplay}</span>
                       <span className="text-slate-600 text-xs ml-1">/ 1000g</span>
                     </div>
                     
                     <div className="text-slate-400">Biegung:</div>
                     <div className="text-right">
-                      <span className="text-green-400 font-bold">{simulationResult.deflection.toFixed(2)}mm</span>
+                      <span className="text-green-400 font-bold">{deflectionDisplay}</span>
                       <span className="text-slate-600 text-xs ml-1">/ 2.00mm</span>
                     </div>
 
                     <div className="text-slate-400 pt-2 border-t border-slate-800 mt-2">Kosten:</div>
                     <div className="text-yellow-400 font-bold text-right pt-2 border-t border-slate-800 mt-2">
-                      {Object.values(MATERIALS).find(m => Math.abs(m.density - parseFloat(inputDensity)) < 0.1)?.cost} CR
+                      {costDisplay}
                     </div>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => setShowReflection(true)}
+                  onClick={() => setSubStep(2)}
                   className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(22,163,74,0.4)] hover:shadow-[0_0_30px_rgba(22,163,74,0.6)]"
                 >
                   Nächstes Level Initialisieren
@@ -461,7 +481,7 @@ Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie
       )}
 
       {/* Reflection Chat Overlay */}
-      {showReflection && (
+      {showOutroReflection && (
         <ReflectionChat
           senderName="Chefin Bazlin"
           senderTitle="Head of Engineering"
@@ -480,7 +500,8 @@ Carbon (Kohlefaser) hat zwei entscheidende Vorteile:
 2. Es ist extrem steif (hoher E-Modul), wodurch sich der Arm auch bei Belastung kaum verbiegt und sehr präzise bleibt.
 
 Die höheren Kosten lohnen sich durch die bessere Performance und Langlebigkeit.`}
-          onComplete={() => advanceLevel(true)}
+          onBack={() => setSubStep(1)}
+          onComplete={() => advanceLevel()}
         />
       )}
     </div>

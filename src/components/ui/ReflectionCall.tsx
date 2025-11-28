@@ -15,6 +15,7 @@ interface ReflectionCallProps {
 
   // Callbacks
   onComplete: () => void;
+  onBack?: () => void;
 
   // Optional customization
   continueButtonText?: string;
@@ -27,6 +28,7 @@ export const ReflectionCall: React.FC<ReflectionCallProps> = ({
   question,
   correctAnswer,
   onComplete,
+  onBack,
   continueButtonText = 'Weiter'
 }) => {
   const [callAccepted, setCallAccepted] = useState(false);
@@ -74,6 +76,15 @@ export const ReflectionCall: React.FC<ReflectionCallProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute left-4 top-4 text-sm text-slate-300 hover:text-white bg-slate-800/70 border border-slate-700 px-3 py-2 rounded flex items-center gap-2 transition-colors"
+        >
+          <span className="text-lg">←</span>
+          Zurück
+        </button>
+      )}
       <AnimatePresence mode="wait">
         {!callAccepted ? (
           <motion.div

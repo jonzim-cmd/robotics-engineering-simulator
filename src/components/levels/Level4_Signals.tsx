@@ -8,7 +8,7 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { motion } from 'framer-motion';
 
 const Level4_Signals: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory } = useGameStore();
+  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep } = useGameStore();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [result, setResult] = useState<{ correct: boolean; msg: string; count: number } | null>(null);
@@ -26,18 +26,23 @@ const Level4_Signals: React.FC = () => {
     // Save state before advancing
     pushStateHistory();
     setLevelState('ACTIVE');
+    setSubStep(0);
   };
 
   const handleSimulate = () => {
     if (!selectedOption) return;
     setSimulating(true);
     setResult(null);
+    setSubStep(0);
 
     setTimeout(() => {
       // Simulation logic
       if (selectedOption === 'wait50') {
         setResult({ correct: true, msg: "Signal stabil! Das Prellen wird ignoriert.", count: 1 });
-        setTimeout(() => setLevelState('SUCCESS'), 1500);
+        setTimeout(() => {
+          setSubStep(1);
+          setLevelState('SUCCESS');
+        }, 1500);
       } else if (selectedOption === 'wait1') {
         setResult({ correct: false, msg: "FEHLER: Wartezeit zu kurz. Prellen wird als neue Kiste erkannt.", count: 5 });
       } else {
@@ -86,7 +91,7 @@ const Level4_Signals: React.FC = () => {
           <div className="text-green-400 text-4xl mb-4">✓ SIGNAL SAUBER</div>
           <p>Der Zähler arbeitet präzise. Entprellung erfolgreich implementiert.</p>
           <button 
-            onClick={() => advanceLevel(true)}
+            onClick={() => advanceLevel()}
             className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
           >
             Nächstes Level

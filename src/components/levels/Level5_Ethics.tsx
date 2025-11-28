@@ -16,15 +16,17 @@ const Level5_Ethics: React.FC = () => {
     levelState,
     pushStateHistory,
     popStateHistory,
+    subStep,
+    setSubStep,
   } = useGameStore();
-  const [step, setStep] = useState<'DIAGNOSIS' | 'REPAIR' | 'LOCKDOWN' | 'DECISION'>('DIAGNOSIS');
   const [hacking, setHacking] = useState(false);
+  const currentStep: 'DIAGNOSIS' | 'REPAIR' | 'LOCKDOWN' | 'DECISION' =
+    subStep === 1 ? 'REPAIR' : subStep === 2 ? 'LOCKDOWN' : subStep === 3 ? 'DECISION' : 'DIAGNOSIS';
 
   const handleBack = () => {
     // Pop from global history
     popStateHistory();
     // Reset local state
-    setStep('DIAGNOSIS');
     setHacking(false);
   };
 
@@ -32,20 +34,22 @@ const Level5_Ethics: React.FC = () => {
     // Save state before advancing
     pushStateHistory();
     setLevelState('ACTIVE');
+    setSubStep(0);
   };
 
   const handleRepair = () => {
     // Save state before deducting credits (for proper back navigation)
     pushStateHistory();
     removeCredits(5);
-    setStep('REPAIR');
+    setSubStep(1);
     setTimeout(() => {
-       setStep('LOCKDOWN');
+       setSubStep(2);
     }, 2000);
   };
 
   const handleHack = () => {
     setHacking(true);
+    setSubStep(3);
     setTimeout(() => {
       setLevelState('SUCCESS'); // The "End" of this prototype
     }, 3000);
@@ -102,11 +106,11 @@ const Level5_Ethics: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <TerminalCard title="LEVEL 5: ETHIK & RECHT AUF REPARATUR" borderColor={step === 'LOCKDOWN' ? 'red' : 'cyan'} onBack={handleBack}>
+      <TerminalCard title="LEVEL 5: ETHIK & RECHT AUF REPARATUR" borderColor={currentStep === 'LOCKDOWN' ? 'red' : 'cyan'} onBack={handleBack}>
         
         <AnimatePresence mode="wait">
           
-          {step === 'DIAGNOSIS' && (
+          {currentStep === 'DIAGNOSIS' && (
             <motion.div 
                key="diag"
                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -126,7 +130,7 @@ const Level5_Ethics: React.FC = () => {
             </motion.div>
           )}
 
-          {step === 'REPAIR' && (
+          {currentStep === 'REPAIR' && (
             <motion.div 
                key="repair"
                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -142,7 +146,7 @@ const Level5_Ethics: React.FC = () => {
             </motion.div>
           )}
 
-          {(step === 'LOCKDOWN' || step === 'DECISION') && (
+          {(currentStep === 'LOCKDOWN' || currentStep === 'DECISION') && (
              <motion.div 
                key="lockdown"
                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}

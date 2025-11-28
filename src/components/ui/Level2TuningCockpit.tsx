@@ -106,7 +106,7 @@ const Gauge: React.FC<{
 };
 // --- Main Component ---
 export const Level2TuningCockpit: React.FC = () => {
-  const { credits, setCredits, setLevelState } = useGameStore();
+  const { credits, setCredits, setLevelState, setSubStep } = useGameStore();
   
   // States
   const [gearRatio, setGearRatio] = useState<number>(8.0);
@@ -147,7 +147,10 @@ export const Level2TuningCockpit: React.FC = () => {
       setIsTestRunning(false);
 
       if (result.testResult === 'SUCCESS') {
-        setTimeout(() => setLevelState('SUCCESS'), 2000);
+        setTimeout(() => {
+          setSubStep(1);
+          setLevelState('SUCCESS');
+        }, 2000);
       }
     }, 1500);
   };

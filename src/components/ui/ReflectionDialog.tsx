@@ -17,11 +17,13 @@ interface ReflectionDialogProps {
 
   // Callbacks
   onComplete: () => void;
+  onBack?: () => void;
 
   // Optional customization
   title?: string;
   contextDescription?: string;
   continueButtonText?: string;
+  introType?: 'hallway' | 'door-knock' | 'none';
 }
 
 export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
@@ -35,8 +37,11 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   onComplete,
   title = 'DIALOG',
   contextDescription,
-  continueButtonText = 'Weiter'
+  continueButtonText = 'Weiter',
+  onBack,
+  introType = 'none'
 }) => {
+  const [showIntro, setShowIntro] = useState(introType !== 'none');
   const [input, setInput] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
@@ -67,9 +72,224 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
     }
   };
 
+  const handleStartDialog = () => {
+    setShowIntro(false);
+  };
+
+  // Hallway Encounter Intro
+  const renderHallwayIntro = () => (
+    <motion.div
+      key="hallway-intro"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="max-w-4xl w-full h-[70vh] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative"
+    >
+      {/* Header */}
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 shrink-0">
+        <h3 className="text-xl font-bold text-white text-center">Gespräch auf dem Flur</h3>
+      </div>
+
+      {/* Hallway Background */}
+      <div className="flex-1 relative overflow-hidden bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950">
+        {/* Floor */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-slate-950 to-transparent">
+          <div className="absolute inset-0 opacity-20" style={{
+            backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,255,255,0.03) 50px, rgba(255,255,255,0.03) 100px)'
+          }}></div>
+        </div>
+
+        {/* Walls with perspective */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute left-0 top-0 bottom-1/3 w-1/4 bg-gradient-to-r from-slate-700 to-transparent"></div>
+          <div className="absolute right-0 top-0 bottom-1/3 w-1/4 bg-gradient-to-l from-slate-700 to-transparent"></div>
+        </div>
+
+        {/* Characters */}
+        <div className="absolute inset-0 flex items-center justify-between px-12 md:px-20">
+          {/* Sender walking in from left */}
+          <motion.div
+            initial={{ x: -300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="flex flex-col items-center gap-3"
+          >
+            <div className="text-6xl md:text-8xl filter drop-shadow-2xl">
+              {senderAvatar}
+            </div>
+            <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-lg px-4 py-2 text-center">
+              <div className="font-bold text-yellow-400 text-sm md:text-base">{senderName}</div>
+              <div className="text-xs text-slate-400">{senderTitle}</div>
+            </div>
+          </motion.div>
+
+          {/* Recipient (you) standing on right */}
+          <motion.div
+            initial={{ opacity: 0.3 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-col items-center gap-3"
+          >
+            <div className="text-6xl md:text-8xl filter drop-shadow-2xl">
+              {recipientAvatar}
+            </div>
+            <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-lg px-4 py-2 text-center">
+              <div className="font-bold text-cyan-400 text-sm md:text-base">{recipientName}</div>
+              <div className="text-xs text-slate-400">Das bist du</div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Interaction Prompt */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.8 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md px-4"
+        >
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleStartDialog}
+            className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl uppercase tracking-wider shadow-lg shadow-cyan-900/30 transition-all"
+          >
+            Gespräch beginnen
+          </motion.button>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+
+  // Door Knock Intro
+  const renderDoorKnockIntro = () => (
+    <motion.div
+      key="door-intro"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="max-w-3xl w-full h-[70vh] bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col relative"
+    >
+      {/* Header */}
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 px-6 py-4 shrink-0">
+        <h3 className="text-xl font-bold text-white text-center">Besuch im Büro</h3>
+      </div>
+
+      {/* Door View */}
+      <div className="flex-1 relative overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900">
+        {/* Door Frame */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            animate={{
+              x: [0, -3, 3, -3, 3, 0],
+            }}
+            transition={{
+              duration: 0.5,
+              repeat: Infinity,
+              repeatDelay: 1.5
+            }}
+            className="relative w-[60%] h-[80%] max-w-md"
+          >
+            {/* Door */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 rounded-lg shadow-2xl border-4 border-slate-600">
+              {/* Door panels */}
+              <div className="absolute inset-6 border-2 border-slate-600/50 rounded"></div>
+              <div className="absolute inset-6 top-1/2 border-t-2 border-slate-600/50"></div>
+
+              {/* Door handle */}
+              <div className="absolute right-8 top-1/2 -translate-y-1/2 w-12 h-3 bg-slate-500 rounded-full shadow-lg"></div>
+
+              {/* Door sign */}
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-slate-600 px-4 py-2 rounded border border-slate-500 shadow-lg">
+                <div className="text-xs text-slate-300 font-mono">BÜRO</div>
+              </div>
+            </div>
+
+            {/* Knock sound waves */}
+            <motion.div
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0, 0.6, 0]
+              }}
+              transition={{
+                duration: 0.8,
+                repeat: Infinity,
+                repeatDelay: 1.2
+              }}
+              className="absolute -right-12 top-1/2 -translate-y-1/2 w-24 h-24 border-4 border-yellow-500/50 rounded-full"
+            />
+          </motion.div>
+        </div>
+
+        {/* Knock text */}
+        <motion.div
+          animate={{
+            opacity: [0, 1, 1, 0]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            times: [0, 0.1, 0.9, 1]
+          }}
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 text-4xl"
+        >
+          🚪 knock knock
+        </motion.div>
+
+        {/* Visitor info card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-xl p-4 shadow-xl"
+        >
+          <div className="flex items-center gap-3">
+            <div className="text-4xl">{senderAvatar}</div>
+            <div>
+              <div className="font-bold text-yellow-400">{senderName}</div>
+              <div className="text-xs text-slate-400">{senderTitle}</div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Interaction Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md px-4"
+        >
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleStartDialog}
+            className="w-full py-4 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold rounded-xl uppercase tracking-wider shadow-lg shadow-yellow-900/30 transition-all"
+          >
+            Herein!
+          </motion.button>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-3 md:p-4">
-      <motion.div
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute left-4 top-4 text-sm text-slate-300 hover:text-white bg-slate-800/70 border border-slate-700 px-3 py-2 rounded flex items-center gap-2 transition-colors z-50"
+        >
+          <span className="text-lg">←</span>
+          Zurück
+        </button>
+      )}
+
+      <AnimatePresence mode="wait">
+        {showIntro ? (
+          introType === 'hallway' ? renderHallwayIntro() :
+          introType === 'door-knock' ? renderDoorKnockIntro() : null
+        ) : (
+          <motion.div
+            key="dialog"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 25 }}
@@ -303,6 +523,8 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
           </div>
         </div>
       </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
@@ -9,7 +9,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceL
 import { motion } from 'framer-motion';
 
 const Level3_Electronics: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory } = useGameStore();
+  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep } = useGameStore();
   const [batteryType, setBatteryType] = useState<'cheap' | 'performance' | null>(null);
   const [capacitorAdded, setCapacitorAdded] = useState(false);
   const [simulating, setSimulating] = useState(false);
@@ -31,6 +31,7 @@ const Level3_Electronics: React.FC = () => {
     // Save state before advancing
     pushStateHistory();
     setLevelState('ACTIVE');
+    setSubStep(0);
   };
 
   const generateData = () => {
@@ -86,8 +87,12 @@ const Level3_Electronics: React.FC = () => {
       if (minV < 5.0) {
         setErrorMsg(`CRITICAL ALERT: Voltage Low (${minV.toFixed(2)}V). CPU Reset triggered. Brownout detected.`);
         setTimeout(() => setLevelState('FAIL'), 2000);
+        setSubStep(0);
       } else {
-        setTimeout(() => setLevelState('SUCCESS'), 1000);
+        setTimeout(() => {
+          setSubStep(1);
+          setLevelState('SUCCESS');
+        }, 1000);
       }
       setSimulating(false);
     }, 1000);
@@ -132,7 +137,7 @@ const Level3_Electronics: React.FC = () => {
           <div className="text-green-400 text-4xl mb-4">✓ SPANNUNG STABIL</div>
           <p>Keine Brownouts detektiert. CPU läuft durchgehend stabil.</p>
           <button 
-            onClick={() => advanceLevel(true)}
+            onClick={() => advanceLevel()}
             className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
           >
             Nächstes Level
