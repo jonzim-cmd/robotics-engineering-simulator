@@ -71,9 +71,13 @@ export default function AdminPage() {
     setIsCreating(false);
   };
 
+  // Filter reflection-like events (all reflection UI variants)
+  const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG']);
+
   // Filter reflections only
   const getReflectionsForUser = (userId: number) => {
-    return progress.filter(p => p.user_id === userId && p.event_type === 'REFLECTION')
+    return progress
+      .filter((p) => p.user_id === userId && reflectionTypes.has(p.event_type))
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   };
 
@@ -224,8 +228,11 @@ export default function AdminPage() {
                     {userReflections.map((ref) => (
                       <div key={ref.id} className="relative">
                         <div className="text-xs text-cyan-500 mb-1 flex justify-between">
-                          <span className="font-bold uppercase flex items-center gap-1">
+                          <span className="font-bold uppercase flex items-center gap-2">
                             <FileText size={12} /> Level {ref.level_id}
+                            <span className="px-2 py-0.5 rounded-full bg-slate-800 text-[10px] tracking-wide text-slate-200 border border-slate-700">
+                              {ref.event_type}
+                            </span>
                           </span>
                           <span className="opacity-50">{new Date(ref.created_at).toLocaleString()}</span>
                         </div>
