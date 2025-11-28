@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useGameStore } from '@/store/gameStore';
+import { trackEvent } from '@/app/actions';
 
 interface ReflectionDialogProps {
   // Dialog participants
@@ -41,6 +43,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   onBack,
   introType = 'none'
 }) => {
+  const { userId, currentLevel } = useGameStore();
   const [showIntro, setShowIntro] = useState(introType !== 'none');
   const [input, setInput] = useState('');
   const [isSent, setIsSent] = useState(false);
@@ -65,9 +68,16 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
     }
   }, [isSent]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim().length > 0) {
       setIsSent(true);
+      if (userId) {
+        await trackEvent(userId, currentLevel, 'REFLECTION_DIALOG', {
+          message: message, // The question/context
+          answer: input,
+          partner: senderName
+        });
+      }
     }
   };
 

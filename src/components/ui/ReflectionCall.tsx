@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useGameStore } from '@/store/gameStore';
+import { trackEvent } from '@/app/actions';
 
 interface ReflectionCallProps {
   // Caller info
@@ -31,6 +33,7 @@ export const ReflectionCall: React.FC<ReflectionCallProps> = ({
   onBack,
   continueButtonText = 'Weiter'
 }) => {
+  const { userId, currentLevel } = useGameStore();
   const [callAccepted, setCallAccepted] = useState(false);
   const [isRinging, setIsRinging] = useState(true);
   const [input, setInput] = useState('');
@@ -61,9 +64,16 @@ export const ReflectionCall: React.FC<ReflectionCallProps> = ({
     setCallAccepted(true);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim().length > 0) {
       setIsSent(true);
+      if (userId) {
+        await trackEvent(userId, currentLevel, 'REFLECTION_CALL', {
+          question,
+          answer: input,
+          caller: callerName
+        });
+      }
     }
   };
 

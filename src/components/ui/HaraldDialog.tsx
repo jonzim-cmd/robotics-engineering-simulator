@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TypewriterText } from './TypewriterText'; // Assuming TypewriterText exists in ui components
 import { useGameStore } from '@/store/gameStore'; // To update credits and level state
+import { trackEvent } from '@/app/actions';
 
 interface HaraldDialogProps {
   onApproved: (cost: number) => void;
@@ -47,6 +48,7 @@ Also: Hier ist das Formular. 12 Seiten. Bitte überall unterschreiben. Und schre
 Ja… dann sehen wir weiter. Vielleicht.`;
 
 export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel, totalCost }) => {
+  const { userId } = useGameStore();
   const [phase, setPhase] = useState<'monologue' | 'form' | 'approval'>('monologue');
   const [showFullMonologue, setShowFullMonologue] = useState(false);
   const [rightArrowPresses, setRightArrowPresses] = useState(0);
@@ -84,7 +86,16 @@ export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel
     setMonologueComplete(true);
   };
 
-  const handleSubmitForm = () => {
+  const handleSubmitForm = async () => {
+    if (userId) {
+      await trackEvent(userId, 2, 'HARALD_FORM_SUBMIT', {
+        totalCost,
+        userName,
+        justification,
+        date: currentDate
+      });
+    }
+
     setPhase('approval');
     setTimeout(() => {
       onApproved(totalCost); // Pass totalCost back to deduct

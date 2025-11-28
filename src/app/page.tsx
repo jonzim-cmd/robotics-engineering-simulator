@@ -10,6 +10,9 @@ import Level4_Electronics from '@/components/levels/Level4_Electronics';
 import Level5_Signals from '@/components/levels/Level5_Signals';
 import Level6_Ethics from '@/components/levels/Level6_Ethics';
 import Level0_Intro from '@/components/levels/Level0_Intro';
+import { Lock } from 'lucide-react';
+import Link from 'next/link';
+import { GameTracker } from '@/components/GameTracker';
 
 export default function Home() {
   const { currentLevel, credits } = useGameStore();
@@ -34,6 +37,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-4 max-w-4xl space-y-6">
+      <GameTracker />
       <header className="flex justify-between items-end border-b border-slate-800 pb-4 mb-6">
         <div>
           <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -55,8 +59,11 @@ export default function Home() {
         {renderLevel()}
       </main>
       
-      <footer className="text-center text-slate-700 text-xs mt-12 font-mono">
-        ARES CORP. SYSTEM TERMINAL // UNAUTHORIZED ACCESS PROHIBITED
+      <footer className="text-center text-slate-700 text-xs mt-12 font-mono flex justify-center items-center gap-2">
+        <span>ARES CORP. SYSTEM TERMINAL // UNAUTHORIZED ACCESS PROHIBITED</span>
+        <Link href="/admin" className="opacity-10 hover:opacity-50 transition-opacity">
+          <Lock size={12} />
+        </Link>
       </footer>
     </div>
   );

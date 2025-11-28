@@ -39,11 +39,14 @@ Wir nutzen Next.js Server Actions für die Kommunikation zwischen Client und Dat
 
 ## 3. Frontend: User Login
 
-*   **Ort:** `src/components/levels/Level0_Intro.tsx` oder ein neuer Wrapper in `src/app/page.tsx`.
+*   **Ort:** `src/components/levels/Level0_Intro.tsx` oder ein neuer Wrapper.
+*   **UI:**
+    *   Überschrift: **IDENTIFIZIERUNG**
+    *   Label: **BENUTZER-ID / NAME**
 *   **Logik:**
-    *   Prüfen, ob `gameStore.userName` gesetzt ist.
-    *   Wenn nicht -> Eingabefeld anzeigen.
-    *   Nach Eingabe -> `loginUser` Action aufrufen -> `userId` im Store speichern -> Spiel starten.
+    *   Der Nutzer gibt seinen Namen ein.
+    *   **Wichtig:** Der Name muss bereits in der Datenbank existieren (vom Admin angelegt).
+    *   `loginUser` Action prüft Existenz. Falls ja -> Login. Falls nein -> Fehler ("Zugriff verweigert").
 
 ## 4. Frontend: Tracking Integration
 
@@ -58,7 +61,8 @@ Wir müssen an strategischen Stellen Events senden.
 *   **UI:**
     *   **Login State:** Eingabefeld für PIN (Hardcoded: `1111`).
     *   **Dashboard State:**
-        *   Tabelle aller Schüler.
+        *   **Schüler anlegen:** Eingabefeld + Button, um neue gültige Namen zur "Whitelist" hinzuzufügen.
+        *   **Übersicht:** Tabelle aller Schüler.
         *   Akkordeon oder Detail-Ansicht pro Schüler, um deren "Reflections" (Textantworten) zu lesen.
         *   Anzeige des aktuellen Levels.
 

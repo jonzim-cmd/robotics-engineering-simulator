@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useGameStore } from '@/store/gameStore';
+import { trackEvent } from '@/app/actions';
 
 interface ReflectionChatProps {
   senderName: string;
@@ -29,6 +31,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
   continueButtonText = 'Weiter',
   onBack
 }) => {
+  const { userId, currentLevel } = useGameStore();
   const [messageOpened, setMessageOpened] = useState(false);
   const [isVibrating, setIsVibrating] = useState(true);
   const [input, setInput] = useState('');
@@ -63,10 +66,18 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
     setIsVibrating(false);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim().length > 0) {
       setIsSent(true);
       setShowTypingIndicator(true);
+
+      if (userId) {
+        await trackEvent(userId, currentLevel, 'REFLECTION', {
+          question: message,
+          answer: input,
+          sender: senderName
+        });
+      }
     }
   };
 

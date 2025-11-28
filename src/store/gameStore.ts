@@ -16,6 +16,7 @@ interface GameState {
   credits: number;
   levelState: LevelState;
   userName: string;
+  userId: number | null; // Database ID of the user
   skipAnimations: boolean;
   subStep: number;
   stateHistory: StateHistoryEntry[];
@@ -32,6 +33,7 @@ interface GameState {
   previousLevel: () => void; // Deprecated: Use popStateHistory instead
   returnToDashboard: () => void;
   setUserName: (name: string) => void;
+  setUserId: (id: number) => void;
   setSkipAnimations: (skip: boolean) => void;
 }
 
@@ -40,6 +42,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   credits: 50, // Starting credits placeholder
   levelState: 'INTRO',
   userName: '',
+  userId: null,
   skipAnimations: false,
   subStep: 0,
   stateHistory: [],
@@ -126,5 +129,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   setUserName: (name) => set({ userName: name }),
+  setUserId: (id) => set({ userId: id }),
   setSkipAnimations: (skip) => set({ skipAnimations: skip }),
 }));

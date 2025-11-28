@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
+import { loginUser } from '@/app/actions';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Lock } from 'lucide-react';
 
 const Level0_Intro: React.FC = () => {
-  const { advanceLevel, setUserName, userName, credits, skipAnimations, setSkipAnimations } = useGameStore();
+  const { advanceLevel, setUserName, setUserId, userName, credits, skipAnimations, setSkipAnimations } = useGameStore();
   const [bootStep, setBootStep] = useState(0);
   const [inputName, setInputName] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
@@ -54,11 +57,31 @@ const Level0_Intro: React.FC = () => {
     }
   }, [showFinance]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [error, setError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputName.trim()) return;
-    setUserName(inputName);
-    setLoggedIn(true);
+    
+    setIsLoggingIn(true);
+    setError("");
+
+    try {
+      const result = await loginUser(inputName);
+      
+      if (result.success && result.userId) {
+        setUserId(result.userId);
+        setUserName(inputName);
+        setLoggedIn(true);
+      } else {
+        setError(result.error || "Login fehlgeschlagen");
+      }
+    } catch (err) {
+      setError("Verbindungsfehler. Bitte erneut versuchen.");
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   if (!loggedIn) {
@@ -81,16 +104,34 @@ const Level0_Intro: React.FC = () => {
                 className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded focus:border-cyan-500 focus:outline-none font-mono text-center uppercase"
                 placeholder="NAME EINGEBEN..."
                 autoFocus
+                disabled={isLoggingIn}
               />
             </div>
+            
+            {error && (
+              <div className="text-red-400 text-xs text-center bg-red-400/10 p-2 rounded border border-red-400/20">
+                {error}
+              </div>
+            )}
+
             <button 
               type="submit"
-              className="w-full py-3 bg-cyan-700 hover:bg-cyan-600 text-white font-bold rounded uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!inputName.trim()}
+              className="w-full py-3 bg-cyan-700 hover:bg-cyan-600 text-white font-bold rounded uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+              disabled={!inputName.trim() || isLoggingIn}
             >
-              LOGIN
+              {isLoggingIn ? (
+                <span className="animate-pulse">PRÜFE ZUGANG...</span>
+              ) : (
+                "LOGIN"
+              )}
             </button>
           </form>
+          
+          <div className="absolute bottom-4 right-4 opacity-10 hover:opacity-50 transition-opacity">
+             <Link href="/admin">
+               <Lock size={16} className="text-slate-500" />
+             </Link>
+          </div>
         </div>
       </TerminalCard>
     );
