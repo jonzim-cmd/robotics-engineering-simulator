@@ -53,7 +53,7 @@ export const BossModal: React.FC<BossModalProps> = ({ onClose }) => {
             {/* Smartphone Frame */}
             <div className="bg-slate-950 rounded-[3rem] p-4 shadow-2xl border-8 border-slate-800 relative overflow-hidden">
               {/* Screen */}
-              <div className="bg-gradient-to-b from-slate-900 to-slate-800 rounded-[2.5rem] overflow-hidden relative aspect-[9/19]">
+              <div className="bg-linear-to-b from-slate-900 to-slate-800 rounded-[2.5rem] overflow-hidden relative aspect-9/19">
                 {/* Notch */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-950 rounded-b-3xl z-10 flex items-center justify-center gap-2">
                   <div className="w-12 h-1 bg-slate-700 rounded-full"></div>
@@ -61,7 +61,7 @@ export const BossModal: React.FC<BossModalProps> = ({ onClose }) => {
                 </div>
 
                 {/* Call Screen Content */}
-                <div className="relative h-full flex flex-col items-center justify-between py-16 px-6 bg-gradient-to-br from-red-950/40 via-slate-900 to-slate-900">
+                <div className="relative h-full flex flex-col items-center justify-between py-16 px-6 bg-linear-to-br from-red-950/40 via-slate-900 to-slate-900">
                   {/* Caller Info */}
                   <div className="flex-1 flex flex-col items-center justify-center space-y-6">
                     {/* Angry Boss Avatar with pulse */}
@@ -190,7 +190,7 @@ export const BossModal: React.FC<BossModalProps> = ({ onClose }) => {
             {/* Smartphone Frame */}
             <div className="bg-slate-950 rounded-[3rem] p-4 shadow-2xl border-8 border-slate-800 relative overflow-hidden">
               {/* Screen */}
-              <div className="bg-gradient-to-b from-slate-900 to-slate-800 rounded-[2.5rem] overflow-hidden relative aspect-[9/19]">
+              <div className="bg-linear-to-b from-slate-900 to-slate-800 rounded-[2.5rem] overflow-hidden relative aspect-9/19">
                 {/* Notch */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-950 rounded-b-3xl z-10 flex items-center justify-center gap-2">
                   <div className="w-12 h-1 bg-slate-700 rounded-full"></div>
@@ -198,7 +198,7 @@ export const BossModal: React.FC<BossModalProps> = ({ onClose }) => {
                 </div>
 
                 {/* Active Call Content */}
-                <div className="relative h-full flex flex-col py-16 px-6 bg-gradient-to-br from-red-950/40 via-slate-900 to-slate-900 overflow-y-auto">
+                <div className="relative h-full flex flex-col py-16 px-6 bg-linear-to-br from-red-950/40 via-slate-900 to-slate-900 overflow-y-auto">
                   {/* Call Active Header */}
                   <div className="text-center mb-6 space-y-3">
                     <div className="text-6xl mb-2">😡</div>

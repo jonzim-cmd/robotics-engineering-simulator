@@ -11,6 +11,7 @@ import { MaterialCard } from '@/components/ui/MaterialCard';
 import { MATERIALS, calculateArmPhysics } from '@/lib/physicsEngine';
 import { motion } from 'framer-motion';
 import { ReflectionChat } from '@/components/ui/ReflectionChat';
+import { ReflectionDialog } from '@/components/ui/ReflectionDialog';
 
 const Level1_Mechanics: React.FC = () => {
   const {
@@ -211,20 +212,23 @@ const Level1_Mechanics: React.FC = () => {
           </div>
         </TerminalCard>
 
-        {/* Intro Reflection Chat */}
+        {/* Intro Reflection Dialog */}
         {showIntroReflection && (
-          <ReflectionChat
+          <ReflectionDialog
             title="DIALOG AUF DEM FLUR"
             contextDescription="Du und ein Mitarbeiter sind auf dem Weg zum Prüflabor, um ein geeignetes Material für den neuen Roboterarm auszuwählen. Auf dem Weg dorthin fragt er dich:"
-            senderName="Mitarbeiter"
+            senderName="Mitarbeiter Yazid"
             senderTitle="Junior Engineer"
-            avatarIcon="👷"
-            message={`Du, Kollege Arianit meinte, wir sollen aufpassen, dass der neue Roboterarm nicht über 1000 kg wiegt, weil sonst die Motoren durchbrennen.
+            senderAvatar="👷🏾"
+            recipientName="Du"
+            recipientAvatar="👨‍💼"
+            message={`Kollege Arianit meinte, wir sollen aufpassen, dass der neue Roboterarm nicht über 1000 kg wiegt, weil sonst die Stützmotoren des Arms durchbrennen.
 
-Das habe ich nicht verstanden. Was meint er damit? Warum sollten die Motoren durchbrennen?`}
-            correctAnswer={`Wenn der Roboterarm zu schwer ist, benötigen die Motoren sehr viel Kraft (Drehmoment), um ihn zu bewegen.
+Ich verstehe das nicht. Was meint er damit genau? Warum sollten die Motoren durchbrennen, nur weil der Arm schwerer ist?`}
+            correctAnswer={`Ah, jetzt verstehe ich. Wenn der Roboterarm sehr schwer ist, müssen die Motoren viel Kraft (Drehmoment) aufbringen, um ihn zu bewegen oder zu halten.
 
-Dabei fließt sehr viel Strom. Wenn zu viel Strom fließt, werden die Motoren extrem heiß. Wenn sie zu heiß werden, schmilzt die Isolierung der Drähte und der Motor geht kaputt ("brennt durch").`}
+Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie stark erhitzt. Wenn sie zu heiß werden, kann die Isolierung der Drähte im Motor schmelzen und der Motor wird beschädigt bzw. "brennt durch".`}
+
             continueButtonText="Weiter zum Labor"
             onComplete={startLevelReal}
           />
