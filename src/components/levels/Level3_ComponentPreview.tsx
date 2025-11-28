@@ -3,6 +3,20 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
+// Static barrel-shaped roller geometry for mecanum wheels
+const mecanumRollerGeom = (() => {
+  const halfLength = 0.32;
+  const midRadius = 0.16;
+  const endRadius = 0.08;
+  const profile = [
+    new THREE.Vector2(endRadius, -halfLength),
+    new THREE.Vector2(midRadius, -halfLength * 0.3),
+    new THREE.Vector2(midRadius, halfLength * 0.3),
+    new THREE.Vector2(endRadius, halfLength),
+  ];
+  return new THREE.LatheGeometry(profile, 32);
+})();
+
 type ComponentType = 
   // Drives
   | 'wheels' | 'tracks' | 'legs' | 'mecanum' | 'hover'
@@ -201,28 +215,59 @@ const RotatingModel = ({ type }: { type: ComponentType }) => {
       case 'mecanum':
         return (
           <group>
-             {/* Hub - Bright Metal */}
-            <mesh rotation={[0, 0, Math.PI / 2]} material={mat.metalBright}>
-              <cylinderGeometry args={[0.6, 0.6, 0.75, 32]} />
-            </mesh>
-            {/* Side Plates - Dark */}
-            <mesh position={[0, 0, 0.38]} rotation={[0, 0, Math.PI / 2]} material={mat.metalDark}>
-               <cylinderGeometry args={[0.9, 0.9, 0.05, 32]} />
-            </mesh>
-            <mesh position={[0, 0, -0.38]} rotation={[0, 0, Math.PI / 2]} material={mat.metalDark}>
-               <cylinderGeometry args={[0.9, 0.9, 0.05, 32]} />
-            </mesh>
+            {(() => {
+               const radius = 1;
+               const width = 0.55;
+               const rollerCount = 12;
+               const tiltDeg = 45;
+               const rollerMidRadius = 0.16;
+               const rollerOffset = radius - rollerMidRadius; 
+               const hubRadius = radius * 0.65;
+               const plateThickness = 0.05;
+               const tilt = (tiltDeg * Math.PI) / 180;
+               const rollerHalfLen = 0.32;
 
-            {/* Angled Rollers - Rubber with separation */}
-            {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
-               <mesh key={i} 
-                  position={[0.9 * Math.cos(deg * Math.PI/180), 0.9 * Math.sin(deg * Math.PI/180), 0]}
-                  rotation={[Math.PI/4, 0, (deg + 90) * Math.PI/180]}
-                  material={mat.rubber}
-               >
-                  <capsuleGeometry args={[0.15, 0.4, 4, 8]} />
-               </mesh>
-            ))}
+               const rollers = Array.from({ length: rollerCount }).map((_, i) => {
+                  const angle = (i / rollerCount) * Math.PI * 2;
+                  return (
+                     <group key={i} rotation={[angle, 0, 0]}>
+                        <group position={[0, rollerOffset, 0]} rotation={[0, tilt, Math.PI / 2]}>
+                           <mesh
+                              material={mat.rubber}
+                              geometry={mecanumRollerGeom}
+                           />
+                           {/* Roller Mount Discs (Endcaps) */}
+                           <mesh position={[0, rollerHalfLen, 0]} material={mat.metalDark}>
+                              <cylinderGeometry args={[0.08, 0.08, 0.02, 16]} />
+                           </mesh>
+                           <mesh position={[0, -rollerHalfLen, 0]} material={mat.metalDark}>
+                              <cylinderGeometry args={[0.08, 0.08, 0.02, 16]} />
+                           </mesh>
+                        </group>
+                     </group>
+                  );
+               });
+
+               return (
+                  <>
+                     {/* Side Plates (Scheiben) */}
+                     <mesh position={[width / 2, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={mat.metalDark}>
+                        <cylinderGeometry args={[radius * 0.95, radius * 0.95, plateThickness, 40]} />
+                     </mesh>
+                     <mesh position={[-width / 2, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={mat.metalDark}>
+                        <cylinderGeometry args={[radius * 0.95, radius * 0.95, plateThickness, 40]} />
+                     </mesh>
+
+                     {/* Hub */}
+                     <mesh rotation={[0, 0, Math.PI / 2]} material={mat.metalBright}>
+                        <cylinderGeometry args={[hubRadius, hubRadius, width, 32]} />
+                     </mesh>
+
+                     {/* Rollers */}
+                     {rollers}
+                  </>
+               );
+            })()}
           </group>
         );
       case 'hover':

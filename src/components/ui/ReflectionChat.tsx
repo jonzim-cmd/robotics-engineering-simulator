@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ReflectionChatProps {
@@ -35,18 +35,21 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
   const [isSent, setIsSent] = useState(false);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Stop vibration after message is opened
-  useEffect(() => {
-    if (messageOpened) {
-      setIsVibrating(false);
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messageOpened]);
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [isSent, showTypingIndicator, showCorrectAnswer]);
 
   // Simulate typing indicator before showing correct answer
   useEffect(() => {
     if (isSent) {
-      setShowTypingIndicator(true);
       const timer = setTimeout(() => {
         setShowTypingIndicator(false);
         setShowCorrectAnswer(true);
@@ -57,11 +60,13 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
 
   const handleOpenMessage = () => {
     setMessageOpened(true);
+    setIsVibrating(false);
   };
 
   const handleSend = () => {
     if (input.trim().length > 0) {
       setIsSent(true);
+      setShowTypingIndicator(true);
     }
   };
 
@@ -335,6 +340,7 @@ export const ReflectionChat: React.FC<ReflectionChatProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area or Continue Button */}
