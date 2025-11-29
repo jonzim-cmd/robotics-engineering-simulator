@@ -117,9 +117,9 @@ export async function getAdminData(pin: string) {
  * Creates a new student (Admin only).
  */
 export async function createStudent(name: string): Promise<{ success: boolean; error?: string }> {
-  // In a real app, we'd check for an admin session here. 
+  // In a real app, we'd check for an admin session here.
   // Since this is called from the protected Admin page, we assume authorization via the UI flow.
-  
+
   const cleanName = name.trim();
   if (!cleanName) return { success: false, error: 'Name ungültig' };
 
@@ -127,7 +127,7 @@ export async function createStudent(name: string): Promise<{ success: boolean; e
     await sql`
       INSERT INTO users (name) VALUES (${cleanName})
     `;
-    
+
     revalidatePath('/admin'); // Refresh admin data if we were using server components there
     return { success: true };
   } catch (error: any) {
@@ -136,5 +136,23 @@ export async function createStudent(name: string): Promise<{ success: boolean; e
     }
     console.error('Create student error:', error);
     return { success: false, error: 'Datenbankfehler' };
+  }
+}
+
+/**
+ * Deletes a user and all associated progress data (Admin only).
+ * The ON DELETE CASCADE constraint ensures all progress records are automatically deleted.
+ */
+export async function deleteUser(userId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const result = await sql`
+      DELETE FROM users WHERE id = ${userId}
+    `;
+
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error) {
+    console.error('Delete user error:', error);
+    return { success: false, error: 'Fehler beim Löschen des Benutzers' };
   }
 }
