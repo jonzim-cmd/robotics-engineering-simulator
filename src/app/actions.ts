@@ -28,8 +28,8 @@ export type ProgressEvent = {
  */
 export async function loginUser(name: string): Promise<{ success: boolean; userId?: number; error?: string }> {
   try {
-    // Normalize name for comparison (trim spaces, maybe lowercase if desired, strictly keeping case for now based on request)
-    const cleanName = name.trim();
+    // Normalize name: trim and convert to uppercase
+    const cleanName = name.trim().toUpperCase();
 
     if (!cleanName) {
       return { success: false, error: 'Name darf nicht leer sein.' };
@@ -120,7 +120,7 @@ export async function createStudent(name: string): Promise<{ success: boolean; e
   // In a real app, we'd check for an admin session here.
   // Since this is called from the protected Admin page, we assume authorization via the UI flow.
 
-  const cleanName = name.trim();
+  const cleanName = name.trim().toUpperCase();
   if (!cleanName) return { success: false, error: 'Name ungültig' };
 
   try {

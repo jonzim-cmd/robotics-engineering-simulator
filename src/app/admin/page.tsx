@@ -222,14 +222,14 @@ export default function AdminPage() {
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg">
             <h2 className="text-sm font-bold text-slate-400 mb-3 uppercase">Register Student</h2>
             <form onSubmit={handleCreateStudent} className="flex gap-2">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={newStudentName}
                 onChange={(e) => setNewStudentName(e.target.value)}
                 placeholder="Name / ID"
-                className="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none"
+                className="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none uppercase"
               />
-              <button 
+              <button
                 disabled={isCreating || !newStudentName.trim()}
                 className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-2 rounded transition-colors disabled:opacity-50"
               >

@@ -63,16 +63,17 @@ const Level0_Intro: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputName.trim()) return;
-    
+
     setIsLoggingIn(true);
     setError("");
 
     try {
-      const result = await loginUser(inputName);
-      
+      const upperCaseName = inputName.trim().toUpperCase();
+      const result = await loginUser(upperCaseName);
+
       if (result.success && result.userId) {
         setUserId(result.userId);
-        setUserName(inputName);
+        setUserName(upperCaseName);
         setLoggedIn(true);
       } else {
         setError(result.error || "Login fehlgeschlagen");
