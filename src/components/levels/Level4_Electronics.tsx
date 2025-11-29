@@ -353,27 +353,14 @@ const Level4_Electronics: React.FC = () => {
               >
                 <strong className="text-red-400 block mb-2">WAS IST PASSIERT?</strong>
                 <p className="mb-2">
-                  Als der Präzisionsmotor startete, brach die Spannung zusammen. Der{" "}
-                  <GlossaryTooltip 
-                    term="Anlaufstrom" 
-                    definition="Der hohe Strombedarf beim Motorstart – oft 5-10x höher als im Normalbetrieb."
-                  />{" "}
-                  war so hoch, dass die CPU einen{" "}
-                  <GlossaryTooltip 
-                    term="Brownout" 
-                    definition="Kurzzeitiger Spannungsabfall, der Computer zum Neustart zwingt."
-                  />{" "}
-                  erlitt und neu startete. Der Greifer verlor dabei seine Kontrolle.
+                  Als der Präzisionsmotor gestartet ist, um die exakte Entladeposition des Containers zu bestimmen, ist die elektrische Spannung eingebrochen. Der Motor hat beim Start so viel Strom gebraucht, dass die Steuereinheit kurz „ohnmächtig“ wurde und neu gestartet hat. Dadurch hat der Greifer die Kontrolle verloren. Dummerweise war zu diesem Zeitpunkt Chefin Bazlens Hund direkt darunter.
                 </p>
 
                 <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
                 <p>
-                  Analysiere das Energiesystem und finde eine Konfiguration, die auch bei hohem{" "}
-                  <GlossaryTooltip 
-                    term="Anlaufstrom" 
-                    definition="Der hohe Strombedarf beim Motorstart – oft 5-10x höher als im Normalbetrieb."
-                  />{" "}
-                  stabil bleibt. Die CPU braucht mindestens <span className="text-cyan-400 font-bold">5 Volt</span>.
+                  Untersuche die Stromversorgung und finde eine Einstellung, bei der die Spannung auch wenn der Motor startet nicht einbricht.
+
+Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens 5 Volt. <span className="text-cyan-400 font-bold">5 Volt</span>.
                 </p>
               </motion.div>
             )}
