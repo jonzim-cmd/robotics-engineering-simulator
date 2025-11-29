@@ -9,7 +9,7 @@ import { BrownoutVisualization } from '@/components/ui/BrownoutVisualization';
 import { EnergyFlowDiagram } from '@/components/ui/EnergyFlowDiagram';
 import { CircuitConfigurator } from '@/components/ui/CircuitConfigurator';
 import { YoutubeResearch } from '@/components/ui/YoutubeResearch';
-import { ReflectionCall } from '@/components/ui/ReflectionCall';
+import { InsuranceForm } from '@/components/ui/InsuranceForm';
 import { HaraldRefillModal } from '@/components/ui/HaraldRefillModal';
 import { HaraldRejectionModal } from '@/components/ui/HaraldRejectionModal';
 import {
@@ -393,23 +393,7 @@ Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span classNam
   // === RENDER: SUCCESS ===
   if (levelState === 'SUCCESS' || subStep === 2) {
     return (
-      <ReflectionCall
-        callerName="Elena Stromberg"
-        callerTitle="Elektrotechnikerin"
-        callerAvatar="👩‍🔧"
-        question={`Ich habe gesehen, dass Sie ${
-          selectedCapacitor !== 'none' ? 'einen Stützkondensator' : 'eine clevere Lösung'
-        } verwendet haben.
-
-Wie verhindert dieser einen kritischen Spannungsabfall in der Steuereinheit?
-
-Verstehen Sie mein Nachfragen nicht falsch, wir müssen unbedingt verhindern, dass der Greifer erneut versagt. Beim nächsten Mal trifft es vielleicht einen Menschen.`}
-        correctAnswer={`Wenn der Motor startet, wird kurz eine sehr hohe Stromstärke benötigt. Die wird aus dem Akku gezogen, aber auch aus der Steuereinheit (CPU), wenn kein Kondensator dazwischen ist.
-          
-Der Kondensator stellt sicher, dass die CPU in diesem Moment immer genug Spannung hat, damit sie sich nicht abschaltet.
-
-Habe ich das richtig verstanden?`}
-        continueButtonText="Nächstes Level"
+      <InsuranceForm
         onBack={() => {
           setLevelState('ACTIVE');
           setSubStep(0);
