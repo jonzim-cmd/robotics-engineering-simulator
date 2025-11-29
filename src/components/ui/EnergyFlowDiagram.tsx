@@ -53,17 +53,19 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
         Energie-Fluss Diagramm
       </div>
 
-      {/* Zeit-Anzeige */}
-      <div className="absolute top-2 right-2 text-xs font-mono text-slate-400">
-        t = {currentData.time.toFixed(0)}ms
-      </div>
-
-      {/* ZEITLUPE Indikator */}
-      {(isSimulating || isTestActive) && (
-        <div className="absolute bottom-2 right-2 text-xs font-mono font-bold text-cyan-500/80 uppercase tracking-widest bg-slate-900/80 px-2 py-1 rounded border border-cyan-900/50">
-          [ ZEITLUPE AKTIV ]
+      {/* Gruppe für Zeit-Anzeige und ZEITLUPE Indikator */}
+      <div className="absolute top-2 right-2 flex items-center gap-2">
+        {/* ZEITLUPE Indikator */}
+        {(isSimulating || isTestActive) && (
+          <div className="text-xs font-mono font-bold text-cyan-500/80 uppercase tracking-widest bg-slate-900/80 px-2 py-1 rounded border border-cyan-900/50">
+            [ ZEITLUPE AKTIV ]
+          </div>
+        )}
+        {/* Zeit-Anzeige */}
+        <div className="text-xs font-mono text-slate-400">
+          t = {currentData.time.toFixed(0)}ms
         </div>
-      )}
+      </div>
 
       {/* SVG Diagramm */}
       <svg viewBox="0 0 500 250" className="w-full h-full">
@@ -116,7 +118,7 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
         <g transform="translate(180, 20)">
           {/* Motor-Gehäuse - NEUTRAL BLAU */}
           <rect x="0" y="0" width="70" height="50" rx="4"
-                fill="#1e293b" stroke="#60a5fa" strokeWidth="3" />
+                fill="#2563eb" stroke="#60a5fa" strokeWidth="3" />
           
           {/* Motor-Welle - NEUTRAL GRAU */}
           <rect x="70" y="20" width="15" height="10" fill="#94a3b8" />
