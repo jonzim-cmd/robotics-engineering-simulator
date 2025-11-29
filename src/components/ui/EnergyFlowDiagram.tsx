@@ -305,9 +305,10 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
       </svg>
       {/* Erklärung des Diagramms */}
       <div className="absolute bottom-2 left-2 right-2 text-xs text-slate-400 text-left bg-slate-900/50 p-1 rounded">
-        Das Diagramm zeigt den Energiefluss. Der Akku (links) versorgt den Motor (oben) und die Steuerung (CPU, rechts).
-        Bei Motorstart steigt der Strom stark an, das hat Einfluss auf die Spannung des Akkus und die CPU-Spannung.
-        Wenn die CPU-Spannung kritisch ist, schaltet sie ab und startet neu.
+          Das Diagramm zeigt den Energiefluss. Der Akku (links) versorgt den Motor (oben) und die Steuerung (CPU, rechts).
+          Bei Motorstart steigt der Strom stark an, das hat Einfluss auf die Spannung des Akkus und die CPU-Spannung.
+          Wenn die CPU-Spannung kritisch ist, schaltet sie ab und startet neu. Genau das hat den Unfall ausgelöst. 
+          Die CPU steuert den Greifer. Wenn sie für einen Moment ausfällt, bekommt der Greifer keine klaren Signale mehr und „weiß“ nicht, was er tun soll.
       </div>
 
     </div>

@@ -8,6 +8,7 @@ interface HaraldRejectionModalProps {
   requestedCost: number;
   availableCredits: number;
   onClose: () => void;
+  customText?: string;
 }
 
 const HARALD_REJECTION_TEXT = `Äh... nein.
@@ -33,7 +34,8 @@ Sie werden mir später danken.
 export const HaraldRejectionModal: React.FC<HaraldRejectionModalProps> = ({
   requestedCost,
   availableCredits,
-  onClose
+  onClose,
+  customText
 }) => {
   const [showFullText, setShowFullText] = useState(false);
   const [textComplete, setTextComplete] = useState(false);
@@ -55,6 +57,8 @@ export const HaraldRejectionModal: React.FC<HaraldRejectionModalProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  const textToShow = customText || HARALD_REJECTION_TEXT;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
@@ -79,31 +83,33 @@ export const HaraldRejectionModal: React.FC<HaraldRejectionModalProps> = ({
           </div>
         </div>
 
-        {/* Budget-Info */}
-        <div className="bg-red-50 border-b-2 border-stone-400 px-6 py-3 flex justify-between items-center">
-          <div className="text-sm" style={{ fontFamily: 'serif' }}>
-            <span className="text-stone-600">Angefordert:</span>
-            <span className="ml-2 font-bold text-red-700">{requestedCost} CR</span>
+        {/* Budget-Info - Only show if no custom text (standard rejection mode) */}
+        {!customText && (
+          <div className="bg-red-50 border-b-2 border-stone-400 px-6 py-3 flex justify-between items-center">
+            <div className="text-sm" style={{ fontFamily: 'serif' }}>
+              <span className="text-stone-600">Angefordert:</span>
+              <span className="ml-2 font-bold text-red-700">{requestedCost} CR</span>
+            </div>
+            <div className="text-sm" style={{ fontFamily: 'serif' }}>
+              <span className="text-stone-600">Verfügbar:</span>
+              <span className="ml-2 font-bold text-stone-800">{availableCredits} CR</span>
+            </div>
+            <div className="text-sm" style={{ fontFamily: 'serif' }}>
+              <span className="text-stone-600">Defizit:</span>
+              <span className="ml-2 font-bold text-red-700">-{requestedCost - availableCredits} CR</span>
+            </div>
           </div>
-          <div className="text-sm" style={{ fontFamily: 'serif' }}>
-            <span className="text-stone-600">Verfügbar:</span>
-            <span className="ml-2 font-bold text-stone-800">{availableCredits} CR</span>
-          </div>
-          <div className="text-sm" style={{ fontFamily: 'serif' }}>
-            <span className="text-stone-600">Defizit:</span>
-            <span className="ml-2 font-bold text-red-700">-{requestedCost - availableCredits} CR</span>
-          </div>
-        </div>
+        )}
 
         {/* Monolog */}
         <div className="p-6 h-80 overflow-y-auto bg-stone-100" style={{ fontFamily: 'serif' }}>
           {showFullText ? (
             <p className="text-stone-800 leading-relaxed whitespace-pre-wrap">
-              {HARALD_REJECTION_TEXT}
+              {textToShow}
             </p>
           ) : (
             <TypewriterText
-              text={HARALD_REJECTION_TEXT}
+              text={textToShow}
               speed={25}
               onComplete={() => setTextComplete(true)}
               className="text-stone-800 leading-relaxed"

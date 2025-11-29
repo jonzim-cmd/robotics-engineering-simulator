@@ -70,6 +70,7 @@ export const CircuitConfigurator: React.FC<CircuitConfiguratorProps> = ({
                           <GlossaryTooltip
                             term="Innenwiderstand"
                             definition="Je höher der Innenwiderstand, desto mehr Spannung geht bei hohem Strombedarf verloren."
+                            position="right"
                           />: <span className="text-slate-300">{battery.internalResistance}Ω</span>
                         </span>
                         <span className="text-slate-500">

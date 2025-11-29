@@ -270,7 +270,7 @@ export const ELECTRONIC_COMPONENTS = {
     performance: {
       id: 'performance' as const,
       name: 'Performance-Akku',
-      cost: 60, // WICHTIG: Über 50 Credits, damit Harald eingreifen muss
+      cost: 120, // WICHTIG: Über 50 Credits, damit Harald eingreifen muss
       voltage: 12 as number,
       internalResistance: 0.2, // Ohm
       description: 'Premium-Qualität mit niedrigem Innenwiderstand. Stabile Spannung auch unter allen Bedingungen.',

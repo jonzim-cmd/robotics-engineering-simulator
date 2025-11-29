@@ -16,7 +16,6 @@ import {
   BatteryType,
   CapacitorType,
   calculateElectronicsSimulation,
-  calculateElectronicsCost,
   ELECTRONIC_COMPONENTS,
   ElectronicsSimulationResult
 } from '@/lib/physicsEngine';
@@ -197,15 +196,15 @@ const Level4_Electronics: React.FC = () => {
 
   // 1. Testaufbau aktivieren (Bezahlen & Bereitmachen)
   const handleActivateTest = () => {
-    const totalCost = calculateElectronicsCost(selectedBattery, selectedCapacitor);
+    const TEST_RUN_COST = 50;
     
-    // Wenn nicht Performance-Akku: Normaler Credit-Check
-    if (selectedBattery !== 'performance' && totalCost > credits) {
+    // Immer prüfen ob genug Credits für den Testlauf da sind (50 CR)
+    if (credits < TEST_RUN_COST) {
       logEvent('LEVEL4_SIMULATION_DENIED', {
         reason: 'insufficient_credits',
         battery: selectedBattery,
         capacitor: selectedCapacitor,
-        cost: totalCost,
+        cost: TEST_RUN_COST,
         credits
       });
       setShowHaraldRefill(true);
@@ -218,12 +217,12 @@ const Level4_Electronics: React.FC = () => {
     logEvent('LEVEL4_TEST_ACTIVATED', {
       battery: selectedBattery,
       capacitor: selectedCapacitor,
-      cost: totalCost,
+      cost: TEST_RUN_COST,
       creditsBefore: credits
     });
 
-    // Credits abziehen
-    removeCredits(totalCost);
+    // Credits abziehen (immer 50)
+    removeCredits(TEST_RUN_COST);
 
     // Nur Testmodus aktivieren - noch keine Berechnung
     setIsTestActive(true);
@@ -265,6 +264,13 @@ const Level4_Electronics: React.FC = () => {
         setIsSimulating(false);
         setCurrentSimStep(0); // Reset to initial state after animation
         
+        // Wenn Performance Akku: Harald beschwert sich NACH DEM ENDE der Simulation zeitverzögert
+        if (selectedBattery === 'performance') {
+            setTimeout(() => {
+                setShowHaraldRejection(true);
+            }, 2000);
+        }
+        
         logEvent('LEVEL4_SIMULATION_RESULT', {
             battery: selectedBattery,
             capacitor: selectedCapacitor,
@@ -286,7 +292,7 @@ const Level4_Electronics: React.FC = () => {
     setCurrentSimStep(0);
     
     // Wenn erfolgreich, könnte man hier direkt weiterleiten, aber wir lassen den User entscheiden
-    if (simulationResult?.testResult === 'SUCCESS') {
+    if (simulationResult?.testResult === 'SUCCESS' && selectedBattery !== 'performance') {
          setTimeout(() => {
             setSubStep(2); // Zur Reflection
           }, 500);
@@ -500,14 +506,14 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
              <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                onClick={simulationResult?.testResult === 'SUCCESS' ? handleStopTest : handleResetConfig}
+                onClick={(simulationResult?.testResult === 'SUCCESS' && selectedBattery !== 'performance') ? handleStopTest : handleResetConfig}
                 className={`flex-1 py-4 font-bold text-lg rounded uppercase tracking-widest transition-all ${
-                   simulationResult?.testResult === 'SUCCESS'
+                   (simulationResult?.testResult === 'SUCCESS' && selectedBattery !== 'performance')
                    ? 'bg-green-600 hover:bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]'
                    : 'bg-slate-700 hover:bg-slate-600 text-white'
                 }`}
              >
-                {simulationResult?.testResult === 'SUCCESS' ? 'Erfolgreich! Weiter...' : 'Test beenden & Korrigieren'}
+                {(simulationResult?.testResult === 'SUCCESS' && selectedBattery !== 'performance') ? 'Erfolgreich! Weiter...' : 'Test beenden & Korrigieren'}
              </motion.button>
           ) : (
              // Wenn Test inaktiv: Button startet den Testmodus
@@ -517,7 +523,7 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
                 onClick={handleActivateTest}
                 className="flex-1 py-4 font-bold text-lg rounded uppercase tracking-widest transition-all bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]"
              >
-               Testaufbau aktivieren ({calculateElectronicsCost(selectedBattery, selectedCapacitor)} CR)
+               Testaufbau aktivieren (50 CR)
              </motion.button>
           )}
         </div>
@@ -538,6 +544,7 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
           requestedCost={ELECTRONIC_COMPONENTS.batteries.performance.cost}
           availableCredits={credits}
           onClose={() => setShowHaraldRejection(false)}
+          customText={selectedBattery === 'performance' ? "Dieser Performance-Akku ist viel zu teuer! Diese Anzahl an Credits? Für eine einfache Spannungsversorgung? \n\nDas ist pure Verschwendung von Steuergeldern. \n\nIch habe Ihnen doch gesagt: Wir müssen sparen. Finden Sie eine kosteneffizientere Lösung. \n\nAntrag abgelehnt. Bauen Sie das um!" : undefined}
         />
       )}
     </div>
