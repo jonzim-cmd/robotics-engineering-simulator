@@ -471,6 +471,11 @@ const Level3_Mechanisms: React.FC = () => {
           onApproved={handleHaraldApproval}
           onCancel={() => setShowHaraldDialog(false)}
           totalCost={driveType && gripperType ? DRIVE_COSTS[driveType] + GRIPPER_COSTS[gripperType] : 0}
+          solutionText={
+            (driveType === 'tracks' ? "Der Kettenantrieb sorgt dafür, dass der Roboter auch auf schlammigem und unebenem Boden gut fährt und nicht so leicht rutscht. " : "") +
+            (gripperType === 'magnetic' ? "Der Elektromagnet kann schwere Stahlcontainer aus Metall sicher anheben." : 
+             gripperType === 'claw' ? "Die mechanische Klaue kann viele verschiedene schwere Lasten sicher festhalten." : "")
+          }
         />
       )}
     </div>

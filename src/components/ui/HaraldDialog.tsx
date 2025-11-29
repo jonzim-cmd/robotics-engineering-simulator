@@ -10,6 +10,7 @@ interface HaraldDialogProps {
   onApproved: (cost: number) => void;
   onCancel: () => void;
   totalCost: number;
+  solutionText?: string;
 }
 
 // Monologue text for Harald - shorter version
@@ -47,9 +48,9 @@ Also: Hier ist das Formular. 12 Seiten. Bitte überall unterschreiben. Und schre
 
 Ja… dann sehen wir weiter. Vielleicht.`;
 
-export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel, totalCost }) => {
+export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel, totalCost, solutionText }) => {
   const { userId } = useGameStore();
-  const [phase, setPhase] = useState<'monologue' | 'form' | 'approval'>('monologue');
+  const [phase, setPhase] = useState<'monologue' | 'form' | 'solution' | 'approval'>('monologue');
   const [showFullMonologue, setShowFullMonologue] = useState(false);
   const [rightArrowPresses, setRightArrowPresses] = useState(0);
   const [monologueComplete, setMonologueComplete] = useState(false);
@@ -96,10 +97,14 @@ export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel
       });
     }
 
-    setPhase('approval');
-    setTimeout(() => {
-      onApproved(totalCost); // Pass totalCost back to deduct
-    }, 4000); // Show stamp for 4 seconds
+    if (solutionText) {
+      setPhase('solution');
+    } else {
+      setPhase('approval');
+      setTimeout(() => {
+        onApproved(totalCost);
+      }, 4000);
+    }
   };
 
   const renderMonologue = () => (
@@ -395,6 +400,47 @@ export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel
     </motion.div>
   );
 
+  const renderSolution = () => (
+    <motion.div
+      key="solution"
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      className="flex flex-col h-full bg-stone-100 overflow-hidden p-8 items-center justify-center"
+    >
+      <div className="max-w-2xl w-full bg-white border-2 border-stone-300 p-8 shadow-lg">
+         <h3 className="text-xl font-bold text-stone-800 mb-6 border-b border-stone-300 pb-2" style={{ fontFamily: 'serif' }}>
+           Vorläufiger Prüfbescheid
+         </h3>
+         
+         <div className="bg-green-50 border-l-4 border-green-600 p-4 mb-8 text-stone-800 leading-relaxed shadow-sm">
+           <p className="font-bold text-green-800 mb-2 flex items-center gap-2">
+             <span className="text-xl">✓</span> Antrag bewilligungsfähig
+           </p>
+           <p style={{ fontFamily: 'serif', fontSize: '1.1rem' }}>
+             Das Budget wird bewilligt, weil Antrieb und Greifer für diese Einsatzbedingungen gut geeignet sind:
+           </p>
+           <p className="mt-4 italic text-stone-700 font-medium">
+             &quot;{solutionText}&quot;
+           </p>
+         </div>
+
+         <button
+           onClick={() => {
+             setPhase('approval');
+             setTimeout(() => {
+               onApproved(totalCost);
+             }, 4000);
+           }}
+           className="w-full py-4 bg-green-700 hover:bg-green-600 text-white font-bold text-lg rounded-sm uppercase tracking-widest shadow-lg transition-all transform hover:-translate-y-1"
+           style={{ fontFamily: 'serif' }}
+         >
+           Stempel abholen
+         </button>
+      </div>
+    </motion.div>
+  );
+
   const renderApproval = () => (
     <motion.div
       key="approval"
@@ -555,6 +601,7 @@ export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel
           <AnimatePresence mode="wait">
             {phase === 'monologue' && renderMonologue()}
             {phase === 'form' && renderForm()}
+            {phase === 'solution' && renderSolution()}
             {phase === 'approval' && renderApproval()}
           </AnimatePresence>
         </div>
