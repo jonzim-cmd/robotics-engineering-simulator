@@ -206,7 +206,7 @@ const Level4_Electronics: React.FC = () => {
     setHasRunOnce(false);
   };
 
-  // 1. Testaufbau aktivieren (Bezahlen & Berechnen)
+  // 1. Testaufbau aktivieren (Bezahlen & Bereitmachen)
   const handleActivateTest = () => {
     const totalCost = calculateElectronicsCost(selectedBattery, selectedCapacitor);
     
@@ -225,7 +225,7 @@ const Level4_Electronics: React.FC = () => {
     // State vor Änderung speichern
     pushStateHistory();
 
-    logEvent('LEVEL4_SIMULATION_STARTED', {
+    logEvent('LEVEL4_TEST_ACTIVATED', {
       battery: selectedBattery,
       capacitor: selectedCapacitor,
       cost: totalCost,
@@ -235,24 +235,32 @@ const Level4_Electronics: React.FC = () => {
     // Credits abziehen
     removeCredits(totalCost);
 
-    // Simulation berechnen (aber noch nicht abspielen)
-    const result = calculateElectronicsSimulation(selectedBattery, selectedCapacitor);
-    setSimulationResult(result);
+    // Nur Testmodus aktivieren - noch keine Berechnung
     setIsTestActive(true);
     setIsSimulating(false);
     setCurrentSimStep(0);
     setHasRunOnce(false);
+    setSimulationResult(null);
   };
 
-  // 2. Trigger am Motor (Animation abspielen)
+  // 2. Trigger am Motor (Berechnen & Animation abspielen)
   const handleTriggerStart = () => {
-    if (!simulationResult || isSimulating) return;
+    if (isSimulating) return;
+
+    // Jetzt erst berechnen
+    const result = calculateElectronicsSimulation(selectedBattery, selectedCapacitor);
+    setSimulationResult(result);
 
     setIsSimulating(true);
     setHasRunOnce(true);
     setCurrentSimStep(0);
 
-    // Animation durchlaufen (Zeitlupe: 3s für 100 Schritte)
+    logEvent('LEVEL4_SIMULATION_STARTED', {
+      battery: selectedBattery,
+      capacitor: selectedCapacitor
+    });
+
+    // Animation durchlaufen (Zeitlupe: 3s für 300 Schritte)
     let step = 0;
     if (simulationIntervalRef.current) clearInterval(simulationIntervalRef.current);
 
@@ -260,24 +268,22 @@ const Level4_Electronics: React.FC = () => {
       step++;
       setCurrentSimStep(step);
 
-      if (step >= simulationResult.dataPoints.length - 1) {
+      if (step >= result.dataPoints.length - 1) {
         if (simulationIntervalRef.current) {
           clearInterval(simulationIntervalRef.current);
         }
         setIsSimulating(false);
+        setCurrentSimStep(0); // Reset to initial state after animation
         
-        // Event nur beim ersten Durchlauf loggen
-        if (!hasRunOnce) {
-            logEvent('LEVEL4_SIMULATION_RESULT', {
-              battery: selectedBattery,
-              capacitor: selectedCapacitor,
-              result: simulationResult.testResult,
-              minVoltage: simulationResult.minCpuVoltage,
-              brownoutOccurred: simulationResult.brownoutOccurred
-            });
-        }
+        logEvent('LEVEL4_SIMULATION_RESULT', {
+            battery: selectedBattery,
+            capacitor: selectedCapacitor,
+            result: result.testResult,
+            minVoltage: result.minCpuVoltage,
+            brownoutOccurred: result.brownoutOccurred
+        });
       }
-    }, 10); // 10ms * 300 Schritte = 3000ms (3 Sekunden) - weichere Animation
+    }, 10); // 10ms * 300 Schritte = 3000ms (3 Sekunden)
   };
 
   // 3. Test beenden / Reset

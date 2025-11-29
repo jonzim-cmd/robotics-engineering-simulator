@@ -290,7 +290,7 @@ export const ELECTRONIC_COMPONENTS = {
       id: 'small' as const,
       name: 'Stützkondensator',
       cost: 15,
-      capacitance: 0.12, // 120mF - genug, um Standard-Akku-Anlauf zu stützen
+      capacitance: 0.14, // 140mF - genug, um Standard-Akku-Anlauf zu stützen
       description: 'Speichert Energie und gibt sie bei kurzen Spannungseinbrüchen ab.',
       icon: '⚡'
     },
@@ -373,23 +373,29 @@ export function calculateElectronicsSimulation(
   // Zeitschritt
   const dt = C.SIMULATION_DURATION_MS / C.SIMULATION_STEPS;
 
-  for (let step = 0; step <= C.SIMULATION_STEPS; step++) {
-    const time = step * dt;
-
-    // 1. Motorstrom bestimmen (Anlaufstrom vs. Normalbetrieb)
-    let motorCurrent: number;
-    if (time < C.INRUSH_DURATION_MS) {
-      // Anlaufphase: exponentieller Abfall von Spitzenstrom
-      const inrushProgress = time / C.INRUSH_DURATION_MS;
-      const inrushFactor = Math.exp(-3 * inrushProgress); // Schneller Abfall
-      motorCurrent = C.MOTOR_RUNNING_CURRENT +
-        (C.MOTOR_INRUSH_CURRENT - C.MOTOR_RUNNING_CURRENT) * inrushFactor;
-    } else {
-      // Normalbetrieb
-      motorCurrent = C.MOTOR_RUNNING_CURRENT;
-    }
-
-    // 2. Batteriespannung nach Innenwiderstand (Ohmsches Gesetz)
+    for (let step = 0; step <= C.SIMULATION_STEPS; step++) {
+      const time = step * dt;
+      const progress = step / C.SIMULATION_STEPS; // 0.0 bis 1.0
+  
+      // 1. Motorstrom bestimmen (Trapez-Profil für bessere Visualisierung)
+      // Wir wollen, dass der hohe Strom (und damit der Spannungsabfall)
+      // lange genug "stehen bleibt", damit man ihn sehen kann.
+      let motorCurrent: number;
+      
+          if (progress < 0.1) {
+            // Phase 1: Rasanter Anstieg von 0 (Start) auf Anlaufstrom
+            const rampUp = progress / 0.1;
+            motorCurrent = 0 + (C.MOTOR_INRUSH_CURRENT - 0) * rampUp;
+          } else if (progress < 0.7) {
+            // Phase 2: PLATEAU (10-70%) - Hier halten wir den "Fehlerzustand" fest
+            motorCurrent = C.MOTOR_INRUSH_CURRENT;
+          } else {
+            // Phase 3: Abklingen auf Normalwert (70-100%)
+            const rampDown = (progress - 0.7) / 0.3; // 0.0 bis 1.0
+            // Smoothstep für weicheres Ausklingen
+            const smooth = rampDown * rampDown * (3 - 2 * rampDown);
+            motorCurrent = C.MOTOR_INRUSH_CURRENT - (C.MOTOR_INRUSH_CURRENT - C.MOTOR_RUNNING_CURRENT) * smooth;
+          }    // 2. Batteriespannung nach Innenwiderstand (Ohmsches Gesetz)
     // U_real = U_nenn - I * R_innen
     const batteryVoltage = battery.voltage - (motorCurrent * battery.internalResistance);
 
@@ -408,7 +414,7 @@ export function calculateElectronicsSimulation(
       if (batteryVoltage < targetVoltage && capacitorCharge > 0) {
         // Kondensator gibt Energie ab
         const voltageDiff = targetVoltage - batteryVoltage;
-        const energyNeeded = voltageDiff * 0.1; // Vereinfachte Energie-Berechnung
+        const energyNeeded = voltageDiff * 0.05; // Energie-Faktor reduziert für realistische Entladung
         const energyAvailable = capacitorCharge * capacitor.capacitance * 10;
 
         if (energyAvailable >= energyNeeded) {

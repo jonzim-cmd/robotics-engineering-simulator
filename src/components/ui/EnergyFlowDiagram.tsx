@@ -60,8 +60,8 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
 
       {/* ZEITLUPE Indikator */}
       {(isSimulating || isTestActive) && (
-        <div className="absolute bottom-2 right-2 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">
-          [ ZEITLUPE: 20x ]
+        <div className="absolute bottom-2 right-2 text-xs font-mono font-bold text-cyan-500/80 uppercase tracking-widest bg-slate-900/80 px-2 py-1 rounded border border-cyan-900/50">
+          [ ZEITLUPE AKTIV ]
         </div>
       )}
 
@@ -114,21 +114,22 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
 
         {/* === MOTOR (oben) === */}
         <g transform="translate(180, 20)">
-          {/* Motor-Gehäuse */}
+          {/* Motor-Gehäuse - NEUTRAL BLAU */}
           <rect x="0" y="0" width="70" height="50" rx="4"
-                fill="#1e293b" stroke="#f59e0b" strokeWidth="2" />
-          {/* Motor-Welle */}
-          <rect x="70" y="20" width="15" height="10" fill="#f59e0b" />
+                fill="#1e293b" stroke="#60a5fa" strokeWidth="2" />
           
-          {/* Rotor-Symbol (nur sichtbar wenn läuft oder inaktiv ohne Button) */}
+          {/* Motor-Welle - NEUTRAL GRAU */}
+          <rect x="70" y="20" width="15" height="10" fill="#94a3b8" />
+          
+          {/* Rotor-Symbol - NEUTRAL GRAU */}
           {(!isTestActive || isSimulating) && (
              <motion.g
                 animate={{ rotate: isSimulating ? 360 : 0 }}
                 transition={{ duration: 0.5, repeat: isSimulating ? Infinity : 0, ease: "linear" }}
                 style={{ transformOrigin: '35px 25px' }}
              >
-                <line x1="25" y1="25" x2="45" y2="25" stroke="#f59e0b" strokeWidth="2" />
-                <line x1="35" y1="15" x2="35" y2="35" stroke="#f59e0b" strokeWidth="2" />
+                <line x1="25" y1="25" x2="45" y2="25" stroke="#94a3b8" strokeWidth="2" />
+                <line x1="35" y1="15" x2="35" y2="35" stroke="#94a3b8" strokeWidth="2" />
              </motion.g>
           )}
 
@@ -208,16 +209,17 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
 
         {/* === CPU (rechts) === */}
         <g transform="translate(280, 90)">
-          {/* CPU-Gehäuse */}
+          {/* CPU-Gehäuse - DYNAMISCHE FARBE */}
           <motion.rect
             x="0" y="0" width="80" height="60" rx="4"
             fill="#1e293b"
             stroke={cpuColor}
             strokeWidth="3"
-            animate={isCritical ? {
-              stroke: ['#ef4444', '#1e293b', '#ef4444'],
-            } : {}}
-            transition={{ duration: 0.3, repeat: isCritical ? Infinity : 0 }}
+                      animate={isCritical ? {
+                        stroke: ['#ef4444', '#1e293b', '#ef4444'],
+                      } : {
+                        stroke: cpuColor
+                      }}            transition={{ duration: 0.3, repeat: isCritical ? Infinity : 0 }}
           />
           {/* Chip-Pins */}
           {[0, 1, 2, 3].map(i => (
