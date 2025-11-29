@@ -95,7 +95,7 @@ export default function AdminPage() {
   };
 
   // Filter reflection-like events (all reflection UI variants)
-  const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG']);
+  const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG', 'INSURANCE_FORM_SUBMITTED']);
 
   // Filter reflections only
   const getReflectionsForUser = (userId: number) => {
@@ -111,9 +111,10 @@ export default function AdminPage() {
     }
 
     if (typeof payload === 'object' && payload !== null) {
-      // Prioritize showing the student's answer
-      if (payload.answer) {
-        const answer = payload.answer.length > 200 ? payload.answer.substring(0, 200) + '...' : payload.answer;
+      // Prioritize showing the student's answer or explanation
+      const textContent = payload.answer || payload.explanation;
+      if (textContent) {
+        const answer = textContent.length > 200 ? textContent.substring(0, 200) + '...' : textContent;
         return (
           <div>
             <div className="font-semibold text-cyan-400 text-xs mb-1">Answer:</div>
@@ -347,7 +348,7 @@ export default function AdminPage() {
                             <span className="opacity-50">{new Date(ref.created_at).toLocaleString()}</span>
                           </div>
                           <div className="text-slate-300 bg-slate-950 p-3 rounded text-sm italic">
-                            "{typeof ref.payload === 'string' ? ref.payload : (ref.payload as any).answer || JSON.stringify(ref.payload)}"
+                            "{typeof ref.payload === 'string' ? ref.payload : (ref.payload as any).answer || (ref.payload as any).explanation || JSON.stringify(ref.payload)}"
                           </div>
                         </div>
                       ))}
