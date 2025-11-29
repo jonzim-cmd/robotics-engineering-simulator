@@ -239,3 +239,236 @@ export const calculateLevel2Physics = (
     resultMessage
   };
 };
+
+// ============================================
+// LEVEL 4: ELEKTRONIK & SPANNUNGSVERSORGUNG
+// ============================================
+
+/**
+ * Elektronik-Komponenten für Level 4
+ */
+export const ELECTRONIC_COMPONENTS = {
+  batteries: {
+    standard: {
+      id: 'standard' as const,
+      name: 'Standard-Akku',
+      cost: 10,
+      voltage: 12 as number, // Volt (Nennspannung)
+      internalResistance: 2.0, // Ohm
+      description: 'Günstig, aber hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein.',
+      icon: '🔋'
+    },
+    performance: {
+      id: 'performance' as const,
+      name: 'Performance-Akku',
+      cost: 60, // WICHTIG: Über 50 Credits, damit Harald eingreifen muss
+      voltage: 12 as number,
+      internalResistance: 0.2, // Ohm
+      description: 'Premium-Qualität mit niedrigem Innenwiderstand. Stabile Spannung auch unter Last.',
+      icon: '⚡'
+    }
+  },
+  capacitors: {
+    none: {
+      id: 'none' as const,
+      name: 'Kein Kondensator',
+      cost: 0,
+      capacitance: 0, // Farad
+      description: 'Ohne Puffer ist die CPU direkt von der Batteriespannung abhängig.',
+      icon: '❌'
+    },
+    small: {
+      id: 'small' as const,
+      name: 'Stützkondensator',
+      cost: 15,
+      capacitance: 0.01, // 10mF - reicht für kurze Überbrückung
+      description: 'Speichert Energie und gibt sie bei kurzen Spannungseinbrüchen ab.',
+      icon: '⚡'
+    },
+    large: {
+      id: 'large' as const,
+      name: 'Pufferkondensator (groß)',
+      cost: 35,
+      capacitance: 0.1, // 100mF
+      description: 'Großer Energiespeicher für längere Überbrückung. Überdimensioniert für diesen Einsatz.',
+      icon: '🔌'
+    }
+  }
+};
+
+// Typen ableiten
+export type BatteryType = keyof typeof ELECTRONIC_COMPONENTS.batteries;
+export type CapacitorType = keyof typeof ELECTRONIC_COMPONENTS.capacitors;
+
+/**
+ * Systemkonstanten für die Simulation
+ */
+export const ELECTRONICS_CONSTANTS = {
+  CPU_MIN_VOLTAGE: 5.0, // Volt - unter diesem Wert: Brownout/Reset
+  MOTOR_RUNNING_CURRENT: 2.0, // Ampere - Normalbetrieb
+  MOTOR_INRUSH_CURRENT: 10.0, // Ampere - Anlaufstrom (5x normal)
+  INRUSH_DURATION_MS: 50, // Millisekunden - Dauer des Anlaufstroms
+  SIMULATION_DURATION_MS: 200, // Millisekunden - Gesamte Simulationsdauer
+  SIMULATION_STEPS: 100, // Anzahl der Datenpunkte
+};
+
+/**
+ * Ergebnis eines einzelnen Simulationsschritts
+ */
+export interface ElectronicsDataPoint {
+  time: number; // ms
+  batteryVoltage: number; // V (nach Innenwiderstand)
+  cpuVoltage: number; // V (nach Kondensator-Pufferung)
+  motorCurrent: number; // A
+  capacitorCharge: number; // 0-1 (relativ)
+}
+
+/**
+ * Gesamtergebnis der Elektronik-Simulation
+ */
+export interface ElectronicsSimulationResult {
+  dataPoints: ElectronicsDataPoint[];
+  minCpuVoltage: number;
+  maxMotorCurrent: number;
+  brownoutOccurred: boolean;
+  brownoutTime: number | null; // ms - wann der Brownout auftrat
+  testResult: 'SUCCESS' | 'BROWNOUT';
+  resultMessage: string;
+}
+
+/**
+ * Berechnet den Spannungsverlauf bei Motorstart
+ *
+ * Physik-Modell (vereinfacht aber korrekt):
+ * 1. U_batterie_real = U_nenn - (I * R_innen)
+ * 2. Kondensator puffert kurze Einbrüche
+ * 3. CPU braucht mindestens 5V
+ */
+export function calculateElectronicsSimulation(
+  batteryType: BatteryType,
+  capacitorType: CapacitorType
+): ElectronicsSimulationResult {
+  const battery = ELECTRONIC_COMPONENTS.batteries[batteryType];
+  const capacitor = ELECTRONIC_COMPONENTS.capacitors[capacitorType];
+  const C = ELECTRONICS_CONSTANTS;
+
+  const dataPoints: ElectronicsDataPoint[] = [];
+  let minCpuVoltage = battery.voltage;
+  let maxMotorCurrent = 0;
+  let brownoutOccurred = false;
+  let brownoutTime: number | null = null;
+
+  // Kondensator-Ladezustand (startet voll geladen)
+  let capacitorCharge = 1.0;
+
+  // Zeitschritt
+  const dt = C.SIMULATION_DURATION_MS / C.SIMULATION_STEPS;
+
+  for (let step = 0; step <= C.SIMULATION_STEPS; step++) {
+    const time = step * dt;
+
+    // 1. Motorstrom bestimmen (Anlaufstrom vs. Normalbetrieb)
+    let motorCurrent: number;
+    if (time < C.INRUSH_DURATION_MS) {
+      // Anlaufphase: exponentieller Abfall von Spitzenstrom
+      const inrushProgress = time / C.INRUSH_DURATION_MS;
+      const inrushFactor = Math.exp(-3 * inrushProgress); // Schneller Abfall
+      motorCurrent = C.MOTOR_RUNNING_CURRENT +
+        (C.MOTOR_INRUSH_CURRENT - C.MOTOR_RUNNING_CURRENT) * inrushFactor;
+    } else {
+      // Normalbetrieb
+      motorCurrent = C.MOTOR_RUNNING_CURRENT;
+    }
+
+    // 2. Batteriespannung nach Innenwiderstand (Ohmsches Gesetz)
+    // U_real = U_nenn - I * R_innen
+    const batteryVoltage = battery.voltage - (motorCurrent * battery.internalResistance);
+
+    // 3. CPU-Spannung mit Kondensator-Pufferung
+    let cpuVoltage: number;
+
+    if (capacitor.capacitance === 0) {
+      // Ohne Kondensator: CPU bekommt direkt die Batteriespannung
+      cpuVoltage = batteryVoltage;
+    } else {
+      // Mit Kondensator: Pufferung bei Spannungseinbruch
+      // Vereinfachtes Modell: Kondensator gleicht Differenz aus
+
+      const targetVoltage = Math.max(batteryVoltage, C.CPU_MIN_VOLTAGE + 0.5);
+
+      if (batteryVoltage < targetVoltage && capacitorCharge > 0) {
+        // Kondensator gibt Energie ab
+        const voltageDiff = targetVoltage - batteryVoltage;
+        const energyNeeded = voltageDiff * 0.1; // Vereinfachte Energie-Berechnung
+        const energyAvailable = capacitorCharge * capacitor.capacitance * 10;
+
+        if (energyAvailable >= energyNeeded) {
+          cpuVoltage = targetVoltage;
+          capacitorCharge -= (energyNeeded / (capacitor.capacitance * 10)) * (dt / 10);
+          capacitorCharge = Math.max(0, capacitorCharge);
+        } else {
+          // Kondensator leer, Spannung fällt
+          cpuVoltage = batteryVoltage + (energyAvailable / 0.1);
+          capacitorCharge = 0;
+        }
+      } else {
+        // Batteriespannung OK oder Kondensator leer
+        cpuVoltage = batteryVoltage;
+
+        // Kondensator lädt sich wieder auf wenn Spannung OK
+        if (batteryVoltage > C.CPU_MIN_VOLTAGE + 1) {
+          capacitorCharge = Math.min(1, capacitorCharge + 0.05);
+        }
+      }
+    }
+
+    // 4. Tracking
+    minCpuVoltage = Math.min(minCpuVoltage, cpuVoltage);
+    maxMotorCurrent = Math.max(maxMotorCurrent, motorCurrent);
+
+    if (cpuVoltage < C.CPU_MIN_VOLTAGE && !brownoutOccurred) {
+      brownoutOccurred = true;
+      brownoutTime = time;
+    }
+
+    // 5. Datenpunkt speichern
+    dataPoints.push({
+      time,
+      batteryVoltage: Math.max(0, batteryVoltage),
+      cpuVoltage: Math.max(0, cpuVoltage),
+      motorCurrent,
+      capacitorCharge
+    });
+  }
+
+  // Ergebnis bestimmen
+  const testResult: 'SUCCESS' | 'BROWNOUT' = brownoutOccurred ? 'BROWNOUT' : 'SUCCESS';
+
+  let resultMessage: string;
+  if (brownoutOccurred) {
+    resultMessage = `SYSTEM FAILURE: CPU-Spannung fiel auf ${minCpuVoltage.toFixed(1)}V (Minimum: ${C.CPU_MIN_VOLTAGE}V). Neustart ausgelöst bei t=${brownoutTime?.toFixed(0)}ms.`;
+  } else {
+    resultMessage = `SYSTEM STABLE: CPU-Spannung blieb stabil bei mindestens ${minCpuVoltage.toFixed(1)}V. Motorstart erfolgreich.`;
+  }
+
+  return {
+    dataPoints,
+    minCpuVoltage,
+    maxMotorCurrent,
+    brownoutOccurred,
+    brownoutTime,
+    testResult,
+    resultMessage
+  };
+}
+
+/**
+ * Berechnet die Gesamtkosten einer Konfiguration
+ */
+export function calculateElectronicsCost(
+  batteryType: BatteryType,
+  capacitorType: CapacitorType
+): number {
+  return ELECTRONIC_COMPONENTS.batteries[batteryType].cost +
+         ELECTRONIC_COMPONENTS.capacitors[capacitorType].cost;
+}

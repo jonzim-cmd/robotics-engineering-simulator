@@ -1,285 +1,469 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { motion } from 'framer-motion';
+import { BrownoutVisualization } from '@/components/ui/BrownoutVisualization';
+import { EnergyFlowDiagram } from '@/components/ui/EnergyFlowDiagram';
+import { CircuitConfigurator } from '@/components/ui/CircuitConfigurator';
+import { SmartphoneResearch } from '@/components/ui/SmartphoneResearch';
+import { ReflectionCall } from '@/components/ui/ReflectionCall';
+import { HaraldRejectionModal } from '@/components/ui/HaraldRejectionModal';
+import {
+  BatteryType,
+  CapacitorType,
+  calculateElectronicsSimulation,
+  calculateElectronicsCost,
+  ELECTRONIC_COMPONENTS,
+  ElectronicsSimulationResult
+} from '@/lib/physicsEngine';
 import { trackEvent } from '@/app/actions';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const RESEARCH_RESULTS = [
+  {
+    title: "Warum brauchen Computer stabile Spannung?",
+    content: `Computer arbeiten mit präzisen elektrischen Signalen.
+Diese Signale sind entweder "an" (z.B. 5 Volt) oder "aus" (0 Volt).
+
+Wenn die Spannung unter einen bestimmten Wert fällt, kann der Prozessor die Signale nicht mehr richtig unterscheiden.
+
+Das Ergebnis:
+• Datenfehler
+• Programmabstürze
+• Automatischer Neustart (Schutzmechanismus)
+
+Merke:
+Computer brauchen KONSTANTE Spannung – nicht nur "genug" Spannung zu einem Zeitpunkt.`
+  },
+  {
+    title: "Was ist Anlaufstrom?",
+    content: `Wenn ein Motor startet, steht er still und muss erst beschleunigt werden.
+
+In diesem Moment zieht er VIEL MEHR Strom als im normalen Betrieb.
+Oft 5 bis 10 mal so viel!
+
+Beispiel:
+• Motor im Betrieb: 2 Ampere
+• Motor beim Start: 10 Ampere (für wenige Millisekunden)
+
+Das ist wie ein Auto, das anfährt:
+Beim Anfahren braucht man viel Kraft, danach rollt es leichter.
+
+Merke:
+Der kritische Moment ist der START – danach wird alles entspannter.`
+  },
+  {
+    title: "Was ist Innenwiderstand?",
+    content: `Jede Batterie hat einen "versteckten" Widerstand in sich.
+
+Je mehr Strom fließt, desto mehr Spannung geht an diesem Innenwiderstand verloren.
+
+Beispiel:
+• Batterie: 12V, Innenwiderstand 2Ω
+• Bei 5A Strom: 12V - (5A × 2Ω) = 12V - 10V = nur 2V kommen an!
+
+Billige Batterien = hoher Innenwiderstand = große Spannungseinbrüche
+Teure Batterien = niedriger Innenwiderstand = stabile Spannung
+
+Merke:
+Nicht jede "12V-Batterie" liefert unter Last auch wirklich 12 Volt.`
+  },
+  {
+    title: "Was ist ein Kondensator?",
+    content: `Ein Kondensator ist wie ein kleiner Energie-Zwischenspeicher.
+
+So funktioniert er:
+• Er lädt sich auf, wenn genug Spannung da ist
+• Er gibt Energie ab, wenn die Spannung kurz einbricht
+
+Stell dir einen Wassertank vor:
+Wenn der Wasserdruck kurz schwankt, liefert der Tank trotzdem gleichmäßig Wasser.
+
+Kondensatoren können kurze Spannungseinbrüche "überbrücken" – aber nicht dauerhaft Energie liefern.
+
+Merke:
+Kondensatoren sind Puffer für KURZE Schwankungen, kein Ersatz für die Batterie.`
+  }
+];
 
 const Level4_Electronics: React.FC = () => {
-  const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep, userId, currentLevel } = useGameStore();
-  const [batteryType, setBatteryType] = useState<'cheap' | 'performance' | null>(null);
-  const [capacitorAdded, setCapacitorAdded] = useState(false);
-  const [simulating, setSimulating] = useState(false);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const {
+    advanceLevel,
+    setLevelState,
+    levelState,
+    pushStateHistory,
+    popStateHistory,
+    subStep,
+    setSubStep,
+    credits,
+    removeCredits,
+    userId,
+    currentLevel
+  } = useGameStore();
 
-  const handleBack = () => {
-    // Pop from global history
-    popStateHistory();
-    // Reset local state
-    setBatteryType(null);
-    setCapacitorAdded(false);
-    setSimulating(false);
-    setChartData([]);
-    setErrorMsg(null);
+  // State
+  const [showText, setShowText] = useState(false);
+  const [selectedBattery, setSelectedBattery] = useState<BatteryType>('standard');
+  const [selectedCapacitor, setSelectedCapacitor] = useState<CapacitorType>('none');
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationResult, setSimulationResult] = useState<ElectronicsSimulationResult | null>(null);
+  const [currentSimStep, setCurrentSimStep] = useState(0);
+  const [showHaraldRejection, setShowHaraldRejection] = useState(false);
+  const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Event Tracking Helper
+  const logEvent = (eventType: string, payload: Record<string, unknown>) => {
+    if (!userId) return;
+    trackEvent(userId, currentLevel, eventType, payload).catch(err =>
+      console.error('Tracking error', err)
+    );
   };
 
-  const handleStart = () => {
-    // Save state before advancing
+  // Cleanup simulation interval
+  useEffect(() => {
+    return () => {
+      if (simulationIntervalRef.current) {
+        clearInterval(simulationIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Navigation
+  const handleBack = () => {
+    popStateHistory();
+    setShowText(false);
+    setSimulationResult(null);
+    setIsSimulating(false);
+    setCurrentSimStep(0);
+  };
+
+  const handleShowText = () => {
+    setShowText(true);
+  };
+
+  const handleStartResearch = () => {
+    pushStateHistory();
+    setSubStep(1); // Zur Smartphone-Recherche
+  };
+
+  const handleResearchComplete = () => {
     pushStateHistory();
     setLevelState('ACTIVE');
     setSubStep(0);
   };
 
-  const generateData = () => {
-    const data = [];
-    const baseV = 12;
-    let minV = 12;
+  // Batterie-Auswahl mit Harald-Check
+  const handleBatteryChange = (battery: BatteryType) => {
+    const newCost = calculateElectronicsCost(battery, selectedCapacitor);
 
-    // Physics parameters
-    // Internal Resistance: Cheap = 2.0 Ohm, Perf = 0.2 Ohm
-    const R_int = batteryType === 'cheap' ? 2.0 : 0.2;
-    // Inrush Current Profile: Spikes to 5A at t=50, decays
-    
-    for (let t = 0; t < 200; t++) {
-      let current = 0.5; // Standby current
-      if (t > 50 && t < 100) {
-        // Inrush spike
-        current = 5.0; 
-        // Capacitor smoothing effect (simplified): Reduces peak current drawn from battery effectively
-        if (capacitorAdded) current = 3.0; 
-      } else if (t >= 100) {
-        current = 1.0; // Running current
-      }
-
-      let voltage = baseV - (current * R_int);
-      
-      // Capacitor smoothing voltage curve directly
-      if (capacitorAdded && t > 50 && t < 120) {
-         voltage += 1.5; // Fake smoothing boost
-      }
-      
-      if (voltage < 0) voltage = 0;
-      if (voltage < minV) minV = voltage;
-
-      data.push({ time: t, voltage, current });
-    }
-    return { data, minV };
-  };
-
-  const logEvent = (eventType: string, payload: Record<string, unknown>) => {
-    if (!userId) return;
-    trackEvent(userId, currentLevel, eventType, payload).catch((err) => console.error('Tracking error', err));
-  };
-
-  const handleSimulate = () => {
-    if (!batteryType) {
-      logEvent('LEVEL4_SIMULATION_INPUT_ERROR', { reason: 'battery_missing', capacitorAdded });
+    // Wenn Performance-Akku und zu teuer → Harald-Dialog
+    if (battery === 'performance' && newCost > credits) {
+      logEvent('LEVEL4_HARALD_TRIGGERED', {
+        requestedBattery: battery,
+        requestedCost: newCost,
+        availableCredits: credits
+      });
+      setShowHaraldRejection(true);
       return;
     }
-    setSimulating(true);
-    setErrorMsg(null);
-    setChartData([]);
 
-    logEvent('LEVEL4_SIMULATION_STARTED', {
-      batteryType,
-      capacitorAdded,
-    });
-
-    setTimeout(() => {
-      const { data, minV } = generateData();
-      setChartData(data);
-      
-      // Logic: CPU needs > 3.3V (or 5V? Plan says "Computer brauchen konstant 3.3V oder 5V").
-      // Plan example says "Dip geht runter bis 2V -> Reboot".
-      // Let's say threshold is 5V.
-      
-      if (minV < 5.0) {
-        setErrorMsg(`CRITICAL ALERT: Voltage Low (${minV.toFixed(2)}V). CPU Reset triggered. Brownout detected.`);
-        setTimeout(() => setLevelState('FAIL'), 2000);
-        setSubStep(0);
-        logEvent('LEVEL4_SIMULATION_RESULT', {
-          status: 'FAIL',
-          batteryType,
-          capacitorAdded,
-          minVoltage: minV,
-        });
-      } else {
-        setTimeout(() => {
-          setSubStep(1);
-          setLevelState('SUCCESS');
-        }, 1000);
-        logEvent('LEVEL4_SIMULATION_RESULT', {
-          status: 'SUCCESS',
-          batteryType,
-          capacitorAdded,
-          minVoltage: minV,
-        });
-      }
-      setSimulating(false);
-    }, 1000);
+    setSelectedBattery(battery);
+    setSimulationResult(null);
   };
 
+  const handleCapacitorChange = (capacitor: CapacitorType) => {
+    setSelectedCapacitor(capacitor);
+    setSimulationResult(null);
+  };
+
+  // Simulation starten
+  const handleStartSimulation = () => {
+    const totalCost = calculateElectronicsCost(selectedBattery, selectedCapacitor);
+
+    if (totalCost > credits) {
+      logEvent('LEVEL4_SIMULATION_DENIED', {
+        reason: 'insufficient_credits',
+        battery: selectedBattery,
+        capacitor: selectedCapacitor,
+        cost: totalCost,
+        credits
+      });
+      return;
+    }
+
+    // State vor Änderung speichern
+    pushStateHistory();
+
+    logEvent('LEVEL4_SIMULATION_STARTED', {
+      battery: selectedBattery,
+      capacitor: selectedCapacitor,
+      cost: totalCost,
+      creditsBefore: credits
+    });
+
+    // Credits abziehen
+    removeCredits(totalCost);
+
+    // Simulation berechnen
+    const result = calculateElectronicsSimulation(selectedBattery, selectedCapacitor);
+    setSimulationResult(result);
+    setIsSimulating(true);
+    setCurrentSimStep(0);
+
+    // Animation durchlaufen
+    let step = 0;
+    simulationIntervalRef.current = setInterval(() => {
+      step++;
+      setCurrentSimStep(step);
+
+      if (step >= result.dataPoints.length - 1) {
+        if (simulationIntervalRef.current) {
+          clearInterval(simulationIntervalRef.current);
+        }
+        setIsSimulating(false);
+
+        logEvent('LEVEL4_SIMULATION_RESULT', {
+          battery: selectedBattery,
+          capacitor: selectedCapacitor,
+          result: result.testResult,
+          minVoltage: result.minCpuVoltage,
+          brownoutOccurred: result.brownoutOccurred
+        });
+
+        // Bei Erfolg → Reflection
+        if (result.testResult === 'SUCCESS') {
+          setTimeout(() => {
+            setSubStep(2); // Zur Reflection
+          }, 1500);
+        }
+      }
+    }, 30); // 30ms pro Step für flüssige Animation
+  };
+
+  // Reset nach Fehlschlag
+  const handleReset = () => {
+    setSimulationResult(null);
+    setCurrentSimStep(0);
+    setSelectedBattery('standard');
+    setSelectedCapacitor('none');
+  };
+
+  // === RENDER: INTRO ===
   if (levelState === 'INTRO') {
     return (
-      <TerminalCard title="INCOMING TRANSMISSION" borderColor="cyan" onBack={handleBack}>
-        <div className="space-y-4">
-          <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
-          <TypewriterText 
-            text="Ebene 3 Diagnostik: OK. Analysiere Stromversorgung..." 
-            speed={20}
-          />
-          
-          <div className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded">
-            <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
-            <p className="mb-2">Mechanisch läuft alles. Aber wir haben ein elektronisches Phänomen. Jedes Mal, wenn der Transporter mit voller Beladung anfährt, startet der Bordcomputer neu und das System fällt aus.</p>
-            
-            <strong className="text-red-400 block mb-2 mt-4">ANALYSE:</strong>
-            <p className="mb-2">Der <GlossaryTooltip term="Anlaufstrom" definition="Der hohe Strombedarf im Moment des Motor-Starts (Inrush Current)." /> ist unter Last riesig. Das zwingt die Batterie in die Knie. Die Systemspannung bricht kurzzeitig zusammen.</p>
+      <>
+        <TerminalCard title="INCIDENT REPORT - SEKTOR 7" borderColor="red" onBack={handleBack}>
+          <div className="space-y-4">
+            <div className="text-red-400 font-bold">KRITISCHER VORFALL:</div>
+            <TypewriterText
+              text="Sicherheitsrelevanter Zwischenfall aufgezeichnet. Wiedergabe läuft..."
+              speed={20}
+            />
 
-            <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
-            <p>Analysiere das Oszilloskop. Finde eine Stromquelle, die stabil bleibt, auch wenn der Motor plötzlich viel Strom zieht. Vermeide einen <GlossaryTooltip term="Brownout" definition="Kurzer Spannungsabfall, der Computer abstürzen lässt." />.</p>
-          </div>
-
-          <button 
-            onClick={handleStart}
-            className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
-          >
-            Oszilloskop starten
-          </button>
-        </div>
-      </TerminalCard>
-    );
-  }
-
-  if (levelState === 'SUCCESS') {
-    return (
-      <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={handleBack}>
-        <div className="text-center space-y-6 py-8">
-          <div className="text-green-400 text-4xl mb-4">✓ SPANNUNG STABIL</div>
-          <p>Keine Brownouts detektiert. CPU läuft durchgehend stabil.</p>
-          <button 
-            onClick={() => advanceLevel()}
-            className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
-          >
-            Nächstes Level
-          </button>
-        </div>
-      </TerminalCard>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      <TerminalCard title="LEVEL 4: ELEKTRONIK & SPANNUNGSABFALL" borderColor={errorMsg ? 'red' : 'cyan'} onBack={handleBack}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* Controls */}
-          <div className="space-y-6 md:col-span-1">
-            <div className="bg-slate-900 p-4 rounded border border-slate-800 space-y-4">
-              <h3 className="text-cyan-400 font-bold border-b border-slate-700 pb-2">STROMQUELLE</h3>
-              
-              <label className={`flex items-center p-3 rounded border cursor-pointer transition-all ${batteryType === 'cheap' ? 'bg-cyan-900/30 border-cyan-500' : 'border-slate-700 hover:border-slate-500'}`}>
-                <input 
-                  type="radio" 
-                  name="battery" 
-                  className="mr-3"
-                  checked={batteryType === 'cheap'}
-                  onChange={() => setBatteryType('cheap')}
-                />
-                <div>
-                  <div className="font-bold">Standard Akku</div>
-                  <div className="text-xs text-slate-400">Hoher <GlossaryTooltip term="Innenwiderstand" definition="Der Widerstand innerhalb der Batterie." /> (2.0 Ω)</div>
-                </div>
-              </label>
-
-              <label className={`flex items-center p-3 rounded border cursor-pointer transition-all ${batteryType === 'performance' ? 'bg-cyan-900/30 border-cyan-500' : 'border-slate-700 hover:border-slate-500'}`}>
-                <input 
-                  type="radio" 
-                  name="battery" 
-                  className="mr-3"
-                  checked={batteryType === 'performance'}
-                  onChange={() => setBatteryType('performance')}
-                />
-                <div>
-                  <div className="font-bold">High-Perf. Akku</div>
-                  <div className="text-xs text-slate-400">Niedriger Innenwiderstand (0.2 Ω)</div>
-                </div>
-              </label>
-
-              <div className="pt-4 border-t border-slate-700">
-                 <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
-                    <input 
-                      type="checkbox" 
-                      checked={capacitorAdded} 
-                      onChange={(e) => setCapacitorAdded(e.target.checked)}
-                      className="rounded bg-slate-800 border-slate-600 text-cyan-500 focus:ring-cyan-500"
-                    />
-                    <span>Stützkondensator hinzufügen</span>
-                 </label>
-              </div>
+            <div className="mt-6">
+              <BrownoutVisualization />
             </div>
 
-            <button 
-              onClick={handleSimulate}
-              disabled={!batteryType || simulating}
-              className={`w-full py-4 font-bold text-lg rounded uppercase tracking-widest transition-colors ${
-                !batteryType ? 'bg-slate-800 text-slate-500 cursor-not-allowed' :
-                simulating ? 'bg-yellow-600 text-white animate-pulse' :
-                'bg-cyan-600 hover:bg-cyan-500 text-white'
-              }`}
-            >
-              {simulating ? 'Start Motor...' : 'Motor Starten'}
-            </button>
+            {!showText && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 4, duration: 1, repeat: Infinity, repeatType: "reverse" }}
+                className="text-center mt-4 text-slate-400 text-sm cursor-pointer"
+                onClick={handleShowText}
+              >
+                [ Klicken um fortzufahren... ]
+              </motion.div>
+            )}
 
-            {errorMsg && (
-               <motion.div 
-                 initial={{ opacity: 0, scale: 0.95 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 className="p-3 bg-red-900/20 border border-red-500 text-red-400 text-sm rounded"
-               >
-                 {errorMsg}
-                 <button onClick={() => setLevelState('ACTIVE')} className="block mt-2 underline hover:text-red-300">
-                   Reset System
-                 </button>
-               </motion.div>
+            {showText && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded"
+              >
+                <strong className="text-red-400 block mb-2">WAS IST PASSIERT?</strong>
+                <p className="mb-2">
+                  Als der Präzisionsmotor gestartet ist, um die exakte Entladeposition des Containers zu bestimmen, ist die elektrische Spannung eingebrochen. Der Motor hat beim Start so viel Strom gebraucht, dass die Steuereinheit (CPU) kurz „ohnmächtig“ wurde und neu gestartet hat. Dadurch hat der Greifer die Kontrolle verloren. Dummerweise war zu diesem Zeitpunkt Chefin Bazlens Hund direkt darunter.
+                </p>
+
+                <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
+                <p>
+                  Untersuche die Stromversorgung und finde eine Einstellung, bei der die Spannung auch beim starken Anlaufstrom nicht einbricht.
+Die Steuereinheit (CPU) braucht dabei immer mindestens 5 Volt.
+                </p>
+              </motion.div>
+            )}
+
+            {showText && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+                onClick={handleStartResearch}
+                className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white font-bold rounded uppercase tracking-widest transition-colors"
+              >
+                Recherche starten
+              </motion.button>
             )}
           </div>
+        </TerminalCard>
 
-          {/* Oscilloscope */}
-          <div className="md:col-span-2 bg-black rounded border border-slate-800 p-4 relative min-h-[300px] flex flex-col">
-            <div className="flex justify-between items-center mb-2">
-               <h4 className="text-xs text-green-500 font-mono">OSZILLOSKOP // CHANNEL 1: V_BUS</h4>
-               <div className="text-xs text-slate-500 font-mono">TIME: 200ms / DIV</div>
-            </div>
-            
-            <div className="flex-1 w-full relative overflow-hidden border border-green-900/30 bg-[linear-gradient(0deg,transparent_24%,rgba(34,197,94,.1)_25%,rgba(34,197,94,.1)_26%,transparent_27%,transparent_74%,rgba(34,197,94,.1)_75%,rgba(34,197,94,.1)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(34,197,94,.1)_25%,rgba(34,197,94,.1)_26%,transparent_27%,transparent_74%,rgba(34,197,94,.1)_75%,rgba(34,197,94,.1)_76%,transparent_77%,transparent)] bg-size-[50px_50px]">
-               <ResponsiveContainer width="100%" height="100%">
-                 <LineChart data={chartData.length > 0 ? chartData : [{time:0, voltage:12}, {time:200, voltage:12}]}>
-                   <XAxis dataKey="time" hide domain={[0, 200]} />
-                   <YAxis domain={[0, 15]} hide />
-                   <ReferenceLine y={5} stroke="red" strokeDasharray="3 3" label={{ value: "CPU Reset (5V)", fill: 'red', fontSize: 10 }} />
-                   <ReferenceLine y={12} stroke="#334155" strokeDasharray="3 3" />
-                   <Line 
-                     type="monotone" 
-                     dataKey="voltage" 
-                     stroke="#22c55e" 
-                     strokeWidth={2} 
-                     dot={false}
-                     isAnimationActive={simulating}
-                     animationDuration={1000}
-                   />
-                 </LineChart>
-               </ResponsiveContainer>
-            </div>
+        {/* Smartphone Research */}
+        {subStep === 1 && (
+          <SmartphoneResearch
+            searchQuery="Elektronik Spannung Batterie"
+            browserTitle="Elektrotechnik Basics"
+            searchResults={RESEARCH_RESULTS}
+            onComplete={handleResearchComplete}
+          />
+        )}
+      </>
+    );
+  }
+
+  // === RENDER: SUCCESS ===
+  if (levelState === 'SUCCESS' || subStep === 2) {
+    return (
+      <ReflectionCall
+        callerName="Elena Stromberg"
+        callerTitle="Elektrotechnikerin"
+        callerAvatar="👩‍🔧"
+        question={`Sehr gut gelöst! Ich habe gesehen, dass Sie ${
+          selectedCapacitor !== 'none' ? 'einen Stützkondensator' : 'eine clevere Lösung'
+        } verwendet haben.
+
+Können Sie mir erklären, warum ein kleiner Kondensator ausreicht, obwohl der Motor so viel Strom zieht? Das scheint auf den ersten Blick nicht zu passen.`}
+        correctAnswer={`Genau richtig! Der Kondensator muss nicht den ganzen Motor versorgen – er muss nur die CPU für die kurze Zeit des Anlaufstroms stabil halten.
+
+Der Spannungseinbruch dauert nur etwa 50 Millisekunden. In dieser kurzen Zeit gibt der Kondensator seine gespeicherte Energie ab und hält die CPU-Spannung über 5 Volt.
+
+Danach ist der Motor auf Betriebsdrehzahl und braucht viel weniger Strom – dann reicht die Batterie wieder aus.
+
+Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marathon. Clever und kostengünstig!`}
+        continueButtonText="Nächstes Level"
+        onBack={() => {
+          setLevelState('ACTIVE');
+          setSubStep(0);
+        }}
+        onComplete={() => advanceLevel()}
+      />
+    );
+  }
+
+  // === RENDER: ACTIVE (Hauptspiel) ===
+  return (
+    <div className="space-y-6">
+      <TerminalCard
+        title="LEVEL 4: ENERGIEVERSORGUNG KONFIGURIEREN"
+        borderColor={simulationResult?.brownoutOccurred ? 'red' : 'cyan'}
+        onBack={handleBack}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* LINKS: Konfiguration */}
+          <div className="space-y-4">
+            <CircuitConfigurator
+              selectedBattery={selectedBattery}
+              selectedCapacitor={selectedCapacitor}
+              onBatteryChange={handleBatteryChange}
+              onCapacitorChange={handleCapacitorChange}
+              credits={credits}
+              disabled={isSimulating}
+            />
           </div>
 
+          {/* RECHTS: Visualisierung */}
+          <div className="space-y-4">
+            <EnergyFlowDiagram
+              dataPoints={simulationResult?.dataPoints || []}
+              isSimulating={isSimulating}
+              currentStep={currentSimStep}
+              showCapacitor={selectedCapacitor !== 'none'}
+            />
+
+            {/* Ergebnis-Anzeige */}
+            <AnimatePresence>
+              {simulationResult && !isSimulating && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className={`p-4 rounded-lg border ${
+                    simulationResult.brownoutOccurred
+                      ? 'bg-red-900/30 border-red-500 text-red-300'
+                      : 'bg-green-900/30 border-green-500 text-green-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">
+                      {simulationResult.brownoutOccurred ? '⚠️' : '✓'}
+                    </span>
+                    <span className="font-bold text-lg">
+                      {simulationResult.brownoutOccurred ? 'BROWNOUT DETEKTIERT' : 'SYSTEM STABIL'}
+                    </span>
+                  </div>
+                  <p className="text-sm opacity-90">
+                    {simulationResult.resultMessage}
+                  </p>
+                  <div className="mt-3 flex gap-4 text-xs font-mono">
+                    <span>Min. CPU: {simulationResult.minCpuVoltage.toFixed(1)}V</span>
+                    <span>Max. Strom: {simulationResult.maxMotorCurrent.toFixed(1)}A</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-6 pt-4 border-t border-slate-700 flex gap-4">
+          {simulationResult?.brownoutOccurred && !isSimulating && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={handleReset}
+              className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded uppercase tracking-widest transition-colors"
+            >
+              Neu konfigurieren
+            </motion.button>
+          )}
+
+          <motion.button
+            whileHover={{ scale: isSimulating ? 1 : 1.01 }}
+            whileTap={{ scale: isSimulating ? 1 : 0.99 }}
+            onClick={handleStartSimulation}
+            disabled={isSimulating || (simulationResult?.testResult === 'SUCCESS')}
+            className={`flex-1 py-4 font-bold text-lg rounded uppercase tracking-widest transition-all ${
+              isSimulating
+                ? 'bg-yellow-600 text-white animate-pulse cursor-wait'
+                : simulationResult?.testResult === 'SUCCESS'
+                  ? 'bg-green-600 text-white cursor-not-allowed'
+                  : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]'
+            }`}
+          >
+            {isSimulating
+              ? 'Simulation läuft...'
+              : simulationResult?.testResult === 'SUCCESS'
+                ? 'Erfolgreich!'
+                : `Motor starten (${calculateElectronicsCost(selectedBattery, selectedCapacitor)} CR)`
+            }
+          </motion.button>
         </div>
       </TerminalCard>
+
+      {/* Harald Rejection Modal */}
+      {showHaraldRejection && (
+        <HaraldRejectionModal
+          requestedCost={ELECTRONIC_COMPONENTS.batteries.performance.cost}
+          availableCredits={credits}
+          onClose={() => setShowHaraldRejection(false)}
+        />
+      )}
     </div>
   );
 };
