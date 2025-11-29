@@ -412,18 +412,18 @@ const Level4_Electronics: React.FC = () => {
         callerName="Elena Stromberg"
         callerTitle="Elektrotechnikerin"
         callerAvatar="👩‍🔧"
-        question={`Sehr gut gelöst! Ich habe gesehen, dass Sie ${
+        question={`Ich habe gesehen, dass Sie ${
           selectedCapacitor !== 'none' ? 'einen Stützkondensator' : 'eine clevere Lösung'
         } verwendet haben.
 
-Können Sie mir erklären, warum ein kleiner Kondensator ausreicht, obwohl der Motor so viel Strom zieht? Das scheint auf den ersten Blick nicht zu passen.`}
-        correctAnswer={`Genau richtig! Der Kondensator muss nicht den ganzen Motor versorgen – er muss nur die CPU für die kurze Zeit des Anlaufstroms stabil halten.
+Wie verhindert dieser einen kritischen Spannungsabfall in der Steuereinheit?
 
-Der Spannungseinbruch dauert nur etwa 50 Millisekunden. In dieser kurzen Zeit gibt der Kondensator seine gespeicherte Energie ab und hält die CPU-Spannung über 5 Volt.
+Verstehen Sie mein Nachfragen nicht falsch, wir müssen unbedingt verhindern, dass der Greifer erneut versagt. Beim nächsten Mal trifft es vielleicht einen Menschen.`}
+        correctAnswer={`Wenn der Motor startet, wird kurz eine sehr hohe Stromstärke benötigt. Die wird aus dem Akku gezogen, aber auch aus der Steuereinheit (CPU), wenn kein Kondensator dazwischen ist.
+          
+Der Kondensator stellt sicher, dass die CPU in diesem Moment immer genug Spannung hat, damit sie sich nicht abschaltet.
 
-Danach ist der Motor auf Betriebsdrehzahl und braucht viel weniger Strom – dann reicht die Batterie wieder aus.
-
-Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marathon. Clever und kostengünstig!`}
+Habe ich das richtig verstanden?`}
         continueButtonText="Nächstes Level"
         onBack={() => {
           setLevelState('ACTIVE');
@@ -472,7 +472,7 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
                   {simulationResult.brownoutOccurred ? '⚠️' : '✓'}
                 </span>
                 <span className="font-bold text-lg">
-                  {simulationResult.brownoutOccurred ? 'BROWNOUT DETEKTIERT' : 'SYSTEM STABIL'}
+                  {simulationResult.customResultHeader ? simulationResult.customResultHeader : (simulationResult.brownoutOccurred ? 'BROWNOUT (Spannungsabfall) in CPU' : 'SYSTEM STABIL')}
                 </span>
               </div>
               <p className="text-sm opacity-90">

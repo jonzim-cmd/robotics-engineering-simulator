@@ -343,6 +343,7 @@ export interface ElectronicsSimulationResult {
   brownoutTime: number | null; // ms - wann der Brownout auftrat
   testResult: 'SUCCESS' | 'BROWNOUT';
   resultMessage: string;
+  customResultHeader?: string; // Added for custom display headings
 }
 
 /**
@@ -483,12 +484,22 @@ export function calculateElectronicsSimulation(
     resultMessage
   };
 
+  if (isOverkillCap) {
+    return {
+      ...baseResult,
+      brownoutOccurred: true, // Still a "fail" for the system
+      testResult: 'BROWNOUT',
+      resultMessage: 'Der Pufferkondensator ist unnötig groß. Er wird aus Designgründen nicht genehmigt. Diese Konfiguration ist deshalb nicht erlaubt.',
+      customResultHeader: 'KONDENSATOR ÜBERDIMENSIONIERT'
+    };
+  }
+
   if (isPerformance) {
     return {
       ...baseResult,
       brownoutOccurred: false,
       testResult: 'SUCCESS',
-      resultMessage: 'Technisch Spannungsversorgung aufgrund hoher Leistung des Akkus.'
+      resultMessage: 'Technisch stabil. Spannungsversorgung gewährleistet aufgrund hoher Leistung des Akkus.'
     };
   }
 
@@ -510,21 +521,12 @@ export function calculateElectronicsSimulation(
     };
   }
 
-  if (isOverkillCap) {
-    return {
-      ...baseResult,
-      brownoutOccurred: true,
-      testResult: 'BROWNOUT',
-      resultMessage: 'Der große Pufferkondensator ist überdimensioniert und wird nicht freigegeben. Konfiguration abgelehnt.'
-    };
-  }
-
   if (isPerfectCombo && !brownoutOccurred) {
     return {
       ...baseResult,
       brownoutOccurred: false,
       testResult: 'SUCCESS',
-      resultMessage: 'Motorstart stabil: Standard-Akku + Stützkondensator halten die CPU-Spannung über 5V, kein Spannungsabfall.'
+      resultMessage: 'Motorstart stabil: Standard-Akku + Stützkondensator halten die CPU-Spannung über 5V, kein kritischer Spannungsabfall.'
     };
   }
 
@@ -532,7 +534,7 @@ export function calculateElectronicsSimulation(
     ...baseResult,
     brownoutOccurred: true,
     testResult: 'BROWNOUT',
-    resultMessage: 'Diese Konfiguration ist nicht freigegeben. Wähle den Standard-Akku mit Stützkondensator.'
+    resultMessage: 'Qualitative Mängel festgestellt. Akku kollabiert und erzeugt einen Spannungsabfall in der Spannungseinheit (CPU).'
   };
 }
 
