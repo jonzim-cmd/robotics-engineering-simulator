@@ -360,7 +360,7 @@ const Level4_Electronics: React.FC = () => {
                 <p>
                   Untersuche die Stromversorgung und finde eine Einstellung, bei der die Spannung auch wenn der Motor startet nicht einbricht.
 
-Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens 5 Volt. <span className="text-cyan-400 font-bold">5 Volt</span>.
+Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span className="text-cyan-400 font-bold">5 Volt</span>.
                 </p>
               </motion.div>
             )}

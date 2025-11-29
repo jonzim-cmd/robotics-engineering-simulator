@@ -15,7 +15,24 @@ import Link from 'next/link';
 import { GameTracker } from '@/components/GameTracker';
 
 export default function Home() {
-  const { currentLevel, credits } = useGameStore();
+  const { currentLevel, credits, setLevel } = useGameStore();
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey) {
+        if (e.key === 'ArrowRight') {
+          // Secret fast forward: Next level
+          setLevel(Math.min(currentLevel + 1, 7));
+        } else if (e.key === 'ArrowLeft') {
+          // Secret rewind: Previous level
+          setLevel(Math.max(currentLevel - 1, 0));
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentLevel, setLevel]);
 
   const renderLevel = () => {
     switch (currentLevel) {
