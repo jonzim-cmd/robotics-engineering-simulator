@@ -458,17 +458,6 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
           />
         </div>
 
-        {/* UNTEN: Konfiguration in zwei Spalten */}
-        <div className="w-full mb-6">
-          <CircuitConfigurator
-            selectedBattery={selectedBattery}
-            selectedCapacitor={selectedCapacitor}
-            onBatteryChange={handleBatteryChange}
-            onCapacitorChange={handleCapacitorChange}
-            disabled={isTestActive}
-          />
-        </div>
-
         {/* Ergebnis-Anzeige (nur nach erstem Lauf sichtbar) */}
         <AnimatePresence>
           {hasRunOnce && simulationResult && (
@@ -500,6 +489,19 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* UNTEN: Konfiguration in zwei Spalten */}
+        <div className="w-full mb-6">
+          <CircuitConfigurator
+            selectedBattery={selectedBattery}
+            selectedCapacitor={selectedCapacitor}
+            onBatteryChange={handleBatteryChange}
+            onCapacitorChange={handleCapacitorChange}
+            disabled={isTestActive}
+          />
+        </div>
+
+
 
         {/* Action Buttons */}
         <div className="pt-4 border-t border-slate-700 flex gap-4">

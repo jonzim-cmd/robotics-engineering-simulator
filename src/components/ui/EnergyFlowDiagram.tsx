@@ -47,7 +47,7 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
   const isCritical = currentData.cpuVoltage < ELECTRONICS_CONSTANTS.CPU_MIN_VOLTAGE;
 
   return (
-    <div className="relative w-full h-80 bg-slate-950 rounded-lg border border-slate-700 p-4 overflow-hidden">
+    <div className="relative w-full h-[450px] bg-slate-950 rounded-lg border border-slate-700 p-4 overflow-hidden">
       {/* Titel */}
       <div className="absolute top-2 left-2 text-xs text-slate-500 font-mono uppercase tracking-wider">
         Energie-Fluss Diagramm
@@ -66,7 +66,7 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
       )}
 
       {/* SVG Diagramm */}
-      <svg viewBox="0 0 400 220" className="w-full h-full">
+      <svg viewBox="0 0 500 250" className="w-full h-full">
 
         {/* === BATTERIE === */}
         <g transform="translate(30, 80)">
@@ -116,7 +116,7 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
         <g transform="translate(180, 20)">
           {/* Motor-Gehäuse - NEUTRAL BLAU */}
           <rect x="0" y="0" width="70" height="50" rx="4"
-                fill="#1e293b" stroke="#60a5fa" strokeWidth="2" />
+                fill="#1e293b" stroke="#60a5fa" strokeWidth="3" />
           
           {/* Motor-Welle - NEUTRAL GRAU */}
           <rect x="70" y="20" width="15" height="10" fill="#94a3b8" />
@@ -215,11 +215,12 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
             fill="#1e293b"
             stroke={cpuColor}
             strokeWidth="3"
-                      animate={isCritical ? {
-                        stroke: ['#ef4444', '#1e293b', '#ef4444'],
-                      } : {
-                        stroke: cpuColor
-                      }}            transition={{ duration: 0.3, repeat: isCritical ? Infinity : 0 }}
+            animate={isCritical ? {
+              stroke: ['#ef4444', '#1e293b', '#ef4444'],
+            } : {
+              stroke: cpuColor
+            }}
+            transition={{ duration: 0.3, repeat: isCritical ? Infinity : 0 }}
           />
           {/* Chip-Pins */}
           {[0, 1, 2, 3].map(i => (
@@ -276,20 +277,37 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
           />
         )}
 
-        {/* === LEGENDE === */}
-        <g transform="translate(10, 200)">
-          <text x="0" y="-10" fill="#64748b" fontSize="9" fontFamily="monospace" fontWeight="bold">LEGENDE (SPANNUNG):</text>
+        {/* === LEGENDE (RECHTS NEBEN CPU) === */}
+        <g transform="translate(380, 85)">
+          <text x="0" y="0" fill="#64748b" fontSize="9" fontFamily="monospace" fontWeight="bold">LEGENDE</text>
           
-          <circle cx="5" cy="5" r="4" fill="#22c55e" />
-          <text x="15" y="8" fill="#64748b" fontSize="8">OK (≥8V)</text>
+          {/* Item 1 */}
+          <g transform="translate(0, 15)">
+            <circle cx="5" cy="5" r="4" fill="#22c55e" />
+            <text x="15" y="8" fill="#64748b" fontSize="8">OK (&gt;8V)</text>
+          </g>
 
-          <circle cx="80" cy="5" r="4" fill="#eab308" />
-          <text x="90" y="8" fill="#64748b" fontSize="8">Grenzwertig</text>
+          {/* Item 2 */}
+          <g transform="translate(0, 30)">
+            <circle cx="5" cy="5" r="4" fill="#eab308" />
+            <text x="15" y="8" fill="#64748b" fontSize="8">Grenzwertig</text>
+          </g>
 
-          <circle cx="170" cy="5" r="4" fill="#ef4444" />
-          <text x="180" y="8" fill="#64748b" fontSize="8">Kritisch (&lt;5V)</text>
+           {/* Item 3 */}
+           <g transform="translate(0, 45)">
+            <circle cx="5" cy="5" r="4" fill="#ef4444" />
+            <text x="15" y="8" fill="#64748b" fontSize="8">Kritisch</text>
+          </g>
         </g>
+
       </svg>
+      {/* Erklärung des Diagramms */}
+      <div className="absolute bottom-2 left-2 right-2 text-xs text-slate-400 text-left bg-slate-900/50 p-1 rounded">
+        Das Diagramm zeigt den Energiefluss. Der Akku (links) versorgt den Motor (oben) und die Steuerung (CPU, rechts).
+        Bei Motorstart steigt der Strom stark an, das hat Einfluss auf die Spannung des Akkus und die CPU-Spannung.
+        Wenn die CPU-Spannung kritisch ist, schaltet sie ab und startet neu.
+      </div>
+
     </div>
   );
 };
