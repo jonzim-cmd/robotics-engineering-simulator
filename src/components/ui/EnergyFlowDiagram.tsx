@@ -9,13 +9,17 @@ interface EnergyFlowDiagramProps {
   isSimulating: boolean;
   currentStep: number;
   showCapacitor: boolean;
+  onTriggerStart?: () => void;
+  isTestActive?: boolean;
 }
 
 export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
   dataPoints,
   isSimulating,
   currentStep,
-  showCapacitor
+  showCapacitor,
+  onTriggerStart,
+  isTestActive
 }) => {
   const currentData = dataPoints[currentStep] || {
     time: 0,
@@ -53,6 +57,13 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
       <div className="absolute top-2 right-2 text-xs font-mono text-slate-400">
         t = {currentData.time.toFixed(0)}ms
       </div>
+
+      {/* ZEITLUPE Indikator */}
+      {(isSimulating || isTestActive) && (
+        <div className="absolute bottom-2 right-2 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">
+          [ ZEITLUPE: 20x ]
+        </div>
+      )}
 
       {/* SVG Diagramm */}
       <svg viewBox="0 0 400 220" className="w-full h-full">
@@ -108,15 +119,36 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
                 fill="#1e293b" stroke="#f59e0b" strokeWidth="2" />
           {/* Motor-Welle */}
           <rect x="70" y="20" width="15" height="10" fill="#f59e0b" />
-          {/* Rotor-Symbol */}
-          <motion.g
-            animate={{ rotate: isSimulating ? 360 : 0 }}
-            transition={{ duration: 0.5, repeat: isSimulating ? Infinity : 0, ease: "linear" }}
-            style={{ transformOrigin: '35px 25px' }}
-          >
-            <line x1="25" y1="25" x2="45" y2="25" stroke="#f59e0b" strokeWidth="2" />
-            <line x1="35" y1="15" x2="35" y2="35" stroke="#f59e0b" strokeWidth="2" />
-          </motion.g>
+          
+          {/* Rotor-Symbol (nur sichtbar wenn läuft oder inaktiv ohne Button) */}
+          {(!isTestActive || isSimulating) && (
+             <motion.g
+                animate={{ rotate: isSimulating ? 360 : 0 }}
+                transition={{ duration: 0.5, repeat: isSimulating ? Infinity : 0, ease: "linear" }}
+                style={{ transformOrigin: '35px 25px' }}
+             >
+                <line x1="25" y1="25" x2="45" y2="25" stroke="#f59e0b" strokeWidth="2" />
+                <line x1="35" y1="15" x2="35" y2="35" stroke="#f59e0b" strokeWidth="2" />
+             </motion.g>
+          )}
+
+          {/* INTERAKTIVER START-BUTTON */}
+          {isTestActive && !isSimulating && (
+            <motion.g
+              onClick={(e) => { e.stopPropagation(); onTriggerStart && onTriggerStart(); }}
+              className="cursor-pointer"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: [0.95, 1.05, 0.95] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              style={{ transformOrigin: '35px 25px' }}
+            >
+               <circle cx="35" cy="25" r="18" fill="#dc2626" stroke="#fca5a5" strokeWidth="2" />
+               <text x="35" y="29" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ pointerEvents: 'none' }}>
+                 START
+               </text>
+            </motion.g>
+          )}
+
           {/* Label */}
           <text x="35" y="65" textAnchor="middle" fill="#64748b" fontSize="8" fontFamily="monospace">
             MOTOR
@@ -130,7 +162,7 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
         <motion.path
           d="M 120 120 L 120 45 L 180 45"
           fill="none"
-          stroke="#f59e0b"
+          stroke={batteryColor}
           strokeWidth={motorFlowWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -244,6 +276,8 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
 
         {/* === LEGENDE === */}
         <g transform="translate(10, 200)">
+          <text x="0" y="-10" fill="#64748b" fontSize="9" fontFamily="monospace" fontWeight="bold">LEGENDE (SPANNUNG):</text>
+          
           <circle cx="5" cy="5" r="4" fill="#22c55e" />
           <text x="15" y="8" fill="#64748b" fontSize="8">OK (≥8V)</text>
 

@@ -4,16 +4,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
+import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { BrownoutVisualization } from '@/components/ui/BrownoutVisualization';
 import { EnergyFlowDiagram } from '@/components/ui/EnergyFlowDiagram';
 import { CircuitConfigurator } from '@/components/ui/CircuitConfigurator';
 import { SmartphoneResearch } from '@/components/ui/SmartphoneResearch';
 import { ReflectionCall } from '@/components/ui/ReflectionCall';
 import { HaraldRefillModal } from '@/components/ui/HaraldRefillModal';
+import { HaraldRejectionModal } from '@/components/ui/HaraldRejectionModal';
 import {
   BatteryType,
   CapacitorType,
   calculateElectronicsSimulation,
+  calculateElectronicsCost,
+  ELECTRONIC_COMPONENTS,
   ElectronicsSimulationResult
 } from '@/lib/physicsEngine';
 import { trackEvent } from '@/app/actions';
@@ -87,7 +91,6 @@ Kondensatoren sind Puffer für KURZE Schwankungen, kein Ersatz für die Batterie
 ];
 
 const REFILL_CREDITS = 50;
-const MOTOR_START_COST = 25;
 
 const Level4_Electronics: React.FC = () => {
   const {
@@ -109,11 +112,18 @@ const Level4_Electronics: React.FC = () => {
   const [showText, setShowText] = useState(false);
   const [selectedBattery, setSelectedBattery] = useState<BatteryType>('standard');
   const [selectedCapacitor, setSelectedCapacitor] = useState<CapacitorType>('none');
-  const [isSimulating, setIsSimulating] = useState(false);
+  
+  // Simulation State
+  const [isTestActive, setIsTestActive] = useState(false); // Testaufbau bezahlt & bereit
+  const [isSimulating, setIsSimulating] = useState(false); // Animation läuft
+  const [hasRunOnce, setHasRunOnce] = useState(false); // Mindestens einmal gestartet
   const [simulationResult, setSimulationResult] = useState<ElectronicsSimulationResult | null>(null);
   const [currentSimStep, setCurrentSimStep] = useState(0);
+  
+  // Modals
   const [showHaraldRefill, setShowHaraldRefill] = useState(false);
-  const [motorRunning, setMotorRunning] = useState(false);
+  const [showHaraldRejection, setShowHaraldRejection] = useState(false);
+  
   const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Event Tracking Helper
@@ -133,17 +143,13 @@ const Level4_Electronics: React.FC = () => {
     };
   }, []);
 
-  // Motor stoppen wenn Level verlassen wird
+  // Reset wenn Level verlassen wird
   useEffect(() => {
     return () => {
-      if (motorRunning) {
-        setMotorRunning(false);
-        if (simulationIntervalRef.current) {
-          clearInterval(simulationIntervalRef.current);
-        }
-      }
+      setIsTestActive(false);
+      setIsSimulating(false);
     };
-  }, [motorRunning]);
+  }, []);
 
   // Navigation
   const handleBack = () => {
@@ -154,7 +160,7 @@ const Level4_Electronics: React.FC = () => {
     setShowText(false);
     setSimulationResult(null);
     setIsSimulating(false);
-    setMotorRunning(false);
+    setIsTestActive(false);
     setCurrentSimStep(0);
   };
 
@@ -175,23 +181,41 @@ const Level4_Electronics: React.FC = () => {
 
   // Batterie-Auswahl mit Harald-Check
   const handleBatteryChange = (battery: BatteryType) => {
+    const newCost = calculateElectronicsCost(battery, selectedCapacitor);
+    
+    // Wenn Performance-Akku und zu teuer → Harald-Dialog
+    // (Nur prüfen wenn wir nicht genug Credits haben, sonst darf man es wählen)
+    if (battery === 'performance' && newCost > credits) {
+      logEvent('LEVEL4_HARALD_TRIGGERED', {
+        requestedBattery: battery,
+        requestedCost: newCost,
+        availableCredits: credits
+      });
+      setShowHaraldRejection(true);
+      return;
+    }
+    
     setSelectedBattery(battery);
     setSimulationResult(null);
+    setHasRunOnce(false);
   };
 
   const handleCapacitorChange = (capacitor: CapacitorType) => {
     setSelectedCapacitor(capacitor);
     setSimulationResult(null);
+    setHasRunOnce(false);
   };
 
-  // Simulation starten/stoppen
-  const handleStartSimulation = () => {
-    if (MOTOR_START_COST > credits) {
+  // 1. Testaufbau aktivieren (Bezahlen & Berechnen)
+  const handleActivateTest = () => {
+    const totalCost = calculateElectronicsCost(selectedBattery, selectedCapacitor);
+    
+    if (totalCost > credits) {
       logEvent('LEVEL4_SIMULATION_DENIED', {
         reason: 'insufficient_credits',
         battery: selectedBattery,
         capacitor: selectedCapacitor,
-        cost: MOTOR_START_COST,
+        cost: totalCost,
         credits
       });
       setShowHaraldRefill(true);
@@ -204,81 +228,81 @@ const Level4_Electronics: React.FC = () => {
     logEvent('LEVEL4_SIMULATION_STARTED', {
       battery: selectedBattery,
       capacitor: selectedCapacitor,
-      cost: MOTOR_START_COST,
+      cost: totalCost,
       creditsBefore: credits
     });
 
     // Credits abziehen
-    removeCredits(MOTOR_START_COST);
+    removeCredits(totalCost);
 
-    // Simulation berechnen
+    // Simulation berechnen (aber noch nicht abspielen)
     const result = calculateElectronicsSimulation(selectedBattery, selectedCapacitor);
     setSimulationResult(result);
+    setIsTestActive(true);
+    setIsSimulating(false);
+    setCurrentSimStep(0);
+    setHasRunOnce(false);
+  };
+
+  // 2. Trigger am Motor (Animation abspielen)
+  const handleTriggerStart = () => {
+    if (!simulationResult || isSimulating) return;
+
     setIsSimulating(true);
-    setMotorRunning(true);
+    setHasRunOnce(true);
     setCurrentSimStep(0);
 
-    // Animation durchlaufen - kontinuierlich bis gestoppt
+    // Animation durchlaufen (Zeitlupe: 3s für 100 Schritte)
     let step = 0;
-    let brownoutLogged = false;
+    if (simulationIntervalRef.current) clearInterval(simulationIntervalRef.current);
+
     simulationIntervalRef.current = setInterval(() => {
       step++;
       setCurrentSimStep(step);
 
-      // Brownout-Event nur einmal loggen
-      if (!brownoutLogged && result.brownoutOccurred && step >= result.dataPoints.length - 1) {
-        logEvent('LEVEL4_SIMULATION_RESULT', {
-          battery: selectedBattery,
-          capacitor: selectedCapacitor,
-          result: result.testResult,
-          minVoltage: result.minCpuVoltage,
-          brownoutOccurred: result.brownoutOccurred
-        });
-        brownoutLogged = true;
+      if (step >= simulationResult.dataPoints.length - 1) {
+        if (simulationIntervalRef.current) {
+          clearInterval(simulationIntervalRef.current);
+        }
+        setIsSimulating(false);
+        
+        // Event nur beim ersten Durchlauf loggen
+        if (!hasRunOnce) {
+            logEvent('LEVEL4_SIMULATION_RESULT', {
+              battery: selectedBattery,
+              capacitor: selectedCapacitor,
+              result: simulationResult.testResult,
+              minVoltage: simulationResult.minCpuVoltage,
+              brownoutOccurred: simulationResult.brownoutOccurred
+            });
+        }
       }
-
-      // Animation loopen
-      if (step >= result.dataPoints.length - 1) {
-        step = 0;
-      }
-    }, 30); // 30ms pro Step für flüssige Animation
+    }, 10); // 10ms * 300 Schritte = 3000ms (3 Sekunden) - weichere Animation
   };
 
-  // Motor stoppen
-  const handleStopMotor = () => {
+  // 3. Test beenden / Reset
+  const handleStopTest = () => {
     if (simulationIntervalRef.current) {
       clearInterval(simulationIntervalRef.current);
     }
+    setIsTestActive(false);
     setIsSimulating(false);
-    setMotorRunning(false);
-
-    logEvent('LEVEL4_MOTOR_STOPPED', {
-      battery: selectedBattery,
-      capacitor: selectedCapacitor,
-      result: simulationResult?.testResult,
-      brownoutOccurred: simulationResult?.brownoutOccurred
-    });
-
-    // Bei Erfolg → Reflection
-    if (simulationResult?.testResult === 'SUCCESS') {
-      setTimeout(() => {
-        setSubStep(2); // Zur Reflection
-      }, 500);
-    }
-  };
-
-  // Reset nach Fehlschlag
-  const handleReset = () => {
-    if (simulationIntervalRef.current) {
-      clearInterval(simulationIntervalRef.current);
-    }
-    setSimulationResult(null);
     setCurrentSimStep(0);
-    setIsSimulating(false);
-    setMotorRunning(false);
+    
+    // Wenn erfolgreich, könnte man hier direkt weiterleiten, aber wir lassen den User entscheiden
+    if (simulationResult?.testResult === 'SUCCESS') {
+         setTimeout(() => {
+            setSubStep(2); // Zur Reflection
+          }, 500);
+    }
+  };
+  
+  const handleResetConfig = () => {
+    handleStopTest();
+    setSimulationResult(null);
     setSelectedBattery('standard');
     setSelectedCapacitor('none');
-  };
+  }
 
   const handleHaraldRefillClose = () => {
     const refillCredits = Math.max(credits, REFILL_CREDITS);
@@ -327,13 +351,27 @@ const Level4_Electronics: React.FC = () => {
               >
                 <strong className="text-red-400 block mb-2">WAS IST PASSIERT?</strong>
                 <p className="mb-2">
-                  Als der Präzisionsmotor gestartet ist, um die exakte Entladeposition des Containers zu bestimmen, ist die elektrische Spannung eingebrochen. Der Motor hat beim Start so viel Strom gebraucht, dass die Steuereinheit (CPU) kurz „ohnmächtig“ wurde und neu gestartet hat. Dadurch hat der Greifer die Kontrolle verloren. Dummerweise war zu diesem Zeitpunkt Chefin Bazlens Hund direkt darunter.
+                  Als der Präzisionsmotor startete, brach die Spannung zusammen. Der{" "}
+                  <GlossaryTooltip 
+                    term="Anlaufstrom" 
+                    definition="Der hohe Strombedarf beim Motorstart – oft 5-10x höher als im Normalbetrieb."
+                  />{" "}
+                  war so hoch, dass die CPU einen{" "}
+                  <GlossaryTooltip 
+                    term="Brownout" 
+                    definition="Kurzzeitiger Spannungsabfall, der Computer zum Neustart zwingt."
+                  />{" "}
+                  erlitt und neu startete. Der Greifer verlor dabei seine Kontrolle.
                 </p>
 
                 <strong className="text-cyan-400 block mb-2 mt-4">AUFTRAG:</strong>
                 <p>
-                  Untersuche die Stromversorgung und finde eine Einstellung, bei der die Spannung auch beim starken Anlaufstrom nicht einbricht.
-Die Steuereinheit (CPU) braucht dabei immer mindestens 5 Volt.
+                  Analysiere das Energiesystem und finde eine Konfiguration, die auch bei hohem{" "}
+                  <GlossaryTooltip 
+                    term="Anlaufstrom" 
+                    definition="Der hohe Strombedarf beim Motorstart – oft 5-10x höher als im Normalbetrieb."
+                  />{" "}
+                  stabil bleibt. Die CPU braucht mindestens <span className="text-cyan-400 font-bold">5 Volt</span>.
                 </p>
               </motion.div>
             )}
@@ -409,28 +447,30 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
             isSimulating={isSimulating}
             currentStep={currentSimStep}
             showCapacitor={selectedCapacitor !== 'none'}
+            onTriggerStart={handleTriggerStart}
+            isTestActive={isTestActive}
           />
         </div>
 
         {/* UNTEN: Konfiguration in zwei Spalten */}
-        <div className="w-full">
+        <div className="w-full mb-6">
           <CircuitConfigurator
             selectedBattery={selectedBattery}
             selectedCapacitor={selectedCapacitor}
             onBatteryChange={handleBatteryChange}
             onCapacitorChange={handleCapacitorChange}
-            disabled={motorRunning}
+            disabled={isTestActive}
           />
         </div>
 
-        {/* Ergebnis-Anzeige */}
+        {/* Ergebnis-Anzeige (nur nach erstem Lauf sichtbar) */}
         <AnimatePresence>
-          {simulationResult && !isSimulating && (
+          {hasRunOnce && simulationResult && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className={`mt-6 p-4 rounded-lg border ${
+              className={`mb-6 p-4 rounded-lg border ${
                 simulationResult.brownoutOccurred
                   ? 'bg-red-900/30 border-red-500 text-red-300'
                   : 'bg-green-900/30 border-green-500 text-green-300'
@@ -441,7 +481,7 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
                   {simulationResult.brownoutOccurred ? '⚠️' : '✓'}
                 </span>
                 <span className="font-bold text-lg">
-                  {simulationResult.brownoutOccurred ? 'BROWNOUT (SPANNUNGSABFALL)' : 'SYSTEM STABIL'}
+                  {simulationResult.brownoutOccurred ? 'BROWNOUT DETEKTIERT' : 'SYSTEM STABIL'}
                 </span>
               </div>
               <p className="text-sm opacity-90">
@@ -456,38 +496,32 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
         </AnimatePresence>
 
         {/* Action Buttons */}
-        <div className="mt-6 pt-4 border-t border-slate-700 flex gap-4">
-          {simulationResult?.brownoutOccurred && !motorRunning && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              onClick={handleReset}
-              className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded uppercase tracking-widest transition-colors"
-            >
-              Neu konfigurieren
-            </motion.button>
+        <div className="pt-4 border-t border-slate-700 flex gap-4">
+          {isTestActive ? (
+             // Wenn Test aktiv: Button beendet den Testmodus
+             <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={simulationResult?.testResult === 'SUCCESS' ? handleStopTest : handleResetConfig}
+                className={`flex-1 py-4 font-bold text-lg rounded uppercase tracking-widest transition-all ${
+                   simulationResult?.testResult === 'SUCCESS'
+                   ? 'bg-green-600 hover:bg-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                   : 'bg-slate-700 hover:bg-slate-600 text-white'
+                }`}
+             >
+                {simulationResult?.testResult === 'SUCCESS' ? 'Erfolgreich! Weiter...' : 'Test beenden & Korrigieren'}
+             </motion.button>
+          ) : (
+             // Wenn Test inaktiv: Button startet den Testmodus
+             <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={handleActivateTest}
+                className="flex-1 py-4 font-bold text-lg rounded uppercase tracking-widest transition-all bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]"
+             >
+               Testaufbau aktivieren ({calculateElectronicsCost(selectedBattery, selectedCapacitor)} CR)
+             </motion.button>
           )}
-
-          <motion.button
-            whileHover={{ scale: motorRunning ? 1 : 1.01 }}
-            whileTap={{ scale: motorRunning ? 1 : 0.99 }}
-            onClick={motorRunning ? handleStopMotor : handleStartSimulation}
-            disabled={!motorRunning && simulationResult?.testResult === 'SUCCESS'}
-            className={`flex-1 py-4 font-bold text-lg rounded uppercase tracking-widest transition-all ${
-              motorRunning
-                ? 'bg-red-600 hover:bg-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.3)]'
-                : simulationResult?.testResult === 'SUCCESS'
-                  ? 'bg-green-600 text-white cursor-not-allowed'
-                  : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-            }`}
-          >
-            {motorRunning
-              ? 'Motor stoppen'
-              : simulationResult?.testResult === 'SUCCESS'
-                ? 'Erfolgreich!'
-                : `Motor starten (${MOTOR_START_COST} CR)`
-            }
-          </motion.button>
         </div>
       </TerminalCard>
 
@@ -497,6 +531,15 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
           currentCredits={credits}
           refillTo={Math.max(REFILL_CREDITS, credits)}
           onClose={handleHaraldRefillClose}
+        />
+      )}
+      
+      {/* Harald Rejection Modal */}
+      {showHaraldRejection && (
+        <HaraldRejectionModal
+          requestedCost={ELECTRONIC_COMPONENTS.batteries.performance.cost}
+          availableCredits={credits}
+          onClose={() => setShowHaraldRejection(false)}
         />
       )}
     </div>

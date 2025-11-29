@@ -254,7 +254,7 @@ export const ELECTRONIC_COMPONENTS = {
       name: 'Standard-Akku',
       cost: 10,
       voltage: 12 as number, // Volt (Nennspannung)
-      internalResistance: 0.6, // Ohm - spürbarer Einbruch ohne Puffer
+      internalResistance: 1.0, // Ohm - Erhöht, damit 8.5A * 1.0 Ohm = 8.5V Drop -> 3.5V Restspannung (Brownout)
       description: 'Günstig, aber hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein.',
       icon: '🔋'
     },
@@ -263,7 +263,7 @@ export const ELECTRONIC_COMPONENTS = {
       name: 'Standard-Akku',
       cost: 7,
       voltage: 12 as number,
-      internalResistance: 1.5, // Unklare Qualität, bricht stärker ein
+      internalResistance: 1.8, // Unklare Qualität, bricht noch stärker ein
       description: 'Hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein. Herkunft unklar.',
       icon: '🔋'
     },
@@ -318,7 +318,7 @@ export const ELECTRONICS_CONSTANTS = {
   MOTOR_INRUSH_CURRENT: 8.5, // Ampere - Anlaufstrom (reduziert, aber kritisch)
   INRUSH_DURATION_MS: 50, // Millisekunden - Dauer des Anlaufstroms
   SIMULATION_DURATION_MS: 200, // Millisekunden - Gesamte Simulationsdauer
-  SIMULATION_STEPS: 100, // Anzahl der Datenpunkte
+  SIMULATION_STEPS: 300, // Anzahl der Datenpunkte - erhöht für weichere Zeitlupe
 };
 
 /**
