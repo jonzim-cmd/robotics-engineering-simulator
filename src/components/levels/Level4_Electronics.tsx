@@ -8,7 +8,7 @@ import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { BrownoutVisualization } from '@/components/ui/BrownoutVisualization';
 import { EnergyFlowDiagram } from '@/components/ui/EnergyFlowDiagram';
 import { CircuitConfigurator } from '@/components/ui/CircuitConfigurator';
-import { SmartphoneResearch } from '@/components/ui/SmartphoneResearch';
+import { YoutubeResearch } from '@/components/ui/YoutubeResearch';
 import { ReflectionCall } from '@/components/ui/ReflectionCall';
 import { HaraldRefillModal } from '@/components/ui/HaraldRefillModal';
 import { HaraldRejectionModal } from '@/components/ui/HaraldRejectionModal';
@@ -379,11 +379,9 @@ Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span classNam
           </div>
         </TerminalCard>
 
-        {/* Smartphone Research */}
+        {/* Smartphone Research (now Youtube Style) */}
         {subStep === 1 && (
-          <SmartphoneResearch
-            searchQuery="Elektronik Spannung Batterie"
-            browserTitle="Elektrotechnik Basics"
+          <YoutubeResearch
             searchResults={RESEARCH_RESULTS}
             onComplete={handleResearchComplete}
           />
