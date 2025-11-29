@@ -4,20 +4,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
-import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
 import { BrownoutVisualization } from '@/components/ui/BrownoutVisualization';
 import { EnergyFlowDiagram } from '@/components/ui/EnergyFlowDiagram';
 import { CircuitConfigurator } from '@/components/ui/CircuitConfigurator';
 import { SmartphoneResearch } from '@/components/ui/SmartphoneResearch';
 import { ReflectionCall } from '@/components/ui/ReflectionCall';
-import { HaraldRejectionModal } from '@/components/ui/HaraldRejectionModal';
 import { HaraldRefillModal } from '@/components/ui/HaraldRefillModal';
 import {
   BatteryType,
   CapacitorType,
   calculateElectronicsSimulation,
-  calculateElectronicsCost,
-  ELECTRONIC_COMPONENTS,
   ElectronicsSimulationResult
 } from '@/lib/physicsEngine';
 import { trackEvent } from '@/app/actions';
@@ -90,6 +86,9 @@ Kondensatoren sind Puffer für KURZE Schwankungen, kein Ersatz für die Batterie
   }
 ];
 
+const REFILL_CREDITS = 50;
+const MOTOR_START_COST = 25;
+
 const Level4_Electronics: React.FC = () => {
   const {
     advanceLevel,
@@ -100,6 +99,7 @@ const Level4_Electronics: React.FC = () => {
     subStep,
     setSubStep,
     credits,
+    setCredits,
     removeCredits,
     userId,
     currentLevel
@@ -112,7 +112,6 @@ const Level4_Electronics: React.FC = () => {
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<ElectronicsSimulationResult | null>(null);
   const [currentSimStep, setCurrentSimStep] = useState(0);
-  const [showHaraldRejection, setShowHaraldRejection] = useState(false);
   const [showHaraldRefill, setShowHaraldRefill] = useState(false);
   const [motorRunning, setMotorRunning] = useState(false);
   const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -176,19 +175,6 @@ const Level4_Electronics: React.FC = () => {
 
   // Batterie-Auswahl mit Harald-Check
   const handleBatteryChange = (battery: BatteryType) => {
-    const newCost = calculateElectronicsCost(battery, selectedCapacitor);
-
-    // Wenn Performance-Akku und zu teuer → Harald-Dialog
-    if (battery === 'performance' && newCost > credits) {
-      logEvent('LEVEL4_HARALD_TRIGGERED', {
-        requestedBattery: battery,
-        requestedCost: newCost,
-        availableCredits: credits
-      });
-      setShowHaraldRejection(true);
-      return;
-    }
-
     setSelectedBattery(battery);
     setSimulationResult(null);
   };
@@ -200,16 +186,15 @@ const Level4_Electronics: React.FC = () => {
 
   // Simulation starten/stoppen
   const handleStartSimulation = () => {
-    const totalCost = calculateElectronicsCost(selectedBattery, selectedCapacitor);
-
-    if (totalCost > credits) {
+    if (MOTOR_START_COST > credits) {
       logEvent('LEVEL4_SIMULATION_DENIED', {
         reason: 'insufficient_credits',
         battery: selectedBattery,
         capacitor: selectedCapacitor,
-        cost: totalCost,
+        cost: MOTOR_START_COST,
         credits
       });
+      setShowHaraldRefill(true);
       return;
     }
 
@@ -219,12 +204,12 @@ const Level4_Electronics: React.FC = () => {
     logEvent('LEVEL4_SIMULATION_STARTED', {
       battery: selectedBattery,
       capacitor: selectedCapacitor,
-      cost: totalCost,
+      cost: MOTOR_START_COST,
       creditsBefore: credits
     });
 
     // Credits abziehen
-    removeCredits(totalCost);
+    removeCredits(MOTOR_START_COST);
 
     // Simulation berechnen
     const result = calculateElectronicsSimulation(selectedBattery, selectedCapacitor);
@@ -293,6 +278,16 @@ const Level4_Electronics: React.FC = () => {
     setMotorRunning(false);
     setSelectedBattery('standard');
     setSelectedCapacitor('none');
+  };
+
+  const handleHaraldRefillClose = () => {
+    const refillCredits = Math.max(credits, REFILL_CREDITS);
+    setCredits(refillCredits);
+    logEvent('LEVEL4_CREDITS_REFILLED', {
+      from: credits,
+      refillTo: refillCredits
+    });
+    setShowHaraldRefill(false);
   };
 
   // === RENDER: INTRO ===
@@ -418,13 +413,12 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
         </div>
 
         {/* UNTEN: Konfiguration in zwei Spalten */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="w-full">
           <CircuitConfigurator
             selectedBattery={selectedBattery}
             selectedCapacitor={selectedCapacitor}
             onBatteryChange={handleBatteryChange}
             onCapacitorChange={handleCapacitorChange}
-            credits={credits}
             disabled={motorRunning}
           />
         </div>
@@ -491,18 +485,18 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
               ? 'Motor stoppen'
               : simulationResult?.testResult === 'SUCCESS'
                 ? 'Erfolgreich!'
-                : `Motor starten (${calculateElectronicsCost(selectedBattery, selectedCapacitor)} CR)`
+                : `Motor starten (${MOTOR_START_COST} CR)`
             }
           </motion.button>
         </div>
       </TerminalCard>
 
-      {/* Harald Rejection Modal */}
-      {showHaraldRejection && (
-        <HaraldRejectionModal
-          requestedCost={ELECTRONIC_COMPONENTS.batteries.performance.cost}
-          availableCredits={credits}
-          onClose={() => setShowHaraldRejection(false)}
+      {/* Harald Refill Modal */}
+      {showHaraldRefill && (
+        <HaraldRefillModal
+          currentCredits={credits}
+          refillTo={Math.max(REFILL_CREDITS, credits)}
+          onClose={handleHaraldRefillClose}
         />
       )}
     </div>

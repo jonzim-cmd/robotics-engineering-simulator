@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { TypewriterText } from './TypewriterText';
 
 interface HaraldRefillModalProps {
+  currentCredits: number;
+  refillTo?: number;
   onClose: () => void;
 }
 
@@ -33,6 +35,8 @@ Diesmal: ERST DENKEN. DANN TESTEN.
 Und kommen Sie mir nicht nochmal damit.`;
 
 export const HaraldRefillModal: React.FC<HaraldRefillModalProps> = ({
+  currentCredits,
+  refillTo = 50,
   onClose
 }) => {
   const [showFullText, setShowFullText] = useState(false);
@@ -83,12 +87,12 @@ export const HaraldRefillModal: React.FC<HaraldRefillModalProps> = ({
         <div className="bg-yellow-50 border-b-2 border-stone-400 px-6 py-3 flex justify-center items-center gap-8">
           <div className="text-sm" style={{ fontFamily: 'serif' }}>
             <span className="text-stone-600">Aktuell:</span>
-            <span className="ml-2 font-bold text-red-700">0 CR</span>
+            <span className="ml-2 font-bold text-red-700">{currentCredits} CR</span>
           </div>
           <div className="text-2xl text-stone-500">→</div>
           <div className="text-sm" style={{ fontFamily: 'serif' }}>
             <span className="text-stone-600">Aufgefüllt auf:</span>
-            <span className="ml-2 font-bold text-green-700">50 CR</span>
+            <span className="ml-2 font-bold text-green-700">{refillTo} CR</span>
           </div>
         </div>
 
@@ -127,7 +131,7 @@ export const HaraldRefillModal: React.FC<HaraldRefillModalProps> = ({
             }`}
             style={{ fontFamily: 'serif' }}
           >
-            {textComplete || showFullText ? 'Ja, verstanden...' : 'Bitte warten...'}
+            {textComplete || showFullText ? 'Verstanden...' : 'Bitte warten...'}
           </motion.button>
         </div>
       </motion.div>

@@ -254,7 +254,7 @@ export const ELECTRONIC_COMPONENTS = {
       name: 'Standard-Akku',
       cost: 10,
       voltage: 12 as number, // Volt (Nennspannung)
-      internalResistance: 2.0, // Ohm
+      internalResistance: 1.2, // Ohm - hoch genug für Einbruch ohne Puffer
       description: 'Günstig, aber hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein.',
       icon: '🔋'
     },
@@ -281,7 +281,7 @@ export const ELECTRONIC_COMPONENTS = {
       id: 'small' as const,
       name: 'Stützkondensator',
       cost: 15,
-      capacitance: 0.01, // 10mF - reicht für kurze Überbrückung
+      capacitance: 0.12, // 120mF - genug, um Standard-Akku-Anlauf zu stützen
       description: 'Speichert Energie und gibt sie bei kurzen Spannungseinbrüchen ab.',
       icon: '⚡'
     },
@@ -289,7 +289,7 @@ export const ELECTRONIC_COMPONENTS = {
       id: 'large' as const,
       name: 'Pufferkondensator (groß)',
       cost: 35,
-      capacitance: 0.1, // 100mF
+      capacitance: 0.2, // 200mF
       description: 'Großer Energiespeicher für längere Überbrückung. Überdimensioniert für diesen Einsatz.',
       icon: '🔌'
     }
@@ -306,7 +306,7 @@ export type CapacitorType = keyof typeof ELECTRONIC_COMPONENTS.capacitors;
 export const ELECTRONICS_CONSTANTS = {
   CPU_MIN_VOLTAGE: 5.0, // Volt - unter diesem Wert: Brownout/Reset
   MOTOR_RUNNING_CURRENT: 2.0, // Ampere - Normalbetrieb
-  MOTOR_INRUSH_CURRENT: 10.0, // Ampere - Anlaufstrom (5x normal)
+  MOTOR_INRUSH_CURRENT: 8.5, // Ampere - Anlaufstrom (reduziert, aber kritisch)
   INRUSH_DURATION_MS: 50, // Millisekunden - Dauer des Anlaufstroms
   SIMULATION_DURATION_MS: 200, // Millisekunden - Gesamte Simulationsdauer
   SIMULATION_STEPS: 100, // Anzahl der Datenpunkte
