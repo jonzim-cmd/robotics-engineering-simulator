@@ -241,7 +241,6 @@ const Level4_Electronics: React.FC = () => {
     setSimulationResult(result);
 
     setIsSimulating(true);
-    setHasRunOnce(true);
     setCurrentSimStep(0);
 
     logEvent('LEVEL4_SIMULATION_STARTED', {
@@ -262,6 +261,7 @@ const Level4_Electronics: React.FC = () => {
           clearInterval(simulationIntervalRef.current);
         }
         setIsSimulating(false);
+        setHasRunOnce(true);
         setCurrentSimStep(0); // Reset to initial state after animation
         
         // Wenn Performance Akku: Harald beschwert sich NACH DEM ENDE der Simulation zeitverzögert
