@@ -483,6 +483,15 @@ export function calculateElectronicsSimulation(
     resultMessage
   };
 
+  if (isPerformance) {
+    return {
+      ...baseResult,
+      brownoutOccurred: false,
+      testResult: 'SUCCESS',
+      resultMessage: 'Technisch Spannungsversorgung aufgrund hoher Leistung des Akkus.'
+    };
+  }
+
   if (isNoCap) {
     return {
       ...baseResult,
@@ -507,15 +516,6 @@ export function calculateElectronicsSimulation(
       brownoutOccurred: true,
       testResult: 'BROWNOUT',
       resultMessage: 'Der große Pufferkondensator ist überdimensioniert und wird nicht freigegeben. Konfiguration abgelehnt.'
-    };
-  }
-
-  if (isPerformance) {
-    return {
-      ...baseResult,
-      brownoutOccurred: false,
-      testResult: 'BROWNOUT',
-      resultMessage: 'Technisch stabil. [Harald Schuldenbremse]: Ich gebe keine Mittel frei, wenn es billigere Angebote gibt, die ausreichend sind, um das technische Ziel zu erreichen.'
     };
   }
 

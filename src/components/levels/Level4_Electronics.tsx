@@ -181,19 +181,8 @@ const Level4_Electronics: React.FC = () => {
 
   // Batterie-Auswahl mit Harald-Check
   const handleBatteryChange = (battery: BatteryType) => {
-    const newCost = calculateElectronicsCost(battery, selectedCapacitor);
-    
-    // Wenn Performance-Akku und zu teuer → Harald-Dialog
-    // (Nur prüfen wenn wir nicht genug Credits haben, sonst darf man es wählen)
-    if (battery === 'performance' && newCost > credits) {
-      logEvent('LEVEL4_HARALD_TRIGGERED', {
-        requestedBattery: battery,
-        requestedCost: newCost,
-        availableCredits: credits
-      });
-      setShowHaraldRejection(true);
-      return;
-    }
+    // Wir lassen die Auswahl zu, auch wenn es zu teuer ist
+    // Der "Fehler" passiert dann im Ergebnis oder Harald meldet sich danach
     
     setSelectedBattery(battery);
     setSimulationResult(null);
@@ -210,7 +199,8 @@ const Level4_Electronics: React.FC = () => {
   const handleActivateTest = () => {
     const totalCost = calculateElectronicsCost(selectedBattery, selectedCapacitor);
     
-    if (totalCost > credits) {
+    // Wenn nicht Performance-Akku: Normaler Credit-Check
+    if (selectedBattery !== 'performance' && totalCost > credits) {
       logEvent('LEVEL4_SIMULATION_DENIED', {
         reason: 'insufficient_credits',
         battery: selectedBattery,
