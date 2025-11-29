@@ -441,7 +441,7 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
                   {simulationResult.brownoutOccurred ? '⚠️' : '✓'}
                 </span>
                 <span className="font-bold text-lg">
-                  {simulationResult.brownoutOccurred ? 'BROWNOUT DETEKTIERT' : 'SYSTEM STABIL'}
+                  {simulationResult.brownoutOccurred ? 'BROWNOUT (SPANNUNGSABFALL)' : 'SYSTEM STABIL'}
                 </span>
               </div>
               <p className="text-sm opacity-90">

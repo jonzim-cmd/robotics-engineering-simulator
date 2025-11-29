@@ -45,7 +45,7 @@ export const ELECTRONIC_COMPONENTS = {
       cost: 10,
       voltage: 12, // Volt (Nennspannung)
       internalResistance: 2.0, // Ohm
-      description: 'Günstig, aber hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein.',
+      description: 'Hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein.',
       icon: '🔋'
     },
     performance: {

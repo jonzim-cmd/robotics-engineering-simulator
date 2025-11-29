@@ -264,8 +264,8 @@ export const ELECTRONIC_COMPONENTS = {
       cost: 7,
       voltage: 12 as number,
       internalResistance: 1.5, // Unklare Qualität, bricht stärker ein
-      description: 'Herkunft unklar.',
-      icon: '🚚'
+      description: 'Hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein. Herkunft unklar.',
+      icon: '🔋'
     },
     performance: {
       id: 'performance' as const,
@@ -491,7 +491,7 @@ export function calculateElectronicsSimulation(
       ...baseResult,
       brownoutOccurred: true,
       testResult: 'BROWNOUT',
-      resultMessage: 'Der Akku aus unklarer Herkunft kollabiert unter Last. Spannungsabfall führt zum Brownout.'
+      resultMessage: 'Qualitative Mängel festgestellt. Akku kollabiert und erzeugt einen Spannungsabfall in der Spannungseinheit (CPU).'
     };
   }
 
@@ -509,7 +509,7 @@ export function calculateElectronicsSimulation(
       ...baseResult,
       brownoutOccurred: false,
       testResult: 'BROWNOUT',
-      resultMessage: 'Technisch stabil.\n\n[Harald Schuldenbremse]: Ich gebe keine Mittel frei, wenn es billigere Angebote gibt, die ausreichend sind, um das technische Ziel zu erreichen.'
+      resultMessage: 'Technisch stabil. [Harald Schuldenbremse]: Ich gebe keine Mittel frei, wenn es billigere Angebote gibt, die ausreichend sind, um das technische Ziel zu erreichen.'
     };
   }
 
@@ -518,7 +518,7 @@ export function calculateElectronicsSimulation(
       ...baseResult,
       brownoutOccurred: false,
       testResult: 'SUCCESS',
-      resultMessage: 'Motorstart stabil: Standard-Akku + Stützkondensator halten die CPU-Spannung über 5V.'
+      resultMessage: 'Motorstart stabil: Standard-Akku + Stützkondensator halten die CPU-Spannung über 5V, kein Spannungsabfall.'
     };
   }
 
