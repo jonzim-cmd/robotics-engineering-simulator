@@ -316,6 +316,25 @@ const Level4_Electronics: React.FC = () => {
     setShowHaraldRefill(false);
   };
 
+  // === RENDER: SUCCESS ===
+  if (levelState === 'SUCCESS') {
+    return (
+      <TerminalCard title="MISSION COMPLETE" borderColor="green" onBack={handleBack}>
+        <div className="text-center space-y-6 py-8">
+          <div className="text-green-400 text-4xl mb-4">✓ MISSION ERFOLGREICH</div>
+          <p>Die Energieversorgung ist stabilisiert. Die CPU-Einheit bleibt auch beim Motorstart zuverlässig über 5 Volt. Der Greifer arbeitet präzise.</p>
+          <p className="text-sm text-slate-400">Versicherungsfall abgewendet.</p>
+          <button 
+            onClick={() => advanceLevel()}
+            className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded uppercase tracking-widest transition-colors"
+          >
+            Nächstes Level
+          </button>
+        </div>
+      </TerminalCard>
+    );
+  }
+
   // === RENDER: INTRO ===
   if (levelState === 'INTRO') {
     return (
@@ -390,15 +409,15 @@ Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span classNam
     );
   }
 
-  // === RENDER: SUCCESS ===
-  if (levelState === 'SUCCESS' || subStep === 2) {
+  // === RENDER: REFLECTION (Insurance Form) ===
+  if (subStep === 2) {
     return (
       <InsuranceForm
         onBack={() => {
           setLevelState('ACTIVE');
           setSubStep(0);
         }}
-        onComplete={() => advanceLevel()}
+        onComplete={() => setLevelState('SUCCESS')}
       />
     );
   }

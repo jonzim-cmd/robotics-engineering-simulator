@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { trackEvent } from '@/app/actions';
@@ -23,6 +23,17 @@ export const InsuranceForm: React.FC<InsuranceFormProps> = ({
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   // Solution state
   const [showSolution, setShowSolution] = useState(false);
+
+  const solutionRef = useRef<HTMLDivElement>(null); // Ref for the solution section
+
+  useEffect(() => {
+    if (showSolution && solutionRef.current) {
+      // Delay scrolling slightly to allow animation to complete
+      setTimeout(() => {
+        solutionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300); 
+    }
+  }, [showSolution]);
 
   const handleSubmit = async () => {
     if (!explanation.trim()) return;
@@ -171,6 +182,7 @@ export const InsuranceForm: React.FC<InsuranceFormProps> = ({
               <AnimatePresence>
                 {showSolution && (
                   <motion.div
+                    ref={solutionRef} // Attach ref here
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     className="overflow-hidden"
