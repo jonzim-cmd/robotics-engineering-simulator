@@ -11,6 +11,7 @@ import { CircuitConfigurator } from '@/components/ui/CircuitConfigurator';
 import { SmartphoneResearch } from '@/components/ui/SmartphoneResearch';
 import { ReflectionCall } from '@/components/ui/ReflectionCall';
 import { HaraldRejectionModal } from '@/components/ui/HaraldRejectionModal';
+import { HaraldRefillModal } from '@/components/ui/HaraldRefillModal';
 import {
   BatteryType,
   CapacitorType,
@@ -112,6 +113,8 @@ const Level4_Electronics: React.FC = () => {
   const [simulationResult, setSimulationResult] = useState<ElectronicsSimulationResult | null>(null);
   const [currentSimStep, setCurrentSimStep] = useState(0);
   const [showHaraldRejection, setShowHaraldRejection] = useState(false);
+  const [showHaraldRefill, setShowHaraldRefill] = useState(false);
+  const [motorRunning, setMotorRunning] = useState(false);
   const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Event Tracking Helper
@@ -131,12 +134,28 @@ const Level4_Electronics: React.FC = () => {
     };
   }, []);
 
+  // Motor stoppen wenn Level verlassen wird
+  useEffect(() => {
+    return () => {
+      if (motorRunning) {
+        setMotorRunning(false);
+        if (simulationIntervalRef.current) {
+          clearInterval(simulationIntervalRef.current);
+        }
+      }
+    };
+  }, [motorRunning]);
+
   // Navigation
   const handleBack = () => {
+    if (simulationIntervalRef.current) {
+      clearInterval(simulationIntervalRef.current);
+    }
     popStateHistory();
     setShowText(false);
     setSimulationResult(null);
     setIsSimulating(false);
+    setMotorRunning(false);
     setCurrentSimStep(0);
   };
 
@@ -179,7 +198,7 @@ const Level4_Electronics: React.FC = () => {
     setSimulationResult(null);
   };
 
-  // Simulation starten
+  // Simulation starten/stoppen
   const handleStartSimulation = () => {
     const totalCost = calculateElectronicsCost(selectedBattery, selectedCapacitor);
 
@@ -211,20 +230,18 @@ const Level4_Electronics: React.FC = () => {
     const result = calculateElectronicsSimulation(selectedBattery, selectedCapacitor);
     setSimulationResult(result);
     setIsSimulating(true);
+    setMotorRunning(true);
     setCurrentSimStep(0);
 
-    // Animation durchlaufen
+    // Animation durchlaufen - kontinuierlich bis gestoppt
     let step = 0;
+    let brownoutLogged = false;
     simulationIntervalRef.current = setInterval(() => {
       step++;
       setCurrentSimStep(step);
 
-      if (step >= result.dataPoints.length - 1) {
-        if (simulationIntervalRef.current) {
-          clearInterval(simulationIntervalRef.current);
-        }
-        setIsSimulating(false);
-
+      // Brownout-Event nur einmal loggen
+      if (!brownoutLogged && result.brownoutOccurred && step >= result.dataPoints.length - 1) {
         logEvent('LEVEL4_SIMULATION_RESULT', {
           battery: selectedBattery,
           capacitor: selectedCapacitor,
@@ -232,21 +249,48 @@ const Level4_Electronics: React.FC = () => {
           minVoltage: result.minCpuVoltage,
           brownoutOccurred: result.brownoutOccurred
         });
+        brownoutLogged = true;
+      }
 
-        // Bei Erfolg → Reflection
-        if (result.testResult === 'SUCCESS') {
-          setTimeout(() => {
-            setSubStep(2); // Zur Reflection
-          }, 1500);
-        }
+      // Animation loopen
+      if (step >= result.dataPoints.length - 1) {
+        step = 0;
       }
     }, 30); // 30ms pro Step für flüssige Animation
   };
 
+  // Motor stoppen
+  const handleStopMotor = () => {
+    if (simulationIntervalRef.current) {
+      clearInterval(simulationIntervalRef.current);
+    }
+    setIsSimulating(false);
+    setMotorRunning(false);
+
+    logEvent('LEVEL4_MOTOR_STOPPED', {
+      battery: selectedBattery,
+      capacitor: selectedCapacitor,
+      result: simulationResult?.testResult,
+      brownoutOccurred: simulationResult?.brownoutOccurred
+    });
+
+    // Bei Erfolg → Reflection
+    if (simulationResult?.testResult === 'SUCCESS') {
+      setTimeout(() => {
+        setSubStep(2); // Zur Reflection
+      }, 500);
+    }
+  };
+
   // Reset nach Fehlschlag
   const handleReset = () => {
+    if (simulationIntervalRef.current) {
+      clearInterval(simulationIntervalRef.current);
+    }
     setSimulationResult(null);
     setCurrentSimStep(0);
+    setIsSimulating(false);
+    setMotorRunning(false);
     setSelectedBattery('standard');
     setSelectedCapacitor('none');
   };
@@ -363,66 +407,63 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
         borderColor={simulationResult?.brownoutOccurred ? 'red' : 'cyan'}
         onBack={handleBack}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          {/* LINKS: Konfiguration */}
-          <div className="space-y-4">
-            <CircuitConfigurator
-              selectedBattery={selectedBattery}
-              selectedCapacitor={selectedCapacitor}
-              onBatteryChange={handleBatteryChange}
-              onCapacitorChange={handleCapacitorChange}
-              credits={credits}
-              disabled={isSimulating}
-            />
-          </div>
-
-          {/* RECHTS: Visualisierung */}
-          <div className="space-y-4">
-            <EnergyFlowDiagram
-              dataPoints={simulationResult?.dataPoints || []}
-              isSimulating={isSimulating}
-              currentStep={currentSimStep}
-              showCapacitor={selectedCapacitor !== 'none'}
-            />
-
-            {/* Ergebnis-Anzeige */}
-            <AnimatePresence>
-              {simulationResult && !isSimulating && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className={`p-4 rounded-lg border ${
-                    simulationResult.brownoutOccurred
-                      ? 'bg-red-900/30 border-red-500 text-red-300'
-                      : 'bg-green-900/30 border-green-500 text-green-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">
-                      {simulationResult.brownoutOccurred ? '⚠️' : '✓'}
-                    </span>
-                    <span className="font-bold text-lg">
-                      {simulationResult.brownoutOccurred ? 'BROWNOUT DETEKTIERT' : 'SYSTEM STABIL'}
-                    </span>
-                  </div>
-                  <p className="text-sm opacity-90">
-                    {simulationResult.resultMessage}
-                  </p>
-                  <div className="mt-3 flex gap-4 text-xs font-mono">
-                    <span>Min. CPU: {simulationResult.minCpuVoltage.toFixed(1)}V</span>
-                    <span>Max. Strom: {simulationResult.maxMotorCurrent.toFixed(1)}A</span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        {/* OBEN: Energie-Fluss-Diagramm in voller Breite */}
+        <div className="w-full mb-6">
+          <EnergyFlowDiagram
+            dataPoints={simulationResult?.dataPoints || []}
+            isSimulating={isSimulating}
+            currentStep={currentSimStep}
+            showCapacitor={selectedCapacitor !== 'none'}
+          />
         </div>
+
+        {/* UNTEN: Konfiguration in zwei Spalten */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CircuitConfigurator
+            selectedBattery={selectedBattery}
+            selectedCapacitor={selectedCapacitor}
+            onBatteryChange={handleBatteryChange}
+            onCapacitorChange={handleCapacitorChange}
+            credits={credits}
+            disabled={motorRunning}
+          />
+        </div>
+
+        {/* Ergebnis-Anzeige */}
+        <AnimatePresence>
+          {simulationResult && !isSimulating && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className={`mt-6 p-4 rounded-lg border ${
+                simulationResult.brownoutOccurred
+                  ? 'bg-red-900/30 border-red-500 text-red-300'
+                  : 'bg-green-900/30 border-green-500 text-green-300'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-2xl">
+                  {simulationResult.brownoutOccurred ? '⚠️' : '✓'}
+                </span>
+                <span className="font-bold text-lg">
+                  {simulationResult.brownoutOccurred ? 'BROWNOUT DETEKTIERT' : 'SYSTEM STABIL'}
+                </span>
+              </div>
+              <p className="text-sm opacity-90">
+                {simulationResult.resultMessage}
+              </p>
+              <div className="mt-3 flex gap-4 text-xs font-mono">
+                <span>Min. CPU: {simulationResult.minCpuVoltage.toFixed(1)}V</span>
+                <span>Max. Strom: {simulationResult.maxMotorCurrent.toFixed(1)}A</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Action Buttons */}
         <div className="mt-6 pt-4 border-t border-slate-700 flex gap-4">
-          {simulationResult?.brownoutOccurred && !isSimulating && (
+          {simulationResult?.brownoutOccurred && !motorRunning && (
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -434,20 +475,20 @@ Es ist wie ein Sprinter, der nur 10 Sekunden durchhalten muss, nicht einen Marat
           )}
 
           <motion.button
-            whileHover={{ scale: isSimulating ? 1 : 1.01 }}
-            whileTap={{ scale: isSimulating ? 1 : 0.99 }}
-            onClick={handleStartSimulation}
-            disabled={isSimulating || (simulationResult?.testResult === 'SUCCESS')}
+            whileHover={{ scale: motorRunning ? 1 : 1.01 }}
+            whileTap={{ scale: motorRunning ? 1 : 0.99 }}
+            onClick={motorRunning ? handleStopMotor : handleStartSimulation}
+            disabled={!motorRunning && simulationResult?.testResult === 'SUCCESS'}
             className={`flex-1 py-4 font-bold text-lg rounded uppercase tracking-widest transition-all ${
-              isSimulating
-                ? 'bg-yellow-600 text-white animate-pulse cursor-wait'
+              motorRunning
+                ? 'bg-red-600 hover:bg-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.3)]'
                 : simulationResult?.testResult === 'SUCCESS'
                   ? 'bg-green-600 text-white cursor-not-allowed'
                   : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]'
             }`}
           >
-            {isSimulating
-              ? 'Simulation läuft...'
+            {motorRunning
+              ? 'Motor stoppen'
               : simulationResult?.testResult === 'SUCCESS'
                 ? 'Erfolgreich!'
                 : `Motor starten (${calculateElectronicsCost(selectedBattery, selectedCapacitor)} CR)`
