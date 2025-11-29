@@ -206,7 +206,7 @@ export const EnergyFlowDiagram: React.FC<EnergyFlowDiagramProps> = ({
             {currentData.cpuVoltage.toFixed(1)}V
           </text>
           <text x="40" y="80" textAnchor="middle" fill="#64748b" fontSize="8" fontFamily="monospace">
-            STEUERUNG
+            STEUERUNG (CPU)
           </text>
 
           {/* Warnung bei kritischer Spannung */}

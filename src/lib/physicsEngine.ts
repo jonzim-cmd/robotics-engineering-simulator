@@ -254,9 +254,18 @@ export const ELECTRONIC_COMPONENTS = {
       name: 'Standard-Akku',
       cost: 10,
       voltage: 12 as number, // Volt (Nennspannung)
-      internalResistance: 1.2, // Ohm - hoch genug für Einbruch ohne Puffer
+      internalResistance: 0.6, // Ohm - spürbarer Einbruch ohne Puffer
       description: 'Günstig, aber hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein.',
       icon: '🔋'
+    },
+    standard_grey: {
+      id: 'standard_grey' as const,
+      name: 'Standard-Akku',
+      cost: 7,
+      voltage: 12 as number,
+      internalResistance: 1.5, // Unklare Qualität, bricht stärker ein
+      description: 'Herkunft unklar.',
+      icon: '🚚'
     },
     performance: {
       id: 'performance' as const,
@@ -264,7 +273,7 @@ export const ELECTRONIC_COMPONENTS = {
       cost: 60, // WICHTIG: Über 50 Credits, damit Harald eingreifen muss
       voltage: 12 as number,
       internalResistance: 0.2, // Ohm
-      description: 'Premium-Qualität mit niedrigem Innenwiderstand. Stabile Spannung auch unter Last.',
+      description: 'Premium-Qualität mit niedrigem Innenwiderstand. Stabile Spannung auch unter allen Bedingungen.',
       icon: '⚡'
     }
   },
@@ -274,8 +283,8 @@ export const ELECTRONIC_COMPONENTS = {
       name: 'Kein Kondensator',
       cost: 0,
       capacitance: 0, // Farad
-      description: 'Ohne Puffer ist die CPU direkt von der Batteriespannung abhängig.',
-      icon: '❌'
+      description: 'Die CPU (Steuereinheit) ist direkt von der Batteriespannung abhängig.',
+      icon: '📈'
     },
     small: {
       id: 'small' as const,
@@ -290,7 +299,7 @@ export const ELECTRONIC_COMPONENTS = {
       name: 'Pufferkondensator (groß)',
       cost: 35,
       capacitance: 0.2, // 200mF
-      description: 'Großer Energiespeicher für längere Überbrückung. Überdimensioniert für diesen Einsatz.',
+      description: 'Großer Energiespeicher für längere Überbrückung.',
       icon: '🔌'
     }
   }
@@ -441,8 +450,8 @@ export function calculateElectronicsSimulation(
     });
   }
 
-  // Ergebnis bestimmen
-  const testResult: 'SUCCESS' | 'BROWNOUT' = brownoutOccurred ? 'BROWNOUT' : 'SUCCESS';
+  // Ergebnis bestimmen (Basis)
+  const baseTestResult: 'SUCCESS' | 'BROWNOUT' = brownoutOccurred ? 'BROWNOUT' : 'SUCCESS';
 
   let resultMessage: string;
   if (brownoutOccurred) {
@@ -451,14 +460,73 @@ export function calculateElectronicsSimulation(
     resultMessage = `SYSTEM STABLE: CPU-Spannung blieb stabil bei mindestens ${minCpuVoltage.toFixed(1)}V. Motorstart erfolgreich.`;
   }
 
-  return {
+  const isPerfectCombo = batteryType === 'standard' && capacitorType === 'small';
+  const isGreyImport = batteryType === 'standard_grey';
+  const isPerformance = batteryType === 'performance';
+  const isNoCap = capacitorType === 'none';
+  const isOverkillCap = capacitorType === 'large';
+
+  // Basisergebnis
+  const baseResult: ElectronicsSimulationResult = {
     dataPoints,
     minCpuVoltage,
     maxMotorCurrent,
     brownoutOccurred,
     brownoutTime,
-    testResult,
+    testResult: baseTestResult,
     resultMessage
+  };
+
+  if (isNoCap) {
+    return {
+      ...baseResult,
+      brownoutOccurred: true,
+      testResult: 'BROWNOUT',
+      resultMessage: 'Brownout (Spannungseinbruch) ausgelöst. Die CPU hatte kurz zu wenig Strom bekommen und musste neu starten.'
+    };
+  }
+
+  if (isGreyImport) {
+    return {
+      ...baseResult,
+      brownoutOccurred: true,
+      testResult: 'BROWNOUT',
+      resultMessage: 'Der Akku aus unklarer Herkunft kollabiert unter Last. Spannungsabfall führt zum Brownout.'
+    };
+  }
+
+  if (isOverkillCap) {
+    return {
+      ...baseResult,
+      brownoutOccurred: true,
+      testResult: 'BROWNOUT',
+      resultMessage: 'Der große Pufferkondensator ist überdimensioniert und wird nicht freigegeben. Konfiguration abgelehnt.'
+    };
+  }
+
+  if (isPerformance) {
+    return {
+      ...baseResult,
+      brownoutOccurred: false,
+      testResult: 'BROWNOUT',
+      resultMessage: 'Technisch stabil.\n\n[Harald Schuldenbremse]: Ich gebe keine Mittel frei, wenn es billigere Angebote gibt, die ausreichend sind, um das technische Ziel zu erreichen.'
+    };
+  }
+
+  if (isPerfectCombo && !brownoutOccurred) {
+    return {
+      ...baseResult,
+      brownoutOccurred: false,
+      testResult: 'SUCCESS',
+      resultMessage: 'Motorstart stabil: Standard-Akku + Stützkondensator halten die CPU-Spannung über 5V.'
+    };
+  }
+
+  return {
+    ...baseResult,
+    brownoutOccurred: true,
+    testResult: 'BROWNOUT',
+    resultMessage: 'Diese Konfiguration ist nicht freigegeben. Wähle den Standard-Akku mit Stützkondensator.'
   };
 }
 
