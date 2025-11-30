@@ -103,18 +103,18 @@ export const HaraldRejectionModal: React.FC<HaraldRejectionModalProps> = ({
 
         {/* Monolog */}
         <div className="p-6 h-80 overflow-y-auto bg-stone-100" style={{ fontFamily: 'serif' }}>
-          {showFullText ? (
-            <p className="text-stone-800 leading-relaxed whitespace-pre-wrap">
-              {textToShow}
-            </p>
-          ) : (
-            <TypewriterText
-              text={textToShow}
-              speed={25}
-              onComplete={() => setTextComplete(true)}
-              className="text-stone-800 leading-relaxed"
-            />
-          )}
+          <div className="text-stone-800 leading-relaxed whitespace-pre-wrap">
+            {showFullText ? (
+              textToShow
+            ) : (
+              <TypewriterText
+                text={textToShow}
+                speed={25}
+                onComplete={() => setTextComplete(true)}
+                className="block"
+              />
+            )}
+          </div>
         </div>
 
         {/* Footer */}
