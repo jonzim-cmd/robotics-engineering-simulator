@@ -10,7 +10,6 @@ import CrazyRobotSceneWrapper from '@/components/ui/CrazyRobotScene';
 
 const Level5_Signals: React.FC = () => {
   const {
-    advanceLevel,
     levelState,
     popStateHistory,
   } = useGameStore();
@@ -50,7 +49,7 @@ const Level5_Signals: React.FC = () => {
           {/* INCIDENT REPORT */}
           <div className="text-red-400 font-bold">INCIDENT REPORT:</div>
           <TypewriterText
-            text="Verbindung zu Sektor 7 hergestellt. Unit-7 zeigt erratisches Verhalten. Kollisionswarnsystem spielt verrückt."
+            text="Verbindung zu Sektor 7 hergestellt. Unit-7 zeigt unberechenbares Verhalten. Sensoren spielen verrückt."
             speed={20}
           />
 
@@ -95,7 +94,6 @@ const Level5_Signals: React.FC = () => {
 
               <strong className="text-cyan-400 block mb-2 mt-6">AUFTRAG:</strong>
               <p className="text-slate-300 leading-relaxed">
-                Das ist natürlich Unsinn. Roboter sehen keine Geister. <br/>
                 Verbinde dich mit dem Sensorkontrollsystem. Analysiere die eingehenden Signale und finde heraus, warum die Sensoren Hindernisse melden, wo nur leere Luft ist.
               </p>
             </motion.div>

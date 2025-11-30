@@ -94,9 +94,10 @@ const Robot = ({ mode }: { mode: 'IDLE' | 'MOVE' | 'SPIN' | 'SHAKE' | 'PANIC' })
 };
 
 // --- GHOST SENSORS ---
+// Optimize with useMemo for geometries and materials
 const GhostPoints = () => {
   // Generate random points that flicker - these are the "ghost obstacles"
-  const count = 15;
+  const count = 12; // Reduced from 15 for better performance
   const [points, setPoints] = useState(() => Array.from({ length: count }).map(() => ({
     position: [
       (Math.random() - 0.5) * 6,
@@ -106,6 +107,16 @@ const GhostPoints = () => {
     visible: Math.random() > 0.5,
     timer: Math.random() * 100
   })));
+
+  // Reuse geometry and material for performance
+  const sphereGeometry = useMemo(() => new THREE.SphereGeometry(0.25, 12, 12), []); // Reduced segments from 16
+  const material = useMemo(() => new THREE.MeshStandardMaterial({
+    color: "#ef4444",
+    transparent: true,
+    opacity: 0.7,
+    emissive: "#ef4444",
+    emissiveIntensity: 2.5,
+  }), []);
 
   useFrame((state) => {
     setPoints(prev => prev.map(p => {
@@ -125,18 +136,62 @@ const GhostPoints = () => {
     <group>
       {points.map((p, i) => (
         p.visible && (
-          <mesh key={i} position={p.position}>
-            <sphereGeometry args={[0.25, 16, 16]} />
-            <meshStandardMaterial
-              color="#ef4444"
-              transparent
-              opacity={0.7}
-              emissive="#ef4444"
-              emissiveIntensity={2.5}
-            />
-          </mesh>
+          <mesh key={i} position={p.position} geometry={sphereGeometry} material={material} />
         )
       ))}
+    </group>
+  );
+};
+
+// --- PANICKING WORKERS ---
+const PanickingWorker = ({ position }: { position: [number, number, number] }) => {
+  const group = useRef<THREE.Group>(null);
+  const offset = useMemo(() => Math.random() * Math.PI * 2, []); // Random phase offset
+
+  useFrame((state) => {
+    if (!group.current) return;
+    const time = state.clock.getElapsedTime();
+
+    // Wave arms frantically
+    const armSpeed = 8;
+    group.current.rotation.z = Math.sin(time * armSpeed + offset) * 0.3;
+  });
+
+  return (
+    <group position={position}>
+      {/* Body */}
+      <mesh position={[0, 0.6, 0]}>
+        <boxGeometry args={[0.4, 0.8, 0.3]} />
+        <meshStandardMaterial color="#1e3a8a" />
+      </mesh>
+
+      {/* Head */}
+      <mesh position={[0, 1.2, 0]}>
+        <sphereGeometry args={[0.2, 8, 8]} />
+        <meshStandardMaterial color="#fbbf24" />
+      </mesh>
+
+      {/* Arms - waving frantically */}
+      <group ref={group}>
+        <mesh position={[-0.3, 0.7, 0]} rotation={[0, 0, -0.5]}>
+          <boxGeometry args={[0.5, 0.1, 0.1]} />
+          <meshStandardMaterial color="#1e3a8a" />
+        </mesh>
+        <mesh position={[0.3, 0.7, 0]} rotation={[0, 0, 0.5]}>
+          <boxGeometry args={[0.5, 0.1, 0.1]} />
+          <meshStandardMaterial color="#1e3a8a" />
+        </mesh>
+      </group>
+
+      {/* Legs */}
+      <mesh position={[-0.15, 0.2, 0]}>
+        <boxGeometry args={[0.15, 0.4, 0.2]} />
+        <meshStandardMaterial color="#334155" />
+      </mesh>
+      <mesh position={[0.15, 0.2, 0]}>
+        <boxGeometry args={[0.15, 0.4, 0.2]} />
+        <meshStandardMaterial color="#334155" />
+      </mesh>
     </group>
   );
 };
@@ -181,10 +236,15 @@ const SceneContent = () => {
             <pointLight position={[10, 10, 10]} intensity={1} castShadow />
             <Robot mode={mode} />
             <GhostPoints />
-            
+
+            {/* Panicking workers in background */}
+            <PanickingWorker position={[-4, 0, -3]} />
+            <PanickingWorker position={[4.5, 0, -2.5]} />
+            <PanickingWorker position={[-3.5, 0, 3]} />
+
             {/* Floor Grid */}
             <Grid args={[10, 10]} cellColor="#202020" sectionColor="#06b6d4" fadeDistance={20} infiniteGrid />
-            
+
             <ContactShadows opacity={0.5} scale={10} blur={2} far={10} resolution={256} color="#000000" />
         </>
     );
