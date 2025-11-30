@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getAdminData, createStudent, deleteUser, type User, type ProgressEvent } from '../actions';
-import { Lock, Users, FileText, RefreshCw, Plus, AlertCircle, Trash2, ArrowLeft } from 'lucide-react';
+import { getAdminData, createStudent, deleteUser, deleteUserProgress, type User, type ProgressEvent } from '../actions';
+import { Lock, Users, FileText, RefreshCw, Plus, AlertCircle, Trash2, ArrowLeft, XCircle } from 'lucide-react';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -94,8 +94,24 @@ export default function AdminPage() {
     setLoading(false);
   };
 
+  const handleDeleteUserProgress = async (userId: number, userName: string) => {
+    if (!window.confirm(`Möchten Sie alle Progress-Einträge von ${userName} wirklich löschen? Der Benutzer bleibt erhalten, aber alle Fortschritte und Reflexionen werden gelöscht.`)) {
+      return;
+    }
+
+    setLoading(true);
+    const result = await deleteUserProgress(userId);
+
+    if (result.success) {
+      await refreshData();
+    } else {
+      alert(result.error);
+    }
+    setLoading(false);
+  };
+
   // Filter reflection-like events (all reflection UI variants)
-  const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG', 'INSURANCE_FORM_SUBMITTED', 'FINAL_EMAIL']);
+  const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG', 'INSURANCE_FORM_SUBMITTED', 'FINAL_EMAIL', 'REFLECTION_SUBMITTED']);
 
   // Filter reflections only
   const getReflectionsForUser = (userId: number) => {
@@ -111,6 +127,18 @@ export default function AdminPage() {
     }
 
     if (typeof payload === 'object' && payload !== null) {
+      // For Level 5 Protocol Entry (action + reason)
+      if (payload.action && payload.reason) {
+        return (
+          <div>
+            <div className="font-semibold text-cyan-400 text-xs mb-1">Durchgeführte Maßnahme:</div>
+            <div className="mb-2">{payload.action}</div>
+            <div className="font-semibold text-cyan-400 text-xs mb-1">Technische Begründung:</div>
+            <div>{payload.reason}</div>
+          </div>
+        );
+      }
+
       // Prioritize showing the student's answer or explanation
       const textContent = payload.answer || payload.explanation;
       if (textContent) {
@@ -263,7 +291,7 @@ export default function AdminPage() {
                      <tr>
                        <th className="p-3 font-normal">Name</th>
                        <th className="p-3 font-normal text-right">Last Active</th>
-                       <th className="p-3 font-normal w-12"></th>
+                       <th className="p-3 font-normal w-24 text-center">Actions</th>
                      </tr>
                    </thead>
                    <tbody>
@@ -289,17 +317,29 @@ export default function AdminPage() {
                            {new Date(user.last_active).toLocaleDateString()} <br/>
                            {new Date(user.last_active).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                          </td>
-                         <td className="p-3 text-center">
-                           <button
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               handleDeleteUser(user.id, user.name);
-                             }}
-                             className="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-1.5 rounded transition-colors"
-                             title="Benutzer löschen"
-                           >
-                             <Trash2 size={16} />
-                           </button>
+                         <td className="p-3">
+                           <div className="flex items-center justify-center gap-1">
+                             <button
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleDeleteUserProgress(user.id, user.name);
+                               }}
+                               className="text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10 p-1.5 rounded transition-colors"
+                               title="Progress-Einträge löschen"
+                             >
+                               <XCircle size={16} />
+                             </button>
+                             <button
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleDeleteUser(user.id, user.name);
+                               }}
+                               className="text-red-400 hover:text-red-300 hover:bg-red-400/10 p-1.5 rounded transition-colors"
+                               title="Benutzer komplett löschen"
+                             >
+                               <Trash2 size={16} />
+                             </button>
+                           </div>
                          </td>
                        </tr>
                      ))}
@@ -348,7 +388,17 @@ export default function AdminPage() {
                             <span className="opacity-50">{new Date(ref.created_at).toLocaleString()}</span>
                           </div>
                           <div className="text-slate-300 bg-slate-950 p-3 rounded text-sm italic">
-                            "{typeof ref.payload === 'string' ? ref.payload : (ref.payload as any).answer || (ref.payload as any).explanation || JSON.stringify(ref.payload)}"
+                            {typeof ref.payload === 'string'
+                              ? `"${ref.payload}"`
+                              : (ref.payload as any).action && (ref.payload as any).reason
+                                ? (
+                                  <div>
+                                    <div className="mb-2"><strong>Maßnahme:</strong> {(ref.payload as any).action}</div>
+                                    <div><strong>Begründung:</strong> {(ref.payload as any).reason}</div>
+                                  </div>
+                                )
+                                : `"${(ref.payload as any).answer || (ref.payload as any).explanation || JSON.stringify(ref.payload)}"`
+                            }
                           </div>
                         </div>
                       ))}

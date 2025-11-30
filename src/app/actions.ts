@@ -156,3 +156,21 @@ export async function deleteUser(userId: number): Promise<{ success: boolean; er
     return { success: false, error: 'Fehler beim Löschen des Benutzers' };
   }
 }
+
+/**
+ * Deletes all progress entries for a specific user (Admin only).
+ * The user account remains intact, only their progress data is cleared.
+ */
+export async function deleteUserProgress(userId: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    await sql`
+      DELETE FROM progress WHERE user_id = ${userId}
+    `;
+
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error) {
+    console.error('Delete progress error:', error);
+    return { success: false, error: 'Fehler beim Löschen der Progress-Daten' };
+  }
+}
