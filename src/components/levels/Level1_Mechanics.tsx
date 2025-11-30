@@ -263,6 +263,7 @@ const Level1_Mechanics: React.FC = () => {
         {subStep === 1 && (
           <Level1AiResearch
             onComplete={() => setSubStep(2)}
+            onBack={() => setSubStep(0)}
           />
         )}
 

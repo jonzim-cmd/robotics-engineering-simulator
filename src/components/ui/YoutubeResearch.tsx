@@ -11,11 +11,13 @@ interface SearchResult {
 interface YoutubeResearchProps {
   searchResults: SearchResult[];
   onComplete: () => void;
+  onBack?: () => void;
 }
 
 export const YoutubeResearch: React.FC<YoutubeResearchProps> = ({
   searchResults,
   onComplete,
+  onBack,
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const isLastPage = currentPage === searchResults.length - 1;
@@ -116,9 +118,22 @@ export const YoutubeResearch: React.FC<YoutubeResearchProps> = ({
         {/* Video Content Layer */}
         <div className="flex-1 relative overflow-hidden bg-gradient-to-br from-gray-900 to-black">
           
-          {/* Top Overlay (Title) - Fades out when not hovering, like YT controls */}
-          <div className="absolute top-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-b from-black/90 to-transparent z-20 pointer-events-none">
-             <h2 className="text-white text-xl md:text-2xl font-bold tracking-tight leading-tight pr-12">{currentResult.title}</h2>
+          {/* Top Overlay (Title + Back Button) - Fades out when not hovering, like YT controls */}
+          <div className="absolute top-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-b from-black/90 to-transparent z-20">
+             <div className="flex items-start gap-3">
+               {onBack && (
+                 <button
+                   onClick={onBack}
+                   className="text-white/70 hover:text-white transition-colors p-1 shrink-0 pointer-events-auto"
+                   aria-label="Zurück"
+                 >
+                   <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                   </svg>
+                 </button>
+               )}
+               <h2 className="text-white text-xl md:text-2xl font-bold tracking-tight leading-tight flex-1 pointer-events-none">{currentResult.title}</h2>
+             </div>
           </div>
 
           {/* Main Text Content Area - Centered like subtitles or presentation slides */}

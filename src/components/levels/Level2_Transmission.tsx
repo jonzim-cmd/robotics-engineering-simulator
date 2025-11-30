@@ -155,7 +155,7 @@ const Level2_Transmission: React.FC = () => {
               transition={{ delay: 0.1, type: 'spring', damping: 20 }}
               className="max-w-2xl w-full"
             >
-              <TerminalCard title="VORBEREITUNG" borderColor="cyan">
+              <TerminalCard title="VORBEREITUNG" borderColor="cyan" onBack={() => setSubStep(0)}>
                 <div className="space-y-6 py-4">
                   <div className="text-center">
                     <div className="text-6xl mb-4">🔍</div>
@@ -263,6 +263,7 @@ Man kann nicht gleichzeitig maximale Kraft und maximale Geschwindigkeit haben.`
               }
             ]}
             onComplete={handleResearchComplete}
+            onBack={() => setSubStep(1)}
           />
         )}
       </>

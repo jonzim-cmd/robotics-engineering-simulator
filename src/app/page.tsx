@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { GameTracker } from '@/components/GameTracker';
 
 export default function Home() {
-  const { currentLevel, credits, setLevel, levelState, subStep } = useGameStore();
+  const { currentLevel, credits, setLevel, levelState, subStep, popStateHistory, stateHistory } = useGameStore();
 
   // Scroll to top when level or level state changes
   React.useEffect(() => {
@@ -39,6 +39,10 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentLevel, setLevel]);
 
+  const handleGlobalBack = () => {
+    popStateHistory();
+  };
+
   const renderLevel = () => {
     switch (currentLevel) {
       case 0: return <Level0_Intro />;
@@ -61,11 +65,21 @@ export default function Home() {
     <div className="container mx-auto p-4 max-w-4xl space-y-6">
       <GameTracker />
       <header className="flex justify-between items-end border-b border-slate-800 pb-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            ROBOTICS ENGINEERING SIMULATOR
-          </h1>
-          <div className="text-xs text-slate-500 font-mono">INDUSTRIAL TRAINING MODULE v2.0</div>
+        <div className="flex items-center gap-4">
+          {stateHistory.length > 0 && (
+            <button
+              onClick={handleGlobalBack}
+              className="text-slate-400 hover:text-cyan-400 transition-colors text-sm flex items-center gap-1 font-mono"
+            >
+              <span>«</span> ZURÜCK
+            </button>
+          )}
+          <div>
+            <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              ROBOTICS ENGINEERING SIMULATOR
+            </h1>
+            <div className="text-xs text-slate-500 font-mono">INDUSTRIAL TRAINING MODULE v2.0</div>
+          </div>
         </div>
         <div className="flex gap-4 font-mono text-sm">
           <div className="bg-slate-900 border border-slate-800 px-3 py-1 rounded text-cyan-400">

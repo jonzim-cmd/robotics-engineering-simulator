@@ -13,6 +13,7 @@ interface SmartphoneResearchProps {
   onComplete: () => void;
   searchQuery?: string;
   browserTitle?: string;
+  onBack?: () => void;
 }
 
 export const SmartphoneResearch: React.FC<SmartphoneResearchProps> = ({
@@ -20,6 +21,7 @@ export const SmartphoneResearch: React.FC<SmartphoneResearchProps> = ({
   onComplete,
   searchQuery = 'Suche',
   browserTitle = 'Suche',
+  onBack,
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const isLastPage = currentPage === searchResults.length - 1;
@@ -140,11 +142,19 @@ export const SmartphoneResearch: React.FC<SmartphoneResearchProps> = ({
 
               {/* Address Bar */}
               <div className="px-3 pb-2 flex items-center gap-2">
-                <button className="p-1 text-slate-400" disabled>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
+                {onBack ? (
+                  <button onClick={onBack} className="p-1 text-slate-600 hover:text-slate-800 transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                ) : (
+                  <button className="p-1 text-slate-400" disabled>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                )}
                 <button className="p-1 text-slate-400" disabled>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

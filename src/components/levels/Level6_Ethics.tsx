@@ -15,6 +15,7 @@ const Level6_Ethics: React.FC = () => {
     setLevelState,
     levelState,
     pushStateHistory,
+    popStateHistory,
   } = useGameStore();
 
   const [emailContent, setEmailContent] = useState('');
@@ -33,6 +34,15 @@ const Level6_Ethics: React.FC = () => {
     setTimeout(() => {
       setLevelState('SUCCESS');
     }, 2000);
+  };
+
+  const handleBack = () => {
+    if (subStep === 1) {
+      setSubStep(0);
+      setLevelState('INTRO');
+    } else if (levelState === 'SUCCESS' || subStep === 2) {
+      popStateHistory();
+    }
   };
 
   // Determine which view to show
@@ -149,9 +159,17 @@ const Level6_Ethics: React.FC = () => {
             >
               {/* Email Header */}
               <div className="bg-slate-900 p-4 border-b border-slate-700 flex justify-between items-center">
-                <div className="flex items-center gap-2 text-slate-200">
-                   <Mail size={20} className="text-cyan-400" />
-                   <span className="font-bold">Verfassen: Letzte Nachricht</span>
+                <div className="flex items-center gap-4 text-slate-200">
+                   <button
+                      onClick={handleBack}
+                      className="text-slate-400 hover:text-cyan-400 transition-colors text-sm flex items-center gap-1"
+                   >
+                      <span className="mr-1">«</span> ZURÜCK
+                   </button>
+                   <div className="flex items-center gap-2">
+                      <Mail size={20} className="text-cyan-400" />
+                      <span className="font-bold">Verfassen: Letzte Nachricht</span>
+                   </div>
                 </div>
                 <div className="flex gap-2">
                    <div className="w-3 h-3 rounded-full bg-red-500"></div>

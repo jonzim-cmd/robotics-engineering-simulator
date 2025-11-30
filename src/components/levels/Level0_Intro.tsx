@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Lock } from 'lucide-react';
 
 const Level0_Intro: React.FC = () => {
-  const { advanceLevel, setUserName, setUserId, userName, credits, skipAnimations, setSkipAnimations } = useGameStore();
+  const { advanceLevel, setUserName, setUserId, userName, credits, skipAnimations, setSkipAnimations, popStateHistory, setLevel } = useGameStore();
   const [bootStep, setBootStep] = useState(0);
   const [inputName, setInputName] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
@@ -85,6 +85,16 @@ const Level0_Intro: React.FC = () => {
     }
   };
 
+  const handleBack = () => {
+    if (loggedIn) {
+      setLoggedIn(false);
+      setBootStep(0);
+      setTextComplete(false);
+      setShowFinance(false);
+      setShowMission(false);
+    }
+  };
+
   if (!loggedIn) {
     return (
       <TerminalCard title="SECURE LOGIN REQUIRED" borderColor="cyan">
@@ -139,7 +149,7 @@ const Level0_Intro: React.FC = () => {
   }
 
   return (
-    <TerminalCard title="REMOTE MAINTENANCE LOGIN" borderColor="cyan">
+    <TerminalCard title="REMOTE MAINTENANCE LOGIN" borderColor="cyan" onBack={handleBack}>
       <div className="space-y-6 py-4">
         <div className="font-mono text-sm space-y-2 text-slate-400">
           <div className="flex justify-between">

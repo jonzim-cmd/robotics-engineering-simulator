@@ -4,9 +4,10 @@ import { TypewriterText } from './TypewriterText';
 
 interface Level1AiResearchProps {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
-export const Level1AiResearch: React.FC<Level1AiResearchProps> = ({ onComplete }) => {
+export const Level1AiResearch: React.FC<Level1AiResearchProps> = ({ onComplete, onBack }) => {
   const [showAiResponse, setShowAiResponse] = useState(false);
   const [showContinue, setShowContinue] = useState(false);
 
@@ -28,9 +29,23 @@ export const Level1AiResearch: React.FC<Level1AiResearchProps> = ({ onComplete }
         {/* Header */}
         <div className="bg-gray-100 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <div className="w-3 h-3 rounded-full bg-green-500" />
+            {onBack ? (
+              <button
+                onClick={onBack}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                aria-label="Zurück"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            ) : (
+              <>
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+              </>
+            )}
           </div>
           <div className="text-gray-500 text-sm font-medium">NeuroLink AI Research</div>
           <div className="w-4" /> {/* Spacer for centering if needed */}
