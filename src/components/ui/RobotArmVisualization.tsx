@@ -107,7 +107,7 @@ export const RobotArmVisualization: React.FC<RobotArmVisualizationProps> = ({
                       <motion.div
                         key={i}
                         className="absolute -top-4 left-1/2 w-4 h-4 bg-slate-500 rounded-full opacity-50 blur-sm"
-                        animate={{ y: -40, opacity: 0, scale: 2, x: (Math.random() - 0.5) * 20 }}
+                        animate={{ y: -40, opacity: 0, scale: 2, x: (i % 2 === 0 ? 10 : -10) }}
                         transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.5 }}
                       />
                    ))}

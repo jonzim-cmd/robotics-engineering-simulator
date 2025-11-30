@@ -10,16 +10,21 @@ interface BossModalProps {
 export const BossModal: React.FC<BossModalProps> = ({ onClose }) => {
   const [callAccepted, setCallAccepted] = useState(false);
   const [isRinging, setIsRinging] = useState(true);
+  const contentEndRef = React.useRef<HTMLDivElement>(null);
 
-  // Stop ringing after call is accepted
+  // Scroll to bottom when call is accepted (and content appears)
   useEffect(() => {
-    if (callAccepted) {
-      setIsRinging(false);
+    if (callAccepted && contentEndRef.current) {
+       // Small delay to allow animation to start/layout to settle
+       setTimeout(() => {
+         contentEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+       }, 600); // Delay matching the button animation
     }
   }, [callAccepted]);
 
   const handleAcceptCall = () => {
     setCallAccepted(true);
+    setIsRinging(false);
   };
 
   const handleDeclineCall = () => {
@@ -260,6 +265,7 @@ export const BossModal: React.FC<BossModalProps> = ({ onClose }) => {
                     </svg>
                     Verstanden
                   </motion.button>
+                  <div ref={contentEndRef} />
                 </div>
               </div>
 

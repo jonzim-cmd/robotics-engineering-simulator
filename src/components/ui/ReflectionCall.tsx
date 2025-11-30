@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore';
 import { trackEvent } from '@/app/actions';
@@ -40,33 +40,30 @@ export const ReflectionCall: React.FC<ReflectionCallProps> = ({
   const [isSent, setIsSent] = useState(false);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [showReflection, setShowReflection] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Stop ringing after call is accepted
+  // Scroll to bottom when messages change
   useEffect(() => {
-    if (callAccepted) {
-      setIsRinging(false);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-  }, [callAccepted]);
-
-  // Simulate typing indicator before showing reflection
-  useEffect(() => {
-    if (isSent) {
-      setShowTypingIndicator(true);
-      const timer = setTimeout(() => {
-        setShowTypingIndicator(false);
-        setShowReflection(true);
-      }, 1800);
-      return () => clearTimeout(timer);
-    }
-  }, [isSent]);
+  }, [isSent, showTypingIndicator, showReflection]);
 
   const handleAcceptCall = () => {
     setCallAccepted(true);
+    setIsRinging(false);
   };
 
   const handleSend = async () => {
     if (input.trim().length > 0) {
       setIsSent(true);
+      setShowTypingIndicator(true);
+      
+      setTimeout(() => {
+        setShowTypingIndicator(false);
+        setShowReflection(true);
+      }, 1800);
+
       if (userId) {
         await trackEvent(userId, currentLevel, 'REFLECTION_CALL', {
           question,
@@ -367,6 +364,7 @@ export const ReflectionCall: React.FC<ReflectionCallProps> = ({
                   </motion.div>
                 )}
               </AnimatePresence>
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area or Continue Button */}

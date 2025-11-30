@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
@@ -23,12 +23,22 @@ const Level2_Transmission: React.FC = () => {
     setSubStep
   } = useGameStore();
   const [showText, setShowText] = useState(false);
+  const introTextRef = useRef<HTMLDivElement>(null);
 
   // Set initial credits when level starts
   useEffect(() => {
     // Players start Level 2 with 15 credits (as per requirements)
     setCredits(15);
   }, [setCredits]);
+
+  // Scroll to text when shown
+  useEffect(() => {
+    if (showText && introTextRef.current) {
+      setTimeout(() => {
+        introTextRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [showText]);
 
   const handleBack = () => {
     // Pop from global history
@@ -85,6 +95,7 @@ const Level2_Transmission: React.FC = () => {
 
             {showText && (
               <motion.div
+                ref={introTextRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}

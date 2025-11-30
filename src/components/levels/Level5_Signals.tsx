@@ -5,7 +5,6 @@ import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
 import { GlossaryTooltip } from '@/components/ui/GlossaryTooltip';
-import { motion } from 'framer-motion';
 
 const Level5_Signals: React.FC = () => {
   const { advanceLevel, setLevelState, levelState, pushStateHistory, popStateHistory, setSubStep } = useGameStore();

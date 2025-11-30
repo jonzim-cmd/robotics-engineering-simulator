@@ -124,6 +124,8 @@ const Level4_Electronics: React.FC = () => {
   const [showHaraldRejection, setShowHaraldRejection] = useState(false);
   
   const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+  const introTextRef = useRef<HTMLDivElement>(null);
 
   // Event Tracking Helper
   const logEvent = (eventType: string, payload: Record<string, unknown>) => {
@@ -132,6 +134,24 @@ const Level4_Electronics: React.FC = () => {
       console.error('Tracking error', err)
     );
   };
+
+  // Scroll to result when simulation finishes
+  useEffect(() => {
+    if (hasRunOnce && resultRef.current) {
+       setTimeout(() => {
+          resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+       }, 100);
+    }
+  }, [hasRunOnce]);
+
+  // Scroll to text when shown
+  useEffect(() => {
+    if (showText && introTextRef.current) {
+      setTimeout(() => {
+        introTextRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [showText]);
 
   // Cleanup simulation interval
   useEffect(() => {
@@ -365,6 +385,7 @@ const Level4_Electronics: React.FC = () => {
 
             {showText && (
               <motion.div
+                ref={introTextRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
@@ -446,6 +467,7 @@ Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span classNam
         <AnimatePresence>
           {hasRunOnce && simulationResult && (
             <motion.div
+              ref={resultRef}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}

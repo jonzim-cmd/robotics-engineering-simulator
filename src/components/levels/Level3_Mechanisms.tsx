@@ -84,6 +84,7 @@ const Level3_Mechanisms: React.FC = () => {
   const [result, setResult] = useState<{ success: boolean; msg: string; needsFunding?: boolean } | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [showHaraldDialog, setShowHaraldDialog] = useState(false);
+  const resultRef = React.useRef<HTMLDivElement>(null);
 
   const handleBack = () => {
     popStateHistory();
@@ -93,6 +94,16 @@ const Level3_Mechanisms: React.FC = () => {
     setResult(null);
     setShowDialog(false);
   };
+
+  // Scroll to result when it appears
+  React.useEffect(() => {
+    if (result && resultRef.current) {
+      // Wait a tick for the DOM to update
+      setTimeout(() => {
+         resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [result]);
 
   const handleStart = () => {
     pushStateHistory();
@@ -424,6 +435,7 @@ const Level3_Mechanisms: React.FC = () => {
 
           {result && (
              <motion.div
+               ref={resultRef}
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                className={`mt-4 p-4 rounded border text-center font-mono ${result.success ? 'bg-green-900/20 border-green-500 text-green-400' : 'bg-red-900/20 border-red-500 text-red-400'}`}

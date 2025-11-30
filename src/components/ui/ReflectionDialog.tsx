@@ -49,28 +49,30 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
   const [isSent, setIsSent] = useState(false);
   const [showTypingIndicator, setShowTypingIndicator] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [isSent, showTypingIndicator, showCorrectAnswer]);
 
   // Scroll to top when dialog opens
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-
-  // Simulate typing indicator before showing correct answer
-  useEffect(() => {
-    if (isSent) {
-      setShowTypingIndicator(true);
-      const timer = setTimeout(() => {
-        setShowTypingIndicator(false);
-        setShowCorrectAnswer(true);
-      }, 1800);
-      return () => clearTimeout(timer);
-    }
-  }, [isSent]);
-
   const handleSend = async () => {
     if (input.trim().length > 0) {
       setIsSent(true);
+      setShowTypingIndicator(true);
+      
+      setTimeout(() => {
+        setShowTypingIndicator(false);
+        setShowCorrectAnswer(true);
+      }, 1800);
+
       if (userId) {
         await trackEvent(userId, currentLevel, 'REFLECTION_DIALOG', {
           message: message, // The question/context
@@ -472,6 +474,7 @@ export const ReflectionDialog: React.FC<ReflectionDialogProps> = ({
                 </motion.div>
               )}
             </AnimatePresence>
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input Area or Continue Button */}

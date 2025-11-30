@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useGameStore } from '@/store/gameStore';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { TypewriterText } from '@/components/ui/TypewriterText';
@@ -45,10 +45,20 @@ const Level1_Mechanics: React.FC = () => {
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showText, setShowText] = useState(false);
+  const introTextRef = useRef<HTMLDivElement>(null);
 
   const handleStart = () => {
     setSubStep(1);
   };
+
+  // Scroll to text when shown
+  useEffect(() => {
+    if (showText && introTextRef.current) {
+      setTimeout(() => {
+        introTextRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [showText]);
 
   const startLevelReal = () => {
     // Save current state before advancing
@@ -212,6 +222,7 @@ const Level1_Mechanics: React.FC = () => {
 
             {showText && (
               <motion.div
+                ref={introTextRef}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}

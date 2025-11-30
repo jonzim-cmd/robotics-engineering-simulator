@@ -67,7 +67,7 @@ const Level6_Ethics: React.FC = () => {
           
           <div className="mt-4 p-4 bg-slate-900/50 border border-slate-800 rounded">
             <strong className="text-yellow-400 block mb-2">SZENARIO:</strong>
-            <p className="mb-2">Exzellente Arbeit bis hierher. Unit-7 ist fast fertig für den Dauereinsatz. Doch jetzt leuchtet die Warnleuchte: 'GYROSKOP FEHLER'. Ohne <GlossaryTooltip term="Gyroskop" definition="Sensor für Neigung und Drehung. Der Gleichgewichtssinn." /> kippt der Transporter bei Beladung um, da er nicht balancieren kann.</p>
+            <p className="mb-2">Exzellente Arbeit bis hierher. Unit-7 ist fast fertig für den Dauereinsatz. Doch jetzt leuchtet die Warnleuchte: &apos;GYROSKOP FEHLER&apos;. Ohne <GlossaryTooltip term="Gyroskop" definition="Sensor für Neigung und Drehung. Der Gleichgewichtssinn." /> kippt der Transporter bei Beladung um, da er nicht balancieren kann.</p>
             
             <strong className="text-red-400 block mb-2 mt-4">DIAGNOSE:</strong>
             <p className="mb-2">Das Gyro-Modul auf der Platine ist durchgebrannt. Ein Standard-Teil, Cent-Artikel. Wir haben Ersatz im Lager.</p>
@@ -94,7 +94,7 @@ const Level6_Ethics: React.FC = () => {
           <div className="text-green-400 text-4xl mb-4">✓ JAILBREAK ERFOLGREICH</div>
           <p>Du hast die Firmware-Sperre umgangen. Der Rover akzeptiert das Bauteil.</p>
           <div className="p-4 bg-slate-900 border border-slate-800 text-sm text-slate-400 italic">
-             "Als Ingenieur ist es deine Pflicht, Dinge zu reparieren. Auch wenn der Hersteller es verbietet."
+             &quot;Als Ingenieur ist es deine Pflicht, Dinge zu reparieren. Auch wenn der Hersteller es verbietet.&quot;
           </div>
           <div className="text-cyan-400 font-bold text-xl animate-pulse">
              ENDE DER DEMO
@@ -120,7 +120,7 @@ const Level6_Ethics: React.FC = () => {
                   <AlertTriangle size={64} className="text-red-500" />
                </div>
                <h3 className="text-2xl font-bold text-red-400">GYROSKOP DEFEKT</h3>
-               <p>Ersatzteil verfügbar: "Standard MEMS Gyro"</p>
+               <p>Ersatzteil verfügbar: &quot;Standard MEMS Gyro&quot;</p>
                <button 
                  onClick={handleRepair}
                  className="px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded uppercase tracking-widest shadow-[0_0_20px_rgba(6,182,212,0.4)]"
@@ -162,9 +162,9 @@ const Level6_Ethics: React.FC = () => {
                <div className="bg-slate-900 p-4 border border-slate-800 rounded font-mono text-sm">
                   <div className="text-slate-500 border-b border-slate-800 pb-1 mb-2">INCOMING MESSAGE FROM: ARESCORP_LEGAL</div>
                   <div className="text-slate-300">
-                     "Wir haben festgestellt, dass Sie versuchen, ein nicht-zertifiziertes <GlossaryTooltip term="Proprietäres" definition="Technik, die rechtlich geschützt und verschlüsselt ist." /> Bauteil zu nutzen. Dies verletzt die Endbenutzer-Lizenzvereinbarung (EULA). 
+                     &quot;Wir haben festgestellt, dass Sie versuchen, ein nicht-zertifiziertes <GlossaryTooltip term="Proprietäres" definition="Technik, die rechtlich geschützt und verschlüsselt ist." /> Bauteil zu nutzen. Dies verletzt die Endbenutzer-Lizenzvereinbarung (EULA). 
                      <br/><br/>
-                     Bitte entfernen Sie das illegale Bauteil sofort. Kaufen Sie das offizielle zertifizierte Mainboard für <strong>500 Credits</strong>, um den Betrieb wiederaufzunehmen."
+                     Bitte entfernen Sie das illegale Bauteil sofort. Kaufen Sie das offizielle zertifizierte Mainboard für <strong>500 Credits</strong>, um den Betrieb wiederaufzunehmen.&quot;
                   </div>
                </div>
 

@@ -116,9 +116,17 @@ export const Level2TuningCockpit: React.FC = () => {
   const [isTestRunning, setIsTestRunning] = useState(false);
   const [testResult, setTestResult] = useState<Level2SimulationResult | null>(null);
   const [showBossModal, setShowBossModal] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   // Real-time physics calculation
   const physics = calculateLevel2Physics(gearRatio, motorSpeedFactor);
+
+  // Scroll to result when it appears
+  useEffect(() => {
+    if (testResult && resultRef.current) {
+       resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [testResult]);
 
   // Auto-hide test result after delay (except for SUCCESS)
   useEffect(() => {
@@ -248,6 +256,7 @@ export const Level2TuningCockpit: React.FC = () => {
           <AnimatePresence>
             {testResult && !isTestRunning && (
                <motion.div
+                 ref={resultRef}
                  initial={{ opacity: 0, scale: 0.9 }}
                  animate={{ opacity: 1, scale: 1 }}
                  exit={{ opacity: 0, scale: 0.95 }}
