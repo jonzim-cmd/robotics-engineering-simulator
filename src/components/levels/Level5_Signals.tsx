@@ -46,25 +46,26 @@ const Level5_Signals: React.FC = () => {
     return (
       <TerminalCard title="SECURITY ALERT - UNIT 7" borderColor="red" onBack={handleBack}>
         <div className="space-y-6">
-            
+
+          {/* INCIDENT REPORT */}
+          <div className="text-red-400 font-bold">INCIDENT REPORT:</div>
+          <TypewriterText
+            text="Verbindung zu Sektor 7 hergestellt. Unit-7 zeigt erratisches Verhalten. Kollisionswarnsystem spielt verrückt."
+            speed={20}
+          />
+
           {/* SPLIT VIEW: TERMINAL & 3D SCENE */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[400px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[400px] mt-6">
             {/* Left: Logs */}
             <div className="h-full overflow-hidden">
                 <LogTerminal isRunning={true} />
             </div>
-            
+
             {/* Right: 3D Scene */}
             <div className="h-full overflow-hidden">
                 <CrazyRobotSceneWrapper />
             </div>
           </div>
-
-          <div className="text-red-400 font-bold mt-4">INCIDENT REPORT:</div>
-          <TypewriterText
-            text="Verbindung zu Sektor 7 hergestellt. Unit-7 zeigt erratisches Verhalten. Kollisionswarnsystem spielt verrückt."
-            speed={20}
-          />
 
           {!showText && (
             <motion.div
