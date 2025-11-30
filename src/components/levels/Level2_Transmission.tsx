@@ -73,7 +73,7 @@ const Level2_Transmission: React.FC = () => {
           <div className="space-y-4">
             <div className="text-yellow-400 font-bold">SYSTEM MELDUNG:</div>
             <TypewriterText
-              text="Ebene 1 Diagnostik: OK. Kritische Situation in Sektor 4 erkannt..."
+              text="Ebene 2: Kritische Situation in Sektor 4 erkannt..."
               speed={20}
             />
 

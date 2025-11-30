@@ -363,7 +363,7 @@ const Level4_Electronics: React.FC = () => {
           <div className="space-y-4">
             <div className="text-red-400 font-bold">KRITISCHER VORFALL:</div>
             <TypewriterText
-              text="Sicherheitsrelevanter Zwischenfall aufgezeichnet. Wiedergabe läuft..."
+              text="Ebene 4: Sicherheitsrelevanter Zwischenfall aufgezeichnet. Wiedergabe läuft..."
               speed={20}
             />
 

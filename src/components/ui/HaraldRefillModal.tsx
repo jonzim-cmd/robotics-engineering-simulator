@@ -98,18 +98,18 @@ export const HaraldRefillModal: React.FC<HaraldRefillModalProps> = ({
 
         {/* Monolog */}
         <div className="p-6 h-80 overflow-y-auto bg-stone-100" style={{ fontFamily: 'serif' }}>
-          {showFullText ? (
-            <p className="text-stone-800 leading-relaxed whitespace-pre-wrap">
-              {HARALD_REFILL_TEXT}
-            </p>
-          ) : (
-            <TypewriterText
-              text={HARALD_REFILL_TEXT}
-              speed={25}
-              onComplete={() => setTextComplete(true)}
-              className="text-stone-800 leading-relaxed"
-            />
-          )}
+          <div className="text-stone-800 leading-relaxed whitespace-pre-wrap">
+            {showFullText ? (
+              HARALD_REFILL_TEXT
+            ) : (
+              <TypewriterText
+                text={HARALD_REFILL_TEXT}
+                speed={25}
+                onComplete={() => setTextComplete(true)}
+                className="block"
+              />
+            )}
+          </div>
         </div>
 
         {/* Footer */}

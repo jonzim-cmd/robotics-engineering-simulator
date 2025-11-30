@@ -225,7 +225,7 @@ const Level3_Mechanisms: React.FC = () => {
         <div className="space-y-4">
           <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
           <TypewriterText
-            text="Ebene 2 Diagnostik: OK. Lade Missionsparameter..."
+            text="Ebene 3: Diagnostik: OK. Lade Videomaterial Außenbereich..."
             speed={20}
           />
 

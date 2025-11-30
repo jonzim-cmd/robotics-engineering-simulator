@@ -164,7 +164,7 @@ const Level5_Signals: React.FC = () => {
           {/* INCIDENT REPORT */}
           <div className="text-red-400 font-bold">INCIDENT REPORT:</div>
           <TypewriterText
-            text="Verbindung zu Sektor 7 hergestellt. Unit-7 zeigt wahnsinniges Verhalten. Kollisionswarnsystem spielt verrückt."
+            text="Ebene 5: Verbindung zu Sektor 7 hergestellt. Unit-7 zeigt wahnsinniges Verhalten. Sensoren spielen verrückt."
             speed={20}
           />
 

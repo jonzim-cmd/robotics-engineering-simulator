@@ -13,6 +13,7 @@ import { trackEvent } from '@/app/actions';
 import { motion } from 'framer-motion';
 import { ReflectionChat } from '@/components/ui/ReflectionChat';
 import { ReflectionDialog } from '@/components/ui/ReflectionDialog';
+import { Level1AiResearch } from '@/components/ui/Level1AiResearch';
 
 const Level1_Mechanics: React.FC = () => {
   const {
@@ -200,7 +201,7 @@ const Level1_Mechanics: React.FC = () => {
           <div className="space-y-4">
             <div className="text-cyan-400 font-bold">SYSTEM MELDUNG:</div>
             <TypewriterText
-              text="Verbindung hergestellt... Unit-7 Status: KRITISCH."
+              text="Ebene1: Verbindung hergestellt... Unit-7 Status: KRITISCH."
               speed={20}
             />
 
@@ -252,14 +253,21 @@ const Level1_Mechanics: React.FC = () => {
                 onClick={handleStart}
                 className="w-full py-3 mt-4 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white font-bold rounded uppercase tracking-widest transition-colors"
               >
-                Mission Starten
+                Recherche starten
               </motion.button>
             )}
           </div>
         </TerminalCard>
 
-        {/* Intro Reflection Dialog */}
+        {/* AI Research Step */}
         {subStep === 1 && (
+          <Level1AiResearch
+            onComplete={() => setSubStep(2)}
+          />
+        )}
+
+        {/* Intro Reflection Dialog */}
+        {subStep === 2 && (
           <ReflectionDialog
             introType="hallway"
             title="DIALOG AUF DEM FLUR"
@@ -277,7 +285,7 @@ correctAnswer={`Ah, jetzt verstehe ich. Wenn der Roboterarm sehr schwer ist, mü
 Für diese große Kraft brauchen die Motoren sehr viel Strom. Dadurch werden sie stark erhitzt. Wenn sie zu heiß werden, kann die Isolierung der Drähte im Motor schmelzen und der Motor wird beschädigt bzw. "brennt durch".`}
 
             continueButtonText="Weiter zum Labor"
-            onBack={() => setSubStep(0)}
+            onBack={() => setSubStep(1)}
             onComplete={startLevelReal}
           />
         )}
