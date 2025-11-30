@@ -15,7 +15,12 @@ import Link from 'next/link';
 import { GameTracker } from '@/components/GameTracker';
 
 export default function Home() {
-  const { currentLevel, credits, setLevel } = useGameStore();
+  const { currentLevel, credits, setLevel, levelState, subStep } = useGameStore();
+
+  // Scroll to top when level or level state changes
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentLevel, levelState, subStep]);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
