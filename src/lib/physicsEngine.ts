@@ -264,7 +264,7 @@ export const ELECTRONIC_COMPONENTS = {
       cost: 7,
       voltage: 12 as number,
       internalResistance: 1.8, // Unklare Qualität, bricht noch stärker ein
-      description: 'Hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein. Herkunft unklar.',
+      description: 'Hoher Innenwiderstand. Bei hohem Strombedarf bricht die Spannung ein. Herkunft China.',
       icon: '🔋'
     },
     performance: {

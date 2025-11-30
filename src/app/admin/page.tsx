@@ -95,7 +95,7 @@ export default function AdminPage() {
   };
 
   // Filter reflection-like events (all reflection UI variants)
-  const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG', 'INSURANCE_FORM_SUBMITTED']);
+  const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG', 'INSURANCE_FORM_SUBMITTED', 'FINAL_EMAIL']);
 
   // Filter reflections only
   const getReflectionsForUser = (userId: number) => {
