@@ -35,8 +35,60 @@ export default function Home() {
       }
     };
 
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let initialTouches = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      initialTouches = e.touches.length;
+      if (e.touches.length === 3) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // Only trigger if we started with 3 fingers and still have 3 fingers
+      if (initialTouches === 3 && e.touches.length === 3) {
+        const touchEndX = e.touches[0].clientX;
+        const touchEndY = e.touches[0].clientY;
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+
+        // Check if horizontal swipe is dominant (not vertical)
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+          e.preventDefault();
+
+          if (deltaX > 0) {
+            // Swipe right: Next level
+            setLevel(Math.min(currentLevel + 1, 7));
+          } else {
+            // Swipe left: Previous level
+            setLevel(Math.max(currentLevel - 1, 0));
+          }
+
+          // Reset to prevent multiple triggers
+          touchStartX = touchEndX;
+          touchStartY = touchEndY;
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      initialTouches = 0;
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
   }, [currentLevel, setLevel]);
 
   const handleGlobalBack = () => {
@@ -65,21 +117,11 @@ export default function Home() {
     <div className="container mx-auto p-4 max-w-4xl space-y-6">
       <GameTracker />
       <header className="flex justify-between items-end border-b border-slate-800 pb-4 mb-6">
-        <div className="flex items-center gap-4">
-          {stateHistory.length > 0 && (
-            <button
-              onClick={handleGlobalBack}
-              className="text-slate-400 hover:text-cyan-400 transition-colors text-sm flex items-center gap-1 font-mono"
-            >
-              <span>«</span> ZURÜCK
-            </button>
-          )}
-          <div>
-            <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              ROBOTICS ENGINEERING SIMULATOR
-            </h1>
-            <div className="text-xs text-slate-500 font-mono">INDUSTRIAL TRAINING MODULE v2.0</div>
-          </div>
+        <div>
+          <h1 className="text-3xl font-black tracking-tighter bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            ROBOTICS ENGINEERING SIMULATOR
+          </h1>
+          <div className="text-xs text-slate-500 font-mono">INDUSTRIAL TRAINING MODULE v2.0</div>
         </div>
         <div className="flex gap-4 font-mono text-sm">
           <div className="bg-slate-900 border border-slate-800 px-3 py-1 rounded text-cyan-400">
