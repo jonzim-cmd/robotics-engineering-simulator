@@ -75,19 +75,19 @@ const Robot = ({ mode }: { mode: 'IDLE' | 'MOVE' | 'SPIN' | 'SHAKE' | 'PANIC' })
       {/* Wheels */}
       <mesh position={[0.45, 0.2, 0.3]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.2, 0.2, 0.1, 16]} />
-        <meshStandardMaterial color="#0f172a" />
+        <meshStandardMaterial color="#22c55e" metalness={0.6} roughness={0.3} />
       </mesh>
       <mesh position={[-0.45, 0.2, 0.3]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.2, 0.2, 0.1, 16]} />
-        <meshStandardMaterial color="#0f172a" />
+        <meshStandardMaterial color="#22c55e" metalness={0.6} roughness={0.3} />
       </mesh>
       <mesh position={[0.45, 0.2, -0.3]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.2, 0.2, 0.1, 16]} />
-        <meshStandardMaterial color="#0f172a" />
+        <meshStandardMaterial color="#22c55e" metalness={0.6} roughness={0.3} />
       </mesh>
       <mesh position={[-0.45, 0.2, -0.3]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.2, 0.2, 0.1, 16]} />
-        <meshStandardMaterial color="#0f172a" />
+        <meshStandardMaterial color="#22c55e" metalness={0.6} roughness={0.3} />
       </mesh>
     </group>
   );
