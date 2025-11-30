@@ -435,6 +435,7 @@ Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span classNam
     return (
       <InsuranceForm
         onBack={() => {
+          popStateHistory();
           setLevelState('ACTIVE');
           setSubStep(0);
         }}

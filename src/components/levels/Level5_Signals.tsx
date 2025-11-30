@@ -101,7 +101,10 @@ const Level5_Signals: React.FC = () => {
     return (
         <ProtocolEntry
             onComplete={() => setLevelState('SUCCESS')}
-            onBack={() => setSubStep(0)}
+            onBack={() => {
+              popStateHistory();
+              setSubStep(0);
+            }}
         />
     );
   }
