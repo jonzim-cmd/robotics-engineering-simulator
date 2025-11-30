@@ -60,13 +60,13 @@ const Level6_Ethics: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -100 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 md:p-8 lg:p-12 overflow-y-auto"
           >
             <motion.div
               initial={{ y: -1000, rotate: -5, opacity: 0 }}
               animate={{ y: 0, rotate: 0, opacity: 1 }}
               transition={{ type: 'spring', damping: 12, stiffness: 50, delay: 0.2 }}
-              className="bg-white text-black max-w-2xl w-full shadow-2xl p-8 md:p-12 relative my-8"
+              className="bg-white text-black max-w-2xl md:max-w-3xl lg:max-w-4xl w-full shadow-2xl p-8 md:p-12 lg:p-16 relative my-8"
               style={{ fontFamily: 'Times New Roman, serif' }}
             >
               {/* Letter Header */}

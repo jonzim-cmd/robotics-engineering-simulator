@@ -33,36 +33,36 @@ const Robot = ({
         return;
     }
 
-    // Chaos modes - slower and more controlled
+    // Chaos modes - much slower and calmer
     switch (mode) {
       case 'MOVE':
-        // Move forward and backward - slower
-        group.current.position.z = Math.sin(time * 1.5) * 1.0;
-        group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, 0, delta * 5);
+        // Move forward and backward - much slower
+        group.current.position.z = Math.sin(time * 0.8) * 0.7;
+        group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, 0, delta * 3);
         break;
       case 'SPIN':
-        // Moderate spin - robot is confused
-        group.current.rotation.y += delta * 10;
-        group.current.position.x = Math.sin(time * 2) * 0.15;
+        // Slower spin - robot is confused
+        group.current.rotation.y += delta * 4;
+        group.current.position.x = Math.sin(time * 1) * 0.1;
         break;
       case 'SHAKE':
-        // Gentler shaking - obstacle detected
-        group.current.position.x = (Math.random() - 0.5) * 0.2;
-        group.current.position.z = (Math.random() - 0.5) * 0.2;
-        group.current.rotation.y += (Math.random() - 0.5) * 0.15;
+        // Very gentle shaking - obstacle detected
+        group.current.position.x = (Math.random() - 0.5) * 0.1;
+        group.current.position.z = (Math.random() - 0.5) * 0.1;
+        group.current.rotation.y += (Math.random() - 0.5) * 0.08;
         break;
       case 'PANIC':
-        // Controlled panic - spin and shake
-        group.current.rotation.y += delta * 12;
-        group.current.position.x = (Math.random() - 0.5) * 0.25;
-        group.current.position.z = (Math.random() - 0.5) * 0.25;
-        group.current.rotation.z = Math.sin(time * 6) * 0.1;
+        // Calmer panic - slow spin and gentle shake
+        group.current.rotation.y += delta * 5;
+        group.current.position.x = (Math.random() - 0.5) * 0.12;
+        group.current.position.z = (Math.random() - 0.5) * 0.12;
+        group.current.rotation.z = Math.sin(time * 3) * 0.06;
         break;
       case 'IDLE':
       default:
-        // Nervous idle - subtle shaking
-        group.current.position.y = Math.sin(time * 4) * 0.08;
-        group.current.rotation.x = Math.sin(time * 2) * 0.05;
+        // Very subtle idle
+        group.current.position.y = Math.sin(time * 3) * 0.05;
+        group.current.rotation.x = Math.sin(time * 1.5) * 0.03;
         break;
     }
   });
@@ -191,10 +191,10 @@ const SceneContent = ({ isFixed }: { isFixed: boolean }) => {
             <pointLight position={[10, 10, 10]} intensity={1} castShadow />
             <Robot mode={mode} isFixed={isFixed} />
             <GhostPoints isFixed={isFixed} />
-            
+
             {/* Floor Grid */}
             <Grid args={[10, 10]} cellColor="#202020" sectionColor={isFixed ? "#22c55e" : "#06b6d4"} fadeDistance={20} infiniteGrid />
-            
+
             <ContactShadows opacity={0.5} scale={10} blur={2} far={10} resolution={256} color="#000000" />
         </>
     );
