@@ -232,15 +232,15 @@ const Level5_Signals: React.FC = () => {
 
   // === RENDER: ACTIVE GAMEPLAY ===
   return (
-    <TerminalCard 
-        title="SENSOR DIAGNOSTIC TOOL v4.0" 
+    <TerminalCard
+        title="SENSOR DIAGNOSTIC TOOL v4.0"
         borderColor={systemStatus === 'STABLE' ? 'green' : 'red'}
         onBack={handleBack}
     >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:h-[500px]">
             
             {/* LEFT: SIGNAL VISUALIZER */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 min-h-[300px]">
                 <div className="bg-slate-900 border border-slate-700 p-3 rounded flex justify-between items-center">
                     <h3 className="text-cyan-400 font-bold font-mono">OSZILLOSKOP (SENSOR_01)</h3>
                     <div className={`px-2 py-1 rounded text-xs font-bold ${systemStatus === 'STABLE' ? 'bg-green-900 text-green-400' : 'bg-red-900 text-red-400 animate-pulse'}`}>
@@ -262,7 +262,7 @@ const Level5_Signals: React.FC = () => {
             </div>
 
             {/* RIGHT: LIVE PREVIEW */}
-            <div className="flex flex-col gap-4 relative">
+            <div className="flex flex-col gap-4 relative min-h-[350px]">
                 <div className="bg-slate-900 border border-slate-700 p-3 rounded">
                     <h3 className="text-cyan-400 font-bold font-mono">LIVE FEED (CAM_04)</h3>
                 </div>
