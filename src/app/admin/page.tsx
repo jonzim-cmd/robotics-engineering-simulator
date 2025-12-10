@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAdminData, createStudent, deleteUser, deleteUserProgress, updateUser, type User, type ProgressEvent } from '../actions';
-import { Lock, Users, FileText, RefreshCw, Plus, AlertCircle, Trash2, ArrowLeft, XCircle, Edit2, X } from 'lucide-react';
+import { Lock, Users, FileText, RefreshCw, Plus, AlertCircle, Trash2, ArrowLeft, XCircle, Edit2, X, Search } from 'lucide-react';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,6 +22,10 @@ export default function AdminPage() {
   // Student Filter State
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Refs for keyboard navigation
+  const studentListRef = useRef<HTMLDivElement>(null);
 
   // Edit Modal State
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -146,10 +150,43 @@ export default function AdminPage() {
     new Set(users.map(u => u.teacher).filter((t): t is string => t !== null && t !== ''))
   ).sort();
 
-  // Filter users by selected teacher
-  const filteredUsers = selectedTeacher
-    ? users.filter(u => u.teacher === selectedTeacher)
-    : users;
+  // Filter users by selected teacher and search query
+  const filteredUsers = users.filter(u => {
+    const matchesTeacher = !selectedTeacher || u.teacher === selectedTeacher;
+    const matchesSearch = !searchQuery ||
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.teacher && u.teacher.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesTeacher && matchesSearch;
+  });
+
+  // Keyboard navigation handler (must be after filteredUsers)
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (filteredUsers.length === 0) return;
+
+    const currentIndex = selectedStudentId === null
+      ? -1
+      : filteredUsers.findIndex(u => u.id === selectedStudentId);
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentIndex < filteredUsers.length - 1) {
+        setSelectedStudentId(filteredUsers[currentIndex + 1].id);
+      } else if (currentIndex === -1 && filteredUsers.length > 0) {
+        // From "All Students" go to first student
+        setSelectedStudentId(filteredUsers[0].id);
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentIndex > 0) {
+        setSelectedStudentId(filteredUsers[currentIndex - 1].id);
+      } else if (currentIndex === 0) {
+        // Go back to "All Students"
+        setSelectedStudentId(null);
+      }
+    } else if (e.key === 'Escape') {
+      setSelectedStudentId(null);
+    }
+  }, [filteredUsers, selectedStudentId]);
 
   // Filter reflection-like events (all reflection UI variants)
   const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG', 'INSURANCE_FORM_SUBMITTED', 'FINAL_EMAIL', 'REFLECTION_SUBMITTED']);
@@ -323,10 +360,38 @@ export default function AdminPage() {
             </form>
           </div>
 
-          {/* Teacher Filter */}
-          {uniqueTeachers.length > 0 && (
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg">
-              <h2 className="text-sm font-bold text-slate-400 mb-3 uppercase">Filter by Teacher</h2>
+          {/* Search & Filter */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-3">
+            <h2 className="text-sm font-bold text-slate-400 uppercase">Suche & Filter</h2>
+
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSelectedStudentId(null);
+                }}
+                placeholder="Schüler suchen..."
+                className="w-full bg-slate-950 border border-slate-700 rounded pl-10 pr-3 py-2 text-sm focus:border-cyan-500 outline-none"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedStudentId(null);
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* Teacher Filter */}
+            {uniqueTeachers.length > 0 && (
               <select
                 value={selectedTeacher || ''}
                 onChange={(e) => {
@@ -340,16 +405,27 @@ export default function AdminPage() {
                   <option key={teacher} value={teacher}>{teacher}</option>
                 ))}
               </select>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Student List */}
-          <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-             <h2 className="text-sm font-bold text-slate-400 p-4 border-b border-slate-800 uppercase">
-               Roster
-               {selectedTeacher && (
-                 <span className="text-cyan-400 ml-2 font-normal">({selectedTeacher})</span>
-               )}
+          <div
+            ref={studentListRef}
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+          >
+             <h2 className="text-sm font-bold text-slate-400 p-4 border-b border-slate-800 uppercase flex items-center justify-between">
+               <span>
+                 Roster
+                 {selectedTeacher && (
+                   <span className="text-cyan-400 ml-2 font-normal">({selectedTeacher})</span>
+                 )}
+                 {searchQuery && (
+                   <span className="text-cyan-400 ml-2 font-normal">&quot;{searchQuery}&quot;</span>
+                 )}
+               </span>
+               <span className="text-xs text-slate-600 font-normal">↑↓ Navigation</span>
              </h2>
              <div className="max-h-[600px] overflow-y-auto">
                {/* "All Students" Option */}
