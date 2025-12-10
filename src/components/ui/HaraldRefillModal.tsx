@@ -3,11 +3,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { TypewriterText } from './TypewriterText';
+import { trackEvent } from '@/app/actions';
 
 interface HaraldRefillModalProps {
   currentCredits: number;
   refillTo?: number;
   onClose: () => void;
+  userId?: number;
+  levelId?: number;
 }
 
 const HARALD_REFILL_TEXT = `*Seufzt schwer*
@@ -37,7 +40,9 @@ Und kommen Sie mir nicht nochmal damit.`;
 export const HaraldRefillModal: React.FC<HaraldRefillModalProps> = ({
   currentCredits,
   refillTo = 50,
-  onClose
+  onClose,
+  userId,
+  levelId = 4
 }) => {
   const [showFullText, setShowFullText] = useState(false);
   const [textComplete, setTextComplete] = useState(false);
@@ -59,6 +64,16 @@ export const HaraldRefillModal: React.FC<HaraldRefillModalProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  // Track refill event when modal opens
+  useEffect(() => {
+    if (userId) {
+      trackEvent(userId, levelId, 'HARALD_REFILL', {
+        currentCredits,
+        refillTo
+      });
+    }
+  }, [userId, levelId, currentCredits, refillTo]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">

@@ -546,9 +546,11 @@ Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span classNam
           currentCredits={credits}
           refillTo={Math.max(REFILL_CREDITS, credits)}
           onClose={handleHaraldRefillClose}
+          userId={userId ?? undefined}
+          levelId={currentLevel}
         />
       )}
-      
+
       {/* Harald Rejection Modal */}
       {showHaraldRejection && (
         <HaraldRejectionModal
@@ -556,6 +558,8 @@ Die Steuereinheit (CPU) des Motors braucht dabei immer mindestens <span classNam
           availableCredits={credits}
           onClose={() => setShowHaraldRejection(false)}
           customText={selectedBattery === 'performance' ? "Dieser Performance-Akku ist viel zu teuer! Diese Anzahl an Credits? Für eine einfache Spannungsversorgung? \n\nDas ist pure Verschwendung von Steuergeldern. \n\nIch habe Ihnen doch gesagt: Wir müssen sparen. Finden Sie eine kosteneffizientere Lösung. \n\nAntrag abgelehnt. Bauen Sie das um!" : undefined}
+          userId={userId ?? undefined}
+          levelId={currentLevel}
         />
       )}
     </div>

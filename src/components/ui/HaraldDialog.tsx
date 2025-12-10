@@ -11,6 +11,7 @@ interface HaraldDialogProps {
   onCancel: () => void;
   totalCost: number;
   solutionText?: string;
+  levelId?: number;
 }
 
 // Monologue text for Harald - shorter version
@@ -48,7 +49,7 @@ Also: Hier ist das Formular. 12 Seiten. Bitte überall unterschreiben. Und schre
 
 Ja… dann sehen wir weiter. Vielleicht.`;
 
-export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel, totalCost, solutionText }) => {
+export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel, totalCost, solutionText, levelId = 3 }) => {
   const { userId } = useGameStore();
   const [phase, setPhase] = useState<'monologue' | 'form' | 'solution' | 'approval'>('monologue');
   const [showFullMonologue, setShowFullMonologue] = useState(false);
@@ -89,7 +90,7 @@ export const HaraldDialog: React.FC<HaraldDialogProps> = ({ onApproved, onCancel
 
   const handleSubmitForm = async () => {
     if (userId) {
-      await trackEvent(userId, 2, 'HARALD_FORM_SUBMIT', {
+      await trackEvent(userId, levelId, 'HARALD_FORM_SUBMIT', {
         totalCost,
         userName,
         justification,

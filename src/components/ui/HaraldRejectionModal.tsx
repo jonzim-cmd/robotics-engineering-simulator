@@ -3,12 +3,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { TypewriterText } from './TypewriterText';
+import { trackEvent } from '@/app/actions';
 
 interface HaraldRejectionModalProps {
   requestedCost: number;
   availableCredits: number;
   onClose: () => void;
   customText?: string;
+  userId?: number;
+  levelId?: number;
 }
 
 const HARALD_REJECTION_TEXT = `Äh... nein.
@@ -35,7 +38,9 @@ export const HaraldRejectionModal: React.FC<HaraldRejectionModalProps> = ({
   requestedCost,
   availableCredits,
   onClose,
-  customText
+  customText,
+  userId,
+  levelId = 4
 }) => {
   const [showFullText, setShowFullText] = useState(false);
   const [textComplete, setTextComplete] = useState(false);
@@ -57,6 +62,17 @@ export const HaraldRejectionModal: React.FC<HaraldRejectionModalProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  // Track rejection event when modal opens
+  useEffect(() => {
+    if (userId) {
+      trackEvent(userId, levelId, 'HARALD_REJECTION', {
+        requestedCost,
+        availableCredits,
+        deficit: requestedCost - availableCredits
+      });
+    }
+  }, [userId, levelId, requestedCost, availableCredits]);
 
   const textToShow = customText || HARALD_REJECTION_TEXT;
 
