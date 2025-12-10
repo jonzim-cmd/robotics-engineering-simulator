@@ -33,6 +33,7 @@ interface GameState {
   advanceLevel: (skipHistoryPush?: boolean) => void;
   previousLevel: () => void; // Deprecated: Use popStateHistory instead
   returnToDashboard: () => void;
+  resetGame: () => void; // Spiel komplett neu starten
   setUserName: (name: string) => void;
   setUserId: (id: number) => void;
   setSkipAnimations: (skip: boolean) => void;
@@ -131,6 +132,18 @@ export const useGameStore = create<GameState>()(
         set({ currentLevel: 0, levelState: 'INTRO', skipAnimations: true, subStep: 0 });
       },
 
+      resetGame: () => {
+        // Spiel komplett neu starten - behält aber User-Login
+        set({
+          currentLevel: 0,
+          credits: 50,
+          levelState: 'INTRO',
+          skipAnimations: false,
+          subStep: 0,
+          stateHistory: [],
+        });
+      },
+
       setUserName: (name) => set({ userName: name }),
       setUserId: (id) => set({ userId: id }),
       setSkipAnimations: (skip) => set({ skipAnimations: skip }),
@@ -144,7 +157,7 @@ export const useGameStore = create<GameState>()(
         userName: state.userName,
         userId: state.userId,
         subStep: state.subStep,
-        // stateHistory bewusst NICHT persistieren - zu groß und nicht nötig
+        stateHistory: state.stateHistory, // Muss persistiert werden für Zurück-Navigation
       }),
     }
   )
