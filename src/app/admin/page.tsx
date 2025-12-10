@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getAdminData, createStudent, deleteUser, deleteUserProgress, type User, type ProgressEvent } from '../actions';
-import { Lock, Users, FileText, RefreshCw, Plus, AlertCircle, Trash2, ArrowLeft, XCircle } from 'lucide-react';
+import { getAdminData, createStudent, deleteUser, deleteUserProgress, updateUser, type User, type ProgressEvent } from '../actions';
+import { Lock, Users, FileText, RefreshCw, Plus, AlertCircle, Trash2, ArrowLeft, XCircle, Edit2, X } from 'lucide-react';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,10 +16,18 @@ export default function AdminPage() {
 
   // Create Student State
   const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentTeacher, setNewStudentTeacher] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   // Student Filter State
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
+
+  // Edit Modal State
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editTeacher, setEditTeacher] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleLogin = async (e: React.FormEvent | null, pinOverride?: string) => {
     if (e) e.preventDefault();
@@ -63,15 +71,38 @@ export default function AdminPage() {
     if (!newStudentName.trim()) return;
 
     setIsCreating(true);
-    const result = await createStudent(newStudentName);
+    const result = await createStudent(newStudentName, newStudentTeacher || undefined);
 
     if (result.success) {
       setNewStudentName('');
+      setNewStudentTeacher('');
       await refreshData(); // Reload list
     } else {
       alert(result.error);
     }
     setIsCreating(false);
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditName(user.name);
+    setEditTeacher(user.teacher || '');
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser || !editName.trim()) return;
+
+    setIsUpdating(true);
+    const result = await updateUser(editingUser.id, editName, editTeacher || null);
+
+    if (result.success) {
+      setEditingUser(null);
+      await refreshData();
+    } else {
+      alert(result.error);
+    }
+    setIsUpdating(false);
   };
 
   const handleDeleteUser = async (userId: number, userName: string) => {
@@ -109,6 +140,16 @@ export default function AdminPage() {
     }
     setLoading(false);
   };
+
+  // Get unique teachers from users
+  const uniqueTeachers = Array.from(
+    new Set(users.map(u => u.teacher).filter((t): t is string => t !== null && t !== ''))
+  ).sort();
+
+  // Filter users by selected teacher
+  const filteredUsers = selectedTeacher
+    ? users.filter(u => u.teacher === selectedTeacher)
+    : users;
 
   // Filter reflection-like events (all reflection UI variants)
   const reflectionTypes = new Set(['REFLECTION', 'REFLECTION_CALL', 'REFLECTION_DIALOG', 'INSURANCE_FORM_SUBMITTED', 'FINAL_EMAIL', 'REFLECTION_SUBMITTED']);
@@ -250,26 +291,66 @@ export default function AdminPage() {
           {/* Create Student */}
           <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg">
             <h2 className="text-sm font-bold text-slate-400 mb-3 uppercase">Register Student</h2>
-            <form onSubmit={handleCreateStudent} className="flex gap-2">
+            <form onSubmit={handleCreateStudent} className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newStudentName}
+                  onChange={(e) => setNewStudentName(e.target.value)}
+                  placeholder="Name / ID"
+                  className="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none uppercase"
+                />
+                <button
+                  disabled={isCreating || !newStudentName.trim()}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-2 rounded transition-colors disabled:opacity-50"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
               <input
                 type="text"
-                value={newStudentName}
-                onChange={(e) => setNewStudentName(e.target.value)}
-                placeholder="Name / ID"
-                className="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none uppercase"
+                value={newStudentTeacher}
+                onChange={(e) => setNewStudentTeacher(e.target.value)}
+                placeholder="Lehrkraft (optional)"
+                list="teacher-suggestions"
+                className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none"
               />
-              <button
-                disabled={isCreating || !newStudentName.trim()}
-                className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-2 rounded transition-colors disabled:opacity-50"
-              >
-                <Plus size={20} />
-              </button>
+              <datalist id="teacher-suggestions">
+                {uniqueTeachers.map(t => (
+                  <option key={t} value={t} />
+                ))}
+              </datalist>
             </form>
           </div>
 
+          {/* Teacher Filter */}
+          {uniqueTeachers.length > 0 && (
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg">
+              <h2 className="text-sm font-bold text-slate-400 mb-3 uppercase">Filter by Teacher</h2>
+              <select
+                value={selectedTeacher || ''}
+                onChange={(e) => {
+                  setSelectedTeacher(e.target.value || null);
+                  setSelectedStudentId(null);
+                }}
+                className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none"
+              >
+                <option value="">Alle Lehrkräfte</option>
+                {uniqueTeachers.map(teacher => (
+                  <option key={teacher} value={teacher}>{teacher}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Student List */}
           <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-             <h2 className="text-sm font-bold text-slate-400 p-4 border-b border-slate-800 uppercase">Roster</h2>
+             <h2 className="text-sm font-bold text-slate-400 p-4 border-b border-slate-800 uppercase">
+               Roster
+               {selectedTeacher && (
+                 <span className="text-cyan-400 ml-2 font-normal">({selectedTeacher})</span>
+               )}
+             </h2>
              <div className="max-h-[600px] overflow-y-auto">
                {/* "All Students" Option */}
                <div
@@ -280,10 +361,10 @@ export default function AdminPage() {
                      : 'hover:bg-slate-800/50 text-slate-400'
                  }`}
                >
-                 All Students
+                 All Students ({filteredUsers.length})
                </div>
 
-               {users.length === 0 ? (
+               {filteredUsers.length === 0 ? (
                  <div className="p-8 text-center text-slate-600 text-sm">No students registered yet.</div>
                ) : (
                  <table className="w-full text-sm text-left">
@@ -291,11 +372,11 @@ export default function AdminPage() {
                      <tr>
                        <th className="p-3 font-normal">Name</th>
                        <th className="p-3 font-normal text-right">Last Active</th>
-                       <th className="p-3 font-normal w-24 text-center">Actions</th>
+                       <th className="p-3 font-normal w-28 text-center">Actions</th>
                      </tr>
                    </thead>
                    <tbody>
-                     {users.map(user => (
+                     {filteredUsers.map(user => (
                        <tr
                          key={user.id}
                          className={`border-b border-slate-800 transition-colors ${
@@ -308,7 +389,10 @@ export default function AdminPage() {
                            onClick={() => setSelectedStudentId(user.id)}
                            className="p-3 font-medium text-slate-300 cursor-pointer"
                          >
-                           {user.name}
+                           <div>{user.name}</div>
+                           {user.teacher && (
+                             <div className="text-xs text-slate-500">{user.teacher}</div>
+                           )}
                          </td>
                          <td
                            onClick={() => setSelectedStudentId(user.id)}
@@ -319,6 +403,16 @@ export default function AdminPage() {
                          </td>
                          <td className="p-3">
                            <div className="flex items-center justify-center gap-1">
+                             <button
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 handleEditUser(user);
+                               }}
+                               className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/10 p-1.5 rounded transition-colors"
+                               title="Profil bearbeiten"
+                             >
+                               <Edit2 size={16} />
+                             </button>
                              <button
                                onClick={(e) => {
                                  e.stopPropagation();
@@ -362,7 +456,7 @@ export default function AdminPage() {
           </h2>
 
           <div className="space-y-4">
-            {users
+            {filteredUsers
               .filter(user => selectedStudentId === null || user.id === selectedStudentId)
               .map(user => {
                 const userReflections = getReflectionsForUser(user.id);
@@ -407,7 +501,7 @@ export default function AdminPage() {
                 );
               })}
 
-            {users
+            {filteredUsers
               .filter(user => selectedStudentId === null || user.id === selectedStudentId)
               .every(u => getReflectionsForUser(u.id).length === 0) && (
                <div className="p-12 border border-dashed border-slate-800 rounded-lg text-center text-slate-600">
@@ -423,12 +517,20 @@ export default function AdminPage() {
               </div>
               <div className="space-y-3 max-h-[420px] overflow-y-auto">
                 {progress
-                  .filter(evt => selectedStudentId === null || evt.user_id === selectedStudentId)
+                  .filter(evt => {
+                    const userInFilter = filteredUsers.some(u => u.id === evt.user_id);
+                    const studentMatch = selectedStudentId === null || evt.user_id === selectedStudentId;
+                    return userInFilter && studentMatch;
+                  })
                   .length === 0 && (
                   <div className="text-slate-500 text-sm">Keine Events erfasst.</div>
                 )}
                 {progress
-                  .filter(evt => selectedStudentId === null || evt.user_id === selectedStudentId)
+                  .filter(evt => {
+                    const userInFilter = filteredUsers.some(u => u.id === evt.user_id);
+                    const studentMatch = selectedStudentId === null || evt.user_id === selectedStudentId;
+                    return userInFilter && studentMatch;
+                  })
                   .slice(0, 50)
                   .map((evt) => {
                     return (
@@ -455,6 +557,70 @@ export default function AdminPage() {
         </div>
 
       </main>
+
+      {/* Edit User Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-cyan-400">Profil bearbeiten</h2>
+              <button
+                onClick={() => setEditingUser(null)}
+                className="text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateUser} className="space-y-4">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1 uppercase">Name / ID</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none uppercase"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-500 mb-1 uppercase">Lehrkraft (Betreuer)</label>
+                <input
+                  type="text"
+                  value={editTeacher}
+                  onChange={(e) => setEditTeacher(e.target.value)}
+                  placeholder="z.B. Herr Müller, Frau Schmidt..."
+                  list="edit-teacher-suggestions"
+                  className="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-sm focus:border-cyan-500 outline-none"
+                />
+                <datalist id="edit-teacher-suggestions">
+                  {uniqueTeachers.map(t => (
+                    <option key={t} value={t} />
+                  ))}
+                </datalist>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(null)}
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating || !editName.trim()}
+                  className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded transition-colors disabled:opacity-50"
+                >
+                  {isUpdating ? 'Speichert...' : 'Speichern'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

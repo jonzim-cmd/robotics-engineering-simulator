@@ -44,11 +44,32 @@ async function createTables() {
   }
 }
 
+async function runMigrations() {
+  try {
+    // Migration: Add teacher column to users table (preserves existing data)
+    await sql`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS teacher VARCHAR(255) DEFAULT NULL;
+    `;
+    console.log('Migration: Added "teacher" column to users table');
+
+    return { migrations: true };
+  } catch (error) {
+    console.error('Error running migrations:', error);
+    throw error;
+  }
+}
+
 async function main() {
   console.log('Attempting to create database tables...');
   ensureEnv();
   await createTables();
   console.log('Database tables created successfully.');
+
+  console.log('Running migrations...');
+  await runMigrations();
+  console.log('Migrations completed successfully.');
+
   process.exit(0);
 }
 

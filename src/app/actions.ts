@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 export type User = {
   id: number;
   name: string;
+  teacher: string | null;
   created_at: Date;
   last_active: Date;
 };
@@ -116,16 +117,18 @@ export async function getAdminData(pin: string) {
 /**
  * Creates a new student (Admin only).
  */
-export async function createStudent(name: string): Promise<{ success: boolean; error?: string }> {
+export async function createStudent(name: string, teacher?: string): Promise<{ success: boolean; error?: string }> {
   // In a real app, we'd check for an admin session here.
   // Since this is called from the protected Admin page, we assume authorization via the UI flow.
 
   const cleanName = name.trim().toUpperCase();
   if (!cleanName) return { success: false, error: 'Name ungültig' };
 
+  const cleanTeacher = teacher?.trim() || null;
+
   try {
     await sql`
-      INSERT INTO users (name) VALUES (${cleanName})
+      INSERT INTO users (name, teacher) VALUES (${cleanName}, ${cleanTeacher})
     `;
 
     revalidatePath('/admin'); // Refresh admin data if we were using server components there
@@ -136,6 +139,37 @@ export async function createStudent(name: string): Promise<{ success: boolean; e
     }
     console.error('Create student error:', error);
     return { success: false, error: 'Datenbankfehler' };
+  }
+}
+
+/**
+ * Updates a user's name and/or teacher (Admin only).
+ */
+export async function updateUser(
+  userId: number,
+  name: string,
+  teacher: string | null
+): Promise<{ success: boolean; error?: string }> {
+  const cleanName = name.trim().toUpperCase();
+  if (!cleanName) return { success: false, error: 'Name ungültig' };
+
+  const cleanTeacher = teacher?.trim() || null;
+
+  try {
+    await sql`
+      UPDATE users
+      SET name = ${cleanName}, teacher = ${cleanTeacher}
+      WHERE id = ${userId}
+    `;
+
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error: any) {
+    if (error.code === '23505') { // Unique violation
+      return { success: false, error: 'Name existiert bereits' };
+    }
+    console.error('Update user error:', error);
+    return { success: false, error: 'Fehler beim Aktualisieren des Benutzers' };
   }
 }
 
